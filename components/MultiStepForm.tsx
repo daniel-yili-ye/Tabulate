@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardFooter } from "./ui/card";
+import { Button } from "./ui/button";
 import Step1MealName from "./Step1MealName";
 import Step2ReceiptUpload from "./Step2ReceiptUpload";
 import Step3FoodItems from "./Step3FoodItems";
@@ -11,6 +12,7 @@ import Step4Participants from "./Step4Participants";
 const steps = ["Meal Name", "Receipt Upload", "Food Items", "Participants"];
 
 export default function MultiStepForm() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     mealName: "",
@@ -23,9 +25,11 @@ export default function MultiStepForm() {
   });
 
   const handleNext = () => {
-    console.log("Current Step:", currentStep);
-    console.log("Form Data:", formData);
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+    if (currentStep === steps.length - 1) {
+      handleSubmit();
+    } else {
+      setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+    }
   };
 
   const handlePrev = () => {
@@ -34,6 +38,12 @@ export default function MultiStepForm() {
 
   const updateFormData = (key: string, value: any) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSubmit = () => {
+    // Convert formData to a URL-safe string
+    const formDataString = encodeURIComponent(JSON.stringify(formData));
+    router.push(`/result?formData=${formDataString}`);
   };
 
   const renderStep = () => {
@@ -77,10 +87,7 @@ export default function MultiStepForm() {
         <Button onClick={handlePrev} disabled={currentStep === 0}>
           Previous
         </Button>
-        <Button
-          onClick={handleNext}
-          //   disabled={currentStep === steps.length - 1}
-        >
+        <Button onClick={handleNext}>
           {currentStep === steps.length - 1 ? "Submit" : "Next"}
         </Button>
       </CardFooter>
