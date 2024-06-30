@@ -54,7 +54,7 @@ export default function ResultPage() {
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex justify-end space-x-4">
           <Button variant="outline">Edit in Google Sheets</Button>
           <Button>Allocate Tab</Button>
         </CardFooter>

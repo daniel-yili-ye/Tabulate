@@ -1,17 +1,33 @@
-// src/components/Step1MealName.tsx
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+// components/Step1MealName.tsx
+import { UseFormReturn } from "react-hook-form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "./ui/form";
+import { Input } from "./ui/input";
+import { FormData } from "../lib/formSchema";
 
-export default function Step1MealName({ formData, updateFormData }) {
+interface Step1MealNameProps {
+  form: UseFormReturn<FormData>;
+}
+
+export default function Step1MealName({ form }: Step1MealNameProps) {
   return (
-    <div>
-      <Label htmlFor="mealName">Meal Name</Label>
-      <Input
-        id="mealName"
-        value={formData.mealName}
-        onChange={(e) => updateFormData("mealName", e.target.value)}
-        placeholder="Enter meal name"
-      />
-    </div>
+    <FormField
+      control={form.control}
+      name="mealName"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Meal Name</FormLabel>
+          <FormControl>
+            <Input placeholder="Enter meal name" {...field} />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 }

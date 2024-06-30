@@ -1,42 +1,52 @@
-// src/components/Step4Participants.tsx
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+// components/Step4Participants.tsx
+import { UseFormReturn, useFieldArray } from "react-hook-form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "./ui/form";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { FormData } from "../lib/formSchema";
 
-export default function Step4Participants({ formData, updateFormData }) {
-  const addParticipant = () => {
-    updateFormData("participants", [...formData.participants, ""]);
-  };
+interface Step4ParticipantsProps {
+  form: UseFormReturn<FormData>;
+}
 
-  const removeParticipant = (index) => {
-    const newParticipants = formData.participants.filter((_, i) => i !== index);
-    updateFormData("participants", newParticipants);
-  };
-
-  const updateParticipant = (index, value) => {
-    const newParticipants = formData.participants.map((participant, i) =>
-      i === index ? value : participant
-    );
-    updateFormData("participants", newParticipants);
-  };
+export default function Step4Participants({ form }: Step4ParticipantsProps) {
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "participants",
+  });
 
   return (
     <div>
-      {formData.participants.map((participant, index) => (
-        <div key={index} className="flex space-x-2 mb-2">
-          <Input
-            value={participant}
-            onChange={(e) => updateParticipant(index, e.target.value)}
-            placeholder="Participant name"
+      {fields.map((field, index) => (
+        <div key={field.id} className="flex space-x-2 mb-2">
+          <FormField
+            control={form.control}
+            name={`participants.${index}`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input placeholder="Participant name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
           <Button
-            onClick={() => removeParticipant(index)}
+            type="button"
+            onClick={() => remove(index)}
             variant="destructive"
           >
             Remove
           </Button>
         </div>
       ))}
-      <Button onClick={addParticipant} className="mt-2">
+      <Button type="button" onClick={() => append("")} className="mt-2">
         Add Participant
       </Button>
     </div>

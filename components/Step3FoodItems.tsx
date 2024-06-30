@@ -1,88 +1,112 @@
 // components/Step3FoodItems.tsx
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { Label } from "../components/ui/label";
+import { UseFormReturn, useFieldArray } from "react-hook-form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "./ui/form";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { FormData } from "../lib/formSchema";
 
-export default function Step3FoodItems({ formData, updateFormData }) {
-  const addFoodItem = () => {
-    updateFormData("foodItems", [
-      ...formData.foodItems,
-      { item: "", price: "" },
-    ]);
-  };
+interface Step3FoodItemsProps {
+  form: UseFormReturn<FormData>;
+}
 
-  const removeFoodItem = (index) => {
-    const newFoodItems = formData.foodItems.filter((_, i) => i !== index);
-    updateFormData("foodItems", newFoodItems);
-  };
-
-  const updateFoodItem = (index, field, value) => {
-    const newFoodItems = formData.foodItems.map((item, i) =>
-      i === index ? { ...item, [field]: value } : item
-    );
-    updateFormData("foodItems", newFoodItems);
-  };
-
-  const updateExtraField = (field, value) => {
-    updateFormData(field, value);
-  };
+export default function Step3FoodItems({ form }: Step3FoodItemsProps) {
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "foodItems",
+  });
 
   return (
     <div>
-      {formData.foodItems.map((item, index) => (
-        <div key={index} className="flex space-x-2 mb-2">
-          <Input
-            value={item.item}
-            onChange={(e) => updateFoodItem(index, "item", e.target.value)}
-            placeholder="Food item"
+      {fields.map((field, index) => (
+        <div key={field.id} className="flex space-x-2 mb-2">
+          <FormField
+            control={form.control}
+            name={`foodItems.${index}.item`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input placeholder="Food item" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <Input
-            value={item.price}
-            onChange={(e) => updateFoodItem(index, "price", e.target.value)}
-            placeholder="Price"
-            type="number"
+          <FormField
+            control={form.control}
+            name={`foodItems.${index}.price`}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input placeholder="Price" type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <Button onClick={() => removeFoodItem(index)} variant="destructive">
+          <Button
+            type="button"
+            onClick={() => remove(index)}
+            variant="destructive"
+          >
             Remove
           </Button>
         </div>
       ))}
-      <Button onClick={addFoodItem} className="mt-2 mb-4">
+      <Button
+        type="button"
+        onClick={() => append({ item: "", price: "" })}
+        className="mt-2 mb-4"
+      >
         Add Food Item
       </Button>
 
-      <div className="space-y-2">
-        <div>
-          <Label htmlFor="tax">Tax (Optional)</Label>
-          <Input
-            id="tax"
-            value={formData.tax || ""}
-            onChange={(e) => updateExtraField("tax", e.target.value)}
-            placeholder="Tax amount"
-            type="number"
-          />
-        </div>
-        <div>
-          <Label htmlFor="tip">Tip (Optional)</Label>
-          <Input
-            id="tip"
-            value={formData.tip || ""}
-            onChange={(e) => updateExtraField("tip", e.target.value)}
-            placeholder="Tip amount"
-            type="number"
-          />
-        </div>
-        <div>
-          <Label htmlFor="discount">Discount (Optional)</Label>
-          <Input
-            id="discount"
-            value={formData.discount || ""}
-            onChange={(e) => updateExtraField("discount", e.target.value)}
-            placeholder="Discount amount"
-            type="number"
-          />
-        </div>
-      </div>
+      <FormField
+        control={form.control}
+        name="tax"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tax</FormLabel>
+            <FormControl>
+              <Input placeholder="Tax amount" type="number" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="tip"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Tip</FormLabel>
+            <FormControl>
+              <Input placeholder="Tip amount" type="number" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="discount"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Discount</FormLabel>
+            <FormControl>
+              <Input placeholder="Discount amount" type="number" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 }
