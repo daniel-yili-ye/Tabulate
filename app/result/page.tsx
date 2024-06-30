@@ -11,9 +11,10 @@ export default function ResultPage() {
   const formData = JSON.parse(searchParams.get("formData") || "{}");
 
   return (
-    <div className="container mx-auto p-4">
+    <main className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Meal Receipt Splitter</h1>
       <Card>
-        <CardContent className="space-y-4">
+        <CardContent>
           <h1 className="text-2xl font-bold pt-6">{formData.mealName}</h1>
           {formData.receiptImage && (
             <div>
@@ -58,6 +59,6 @@ export default function ResultPage() {
           <Button>Allocate Tab</Button>
         </CardFooter>
       </Card>
-    </div>
+    </main>
   );
 }
