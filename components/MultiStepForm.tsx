@@ -21,7 +21,7 @@ export default function MultiStepForm() {
     tax: "",
     tip: "",
     discount: "",
-    participants: [""],
+    participants: ["", ""],
   });
 
   const handleNext = () => {
