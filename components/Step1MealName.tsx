@@ -1,5 +1,5 @@
 // components/Step1MealName.tsx
-import { UseFormReturn } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -10,15 +10,13 @@ import {
 import { Input } from "./ui/input";
 import { FormData } from "../lib/formSchema";
 
-interface Step1MealNameProps {
-  form: UseFormReturn<FormData>;
-}
+export default function Step1MealName() {
+  const { control } = useFormContext<FormData>();
 
-export default function Step1MealName({ form }: Step1MealNameProps) {
   return (
     <FormField
-      control={form.control}
-      name="mealName"
+      control={control}
+      name="stepOne.mealName"
       render={({ field }) => (
         <FormItem>
           <FormLabel>Meal Name</FormLabel>

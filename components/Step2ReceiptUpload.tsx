@@ -1,5 +1,5 @@
 // components/Step2ReceiptUpload.tsx
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -10,15 +10,13 @@ import {
 import { Input } from "./ui/input";
 import { FormData } from "../lib/formSchema";
 
-interface Step2ReceiptUploadProps {
-  form: UseFormReturn<FormData>;
-}
+export default function Step2ReceiptUpload() {
+  const { control } = useFormContext<FormData>();
 
-export default function Step2ReceiptUpload({ form }: Step2ReceiptUploadProps) {
   return (
     <FormField
-      control={form.control}
-      name="receiptImage"
+      control={control}
+      name="stepTwo.receiptImage"
       render={({ field: { value, onChange, ...field } }) => (
         <FormItem>
           <FormLabel>Upload Receipt (Optional)</FormLabel>

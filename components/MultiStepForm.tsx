@@ -3,7 +3,12 @@
 // components/MultiStepForm.tsx
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import {
+  Controller,
+  FormProvider,
+  useForm,
+  useFormContext,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
@@ -21,50 +26,59 @@ export default function MultiStepForm() {
   const [currentStep, setCurrentStep] = useState(0);
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    shouldUnregister: false,
     mode: "onChange",
     defaultValues: {
-      mealName: "",
-      receiptImage: null,
-      foodItems: [{ item: "", price: undefined }],
-      tax: undefined,
-      tip: undefined,
-      discount: undefined,
-      participants: ["", ""],
+      stepOne: {
+        mealName: "",
+      },
+      stepTwo: {
+        receiptImage: null,
+      },
+      stepThree: {
+        foodItems: [{ item: "", price: undefined }],
+        tax: undefined,
+        tip: undefined,
+        discount: undefined,
+      },
+      stepFour: {
+        participants: ["", ""],
+      },
     },
+    resolver: zodResolver(formSchema),
   });
+  const { handleSubmit } = form;
+
+  // const { trigger } = useFormContext<FormData>();
+
+  const onSubmit = (data: FormData) => {
+    console.log(data);
+    const formDataString = encodeURIComponent(JSON.stringify(data));
+    router.push(`/result?formData=${formDataString}`);
+  };
 
   const handleNext = async () => {
-    const isValid = await form.trigger();
-    // console.log(isValid);
-    // if (isValid) {
-    if (currentStep === steps.length - 1) {
-      handleSubmit();
-    } else {
+    const stepNumber = ["stepOne", "stepTwo", "stepThree", "stepFour"];
+    const isValid = await form.trigger(stepNumber[currentStep]);
+    if (isValid) {
       setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
     }
-    // }
   };
 
   const handlePrev = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  const handleSubmit = form.handleSubmit((data) => {
-    const formDataString = encodeURIComponent(JSON.stringify(data));
-    router.push(`/result?formData=${formDataString}`);
-  });
-
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <Step1MealName form={form} />;
+        return <Step1MealName />;
       case 1:
-        return <Step2ReceiptUpload form={form} />;
+        return <Step2ReceiptUpload />;
       case 2:
-        return <Step3FoodItems form={form} />;
+        return <Step3FoodItems />;
       case 3:
-        return <Step4Participants form={form} />;
+        return <Step4Participants />;
       default:
         return null;
     }
@@ -72,7 +86,7 @@ export default function MultiStepForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardContent>
             <div className="mb-4">
@@ -90,9 +104,13 @@ export default function MultiStepForm() {
             >
               Previous
             </Button>
-            <Button type="button" onClick={handleNext}>
-              {currentStep === steps.length - 1 ? "Submit" : "Next"}
-            </Button>
+            {currentStep === steps.length - 1 ? (
+              <Button type="submit">Submit</Button>
+            ) : (
+              <Button type="button" onClick={handleNext}>
+                Next
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </form>

@@ -15,12 +15,14 @@ export default function ResultPage() {
       <h1 className="text-2xl font-bold mb-4">Meal Receipt Splitter</h1>
       <Card>
         <CardContent>
-          <h1 className="text-2xl font-bold pt-6">{formData.mealName}</h1>
-          {formData.receiptImage && (
+          <h1 className="text-2xl font-bold pt-6">
+            {formData.stepOne.mealName}
+          </h1>
+          {formData.stepTwo.receiptImage && (
             <div>
               <h2 className="text-xl font-semibold">Receipt Image</h2>
               <Image
-                src={formData.receiptImage}
+                src={formData.stepTwo.receiptImage}
                 alt="Receipt"
                 width={300}
                 height={300}
@@ -31,7 +33,7 @@ export default function ResultPage() {
           <div>
             <h2 className="text-xl font-semibold">Food Items</h2>
             <ul>
-              {formData.foodItems.map((item, index) => (
+              {formData.stepThree.foodItems.map((item, index) => (
                 <li key={index}>
                   {item.item}: ${item.price}
                 </li>
@@ -40,14 +42,14 @@ export default function ResultPage() {
           </div>
           <div>
             <h2 className="text-xl font-semibold">Additional Costs</h2>
-            <p>Tax: ${formData.tax}</p>
-            <p>Tip: ${formData.tip}</p>
-            <p>Discount: ${formData.discount}</p>
+            <p>Tax: ${formData.stepThree.tax}</p>
+            <p>Tip: ${formData.stepThree.tip}</p>
+            <p>Discount: ${formData.stepThree.discount}</p>
           </div>
           <div>
             <h2 className="text-xl font-semibold">Participants</h2>
             <ul>
-              {formData.participants.map((participant, index) => (
+              {formData.stepFour.participants.map((participant, index) => (
                 <li key={index}>{participant}</li>
               ))}
             </ul>

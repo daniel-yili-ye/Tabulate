@@ -1,5 +1,5 @@
-// components/Step3FoodItems.tsx
-import { UseFormReturn, useFieldArray } from "react-hook-form";
+// components/Step3stepThree.foodItems.tsx
+import { UseFormReturn, useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -11,14 +11,12 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { FormData } from "../lib/formSchema";
 
-interface Step3FoodItemsProps {
-  form: UseFormReturn<FormData>;
-}
+export default function Step3FoodItems() {
+  const { control } = useFormContext<FormData>();
 
-export default function Step3FoodItems({ form }: Step3FoodItemsProps) {
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "foodItems",
+    control: control,
+    name: "stepThree.foodItems",
   });
 
   return (
@@ -26,8 +24,8 @@ export default function Step3FoodItems({ form }: Step3FoodItemsProps) {
       {fields.map((field, index) => (
         <div key={field.id} className="flex space-x-2 mb-2">
           <FormField
-            control={form.control}
-            name={`foodItems.${index}.item`}
+            control={control}
+            name={`stepThree.foodItems.${index}.item`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -38,8 +36,8 @@ export default function Step3FoodItems({ form }: Step3FoodItemsProps) {
             )}
           />
           <FormField
-            control={form.control}
-            name={`foodItems.${index}.price`}
+            control={control}
+            name={`stepThree.foodItems.${index}.price`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -67,8 +65,8 @@ export default function Step3FoodItems({ form }: Step3FoodItemsProps) {
       </Button>
 
       <FormField
-        control={form.control}
-        name="tax"
+        control={control}
+        name="stepThree.tax"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Tax</FormLabel>
@@ -81,8 +79,8 @@ export default function Step3FoodItems({ form }: Step3FoodItemsProps) {
       />
 
       <FormField
-        control={form.control}
-        name="tip"
+        control={control}
+        name="stepThree.tip"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Tip</FormLabel>
@@ -95,8 +93,8 @@ export default function Step3FoodItems({ form }: Step3FoodItemsProps) {
       />
 
       <FormField
-        control={form.control}
-        name="discount"
+        control={control}
+        name="stepThree.discount"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Discount</FormLabel>

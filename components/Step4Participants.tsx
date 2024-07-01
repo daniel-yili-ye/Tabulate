@@ -1,5 +1,5 @@
 // components/Step4Participants.tsx
-import { UseFormReturn, useFieldArray } from "react-hook-form";
+import { UseFormReturn, useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -11,14 +11,12 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { FormData } from "../lib/formSchema";
 
-interface Step4ParticipantsProps {
-  form: UseFormReturn<FormData>;
-}
+export default function Step4Participants() {
+  const { control } = useFormContext<FormData>();
 
-export default function Step4Participants({ form }: Step4ParticipantsProps) {
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "participants",
+    control: control,
+    name: "stepFour.participants",
   });
 
   return (
@@ -26,8 +24,8 @@ export default function Step4Participants({ form }: Step4ParticipantsProps) {
       {fields.map((field, index) => (
         <div key={field.id} className="flex space-x-2 mb-2">
           <FormField
-            control={form.control}
-            name={`participants.${index}`}
+            control={control}
+            name={`stepFour.participants.${index}`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
