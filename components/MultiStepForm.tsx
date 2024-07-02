@@ -41,9 +41,7 @@ export default function MultiStepForm() {
         tip: undefined,
         discount: undefined,
       },
-      stepFour: {
-        participants: ["", ""],
-      },
+      stepFour: [{ name: "" }, { name: "" }],
     },
     resolver: zodResolver(formSchema),
   });
@@ -70,6 +68,7 @@ export default function MultiStepForm() {
   };
 
   const renderStep = () => {
+    console.log(currentStep);
     switch (currentStep) {
       case 0:
         return <Step1MealName />;

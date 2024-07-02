@@ -49,8 +49,8 @@ export default function ResultPage() {
           <div>
             <h2 className="text-xl font-semibold">Participants</h2>
             <ul>
-              {formData.stepFour.participants.map((participant, index) => (
-                <li key={index}>{participant}</li>
+              {formData.stepFour.map((person, index) => (
+                <li key={index}>{person.name}</li>
               ))}
             </ul>
           </div>

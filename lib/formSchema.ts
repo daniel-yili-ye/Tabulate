@@ -23,11 +23,9 @@ const wizardThreeSchema = z.object({
   discount: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
 });
 
-const wizardFourSchema = z.object({
-  participants: z
-    .array(z.string().min(1, "Participant name is required"))
-    .min(2, "At least 2 participants are required"),
-});
+const wizardFourSchema = z
+  .array(z.object({ name: z.string().min(1, "Participant name is required") }))
+  .min(2, "At least 2 participants are required");
 
 export const formSchema = z.object({
   stepOne: wizardOneSchema,

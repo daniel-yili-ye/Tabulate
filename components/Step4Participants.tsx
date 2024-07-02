@@ -16,7 +16,7 @@ export default function Step4Participants() {
 
   const { fields, append, remove } = useFieldArray({
     control: control,
-    name: "stepFour.participants",
+    name: "stepFour",
   });
 
   return (
@@ -25,7 +25,7 @@ export default function Step4Participants() {
         <div key={field.id} className="flex space-x-2 mb-2">
           <FormField
             control={control}
-            name={`stepFour.participants.${index}`}
+            name={`stepFour.${index}.name`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -44,7 +44,11 @@ export default function Step4Participants() {
           </Button>
         </div>
       ))}
-      <Button type="button" onClick={() => append("")} className="mt-2">
+      <Button
+        type="button"
+        onClick={() => append({ name: "" })}
+        className="mt-2"
+      >
         Add Participant
       </Button>
     </div>
