@@ -1,21 +1,35 @@
-// src/components/Step2ReceiptUpload.tsx
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+// components/Step2ReceiptUpload.tsx
+import { UseFormReturn, useFormContext } from "react-hook-form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "./ui/form";
+import { Input } from "./ui/input";
+import { FormData } from "../lib/formSchema";
 
-export default function Step2ReceiptUpload({ formData, updateFormData }) {
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      console.log(imageUrl);
-      updateFormData("receiptImage", imageUrl);
-    }
-  };
+export default function Step2ReceiptUpload() {
+  const { control } = useFormContext<FormData>();
 
   return (
-    <div>
-      <Label htmlFor="receiptImage">Upload Receipt (Optional)</Label>
-      <Input id="receiptImage" type="file" onChange={handleFileChange} />
-    </div>
+    <FormField
+      control={control}
+      name="stepTwo.receiptImage"
+      render={({ field: { value, onChange, ...field } }) => (
+        <FormItem>
+          <FormLabel>Upload Receipt (Optional)</FormLabel>
+          <FormControl>
+            <Input
+              type="file"
+              onChange={(e) => onChange(e.target.files?.[0] || null)}
+              {...field}
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 }
