@@ -39,6 +39,7 @@ export default function Step4Participants() {
             type="button"
             onClick={() => remove(index)}
             variant="destructive"
+            disabled={fields.length <= 2}
           >
             Remove
           </Button>

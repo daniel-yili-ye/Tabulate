@@ -51,6 +51,7 @@ export default function Step3FoodItems() {
             type="button"
             onClick={() => remove(index)}
             variant="destructive"
+            disabled={fields.length <= 1}
           >
             Remove
           </Button>
