@@ -11,7 +11,15 @@ import { Input } from "./ui/input";
 import { FormData } from "../lib/formSchema";
 
 export default function Step2ReceiptUpload() {
-  const { control } = useFormContext<FormData>();
+  const { control, setValue } = useFormContext<FormData>();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setValue("stepTwo.receiptImage", imageUrl);
+    }
+  };
 
   return (
     <FormField
@@ -21,11 +29,7 @@ export default function Step2ReceiptUpload() {
         <FormItem>
           <FormLabel>Upload Receipt (Optional)</FormLabel>
           <FormControl>
-            <Input
-              type="file"
-              onChange={(e) => onChange(e.target.files?.[0] || null)}
-              {...field}
-            />
+            <Input type="file" onChange={handleFileChange} {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>
