@@ -27,11 +27,22 @@ const wizardFourSchema = z
   .array(z.object({ name: z.string().min(1, "Participant name is required") }))
   .min(2, "At least 2 participants are required");
 
+const wizardFiveSchema = z.array(
+  z.object({
+    persons: z
+      .array(z.string())
+      .refine((value) => value.some((person) => person), {
+        message: "You have to select at least one person.",
+      }),
+  })
+);
+
 export const formSchema = z.object({
   stepOne: wizardOneSchema,
   stepTwo: wizardTwoSchema,
   stepThree: wizardThreeSchema,
   stepFour: wizardFourSchema,
+  stepFive: wizardFiveSchema,
 });
 
 export type FormData = z.infer<typeof formSchema>;

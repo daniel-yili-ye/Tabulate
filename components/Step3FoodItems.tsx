@@ -64,7 +64,6 @@ export default function Step3FoodItems() {
       >
         Add Food Item
       </Button>
-
       <FormField
         control={control}
         name="stepThree.tax"
@@ -78,7 +77,6 @@ export default function Step3FoodItems() {
           </FormItem>
         )}
       />
-
       <FormField
         control={control}
         name="stepThree.tip"
@@ -92,7 +90,6 @@ export default function Step3FoodItems() {
           </FormItem>
         )}
       />
-
       <FormField
         control={control}
         name="stepThree.discount"
