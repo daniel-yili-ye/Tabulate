@@ -47,6 +47,7 @@ export default function Summary({ formData }: { formData: FormData }) {
       </CardContent>
 
       <CardFooter className="flex justify-end space-x-4">
+        <Button variant="outline">Edit in Google Sheets</Button>
         <Button>Share Link</Button>
       </CardFooter>
     </Card>
