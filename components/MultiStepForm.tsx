@@ -116,9 +116,12 @@ export default function MultiStepForm() {
             >
               Previous
             </Button>
-            <Button type="button" onClick={handleNext}>
-              {currentStep === steps.length - 1 ? "Submit" : "Next"}
-            </Button>
+            <div className="space-x-4">
+              <Button variant="outline">Edit in Google Sheets</Button>
+              <Button type="button" onClick={handleNext}>
+                {currentStep === steps.length - 1 ? "Submit" : "Next"}
+              </Button>
+            </div>
           </CardFooter>
         </Card>
       </form>

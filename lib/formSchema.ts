@@ -29,11 +29,8 @@ const wizardFourSchema = z
 
 const wizardFiveSchema = z.array(
   z.object({
-    persons: z
-      .array(z.string())
-      .refine((value) => value.some((person) => person), {
-        message: "You have to select at least one person.",
-      }),
+    foodItemIndex: z.number().int().nonnegative(),
+    participantIndices: z.array(z.number().int().nonnegative()),
   })
 );
 

@@ -1,4 +1,5 @@
-import { Form, useFieldArray, useForm, useFormContext } from "react-hook-form";
+import React, { useEffect } from "react";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -10,66 +11,63 @@ import { FormData } from "../lib/formSchema";
 import { Checkbox } from "./ui/checkbox";
 
 export default function Step5AllocateFoodItems() {
-  const { control } = useFormContext<FormData>();
+  const { control, watch, setValue } = useFormContext<FormData>();
 
-  const { fields: stepThreeFields } = useFieldArray({
-    control,
-    name: "stepThree.foodItems",
-  });
+  const foodItems = watch("stepThree.foodItems");
+  const participants = watch("stepFour");
 
-  const { fields: stepFourFields } = useFieldArray({
-    control,
-    name: "stepFour",
-  });
-
-  const { fields: stepFiveFields } = useFieldArray({
+  const { fields: allocations } = useFieldArray({
     control,
     name: "stepFive",
   });
 
+  // Use useEffect to initialize allocations
+  useEffect(() => {
+    if (foodItems && allocations.length !== foodItems.length) {
+      const newAllocations = foodItems.map((_, index) => ({
+        foodItemIndex: index,
+        participantIndices: [],
+      }));
+      setValue("stepFive", newAllocations);
+    }
+  }, [foodItems, allocations.length, setValue]);
+
+  if (!foodItems || !participants) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="space-y-3">
-      {stepThreeFields.map((field, index) => (
+      {foodItems.map((foodItem, foodItemIndex) => (
         <FormField
-          key={field.id}
+          key={foodItemIndex}
           control={control}
-          name={`stepThree.foodItems.${index}`}
-          render={() => (
+          name={`stepFive.${foodItemIndex}.participantIndices`}
+          render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base">{field.item}</FormLabel>
-              {stepFourFields.map((item) => (
-                <FormField
-                  key={item.id}
-                  control={control}
-                  name={`stepFive.${index}.persons`}
-                  render={({ field }) => {
-                    return (
-                      <FormItem
-                        key={item.id}
-                        className="flex flex-row items-start space-x-3 space-y-0"
-                      >
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(item.id)}
-                            onCheckedChange={(checked) => {
-                              const currentValue = field.value || [];
-                              return checked
-                                ? field.onChange([...currentValue, item.id])
-                                : field.onChange(
-                                    currentValue.filter(
-                                      (value) => value !== item.id
-                                    )
-                                  );
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {item.name}
-                        </FormLabel>
-                      </FormItem>
-                    );
-                  }}
-                />
+              <FormLabel className="text-base">{foodItem.item}</FormLabel>
+              {participants.map((participant, participantIndex) => (
+                <FormItem
+                  key={participantIndex}
+                  className="flex flex-row items-start space-x-3 space-y-0"
+                >
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value?.includes(participantIndex)}
+                      onCheckedChange={(checked) => {
+                        const updatedIndices = checked
+                          ? [...(field.value || []), participantIndex]
+                          : (field.value || []).filter(
+                              (index) => index !== participantIndex
+                            );
+                        field.onChange(updatedIndices);
+                      }}
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">
+                    {participant.name}
+                  </FormLabel>
+                </FormItem>
               ))}
               <FormMessage />
             </FormItem>
