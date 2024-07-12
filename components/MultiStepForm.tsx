@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { FormProvider, useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
@@ -11,9 +10,17 @@ import Step1MealName from "./Step1MealName";
 import Step2ReceiptUpload from "./Step2ReceiptUpload";
 import Step3FoodItems from "./Step3FoodItems";
 import Step4Participants from "./Step4Participants";
+import Step5AllocateFoodItems from "./Step5AllocateFoodItems";
+import Summary from "./Summary";
 import { formSchema, FormData } from "../lib/formSchema";
 
-const steps = ["Meal Name", "Receipt Upload", "Food Items", "Participants"];
+const steps = [
+  "Meal Name",
+  "Receipt Upload",
+  "Food Items",
+  "Participants",
+  "Allocate Food Items",
+];
 
 const defaultValues: FormData = {
   stepOne: { mealName: "" },
@@ -28,8 +35,8 @@ const defaultValues: FormData = {
 };
 
 export default function MultiStepForm() {
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm<FormData>({
     shouldUnregister: false,
@@ -42,12 +49,22 @@ export default function MultiStepForm() {
 
   const onSubmit = (data: FormData) => {
     console.log("Form submitted with data:", data);
-    const formDataString = encodeURIComponent(JSON.stringify(data));
-    router.push(`/result?formData=${formDataString}`);
+    setIsSubmitted(true);
   };
 
+  if (isSubmitted) {
+    return <Summary formData={form.getValues()} />;
+  }
+
   const handleNext = async () => {
-    const stepNumber = ["stepOne", "stepTwo", "stepThree", "stepFour"];
+    const stepNumber: string[] = [
+      "stepOne",
+      "stepTwo",
+      "stepThree",
+      "stepFour",
+      "stepFive",
+    ];
+
     const isValid = await form.trigger(stepNumber[currentStep]);
     if (isValid) {
       if (currentStep === steps.length - 1) {
@@ -72,6 +89,8 @@ export default function MultiStepForm() {
         return <Step3FoodItems />;
       case 3:
         return <Step4Participants />;
+      case 4:
+        return <Step5AllocateFoodItems />;
       default:
         return null;
     }
@@ -97,7 +116,7 @@ export default function MultiStepForm() {
             >
               Previous
             </Button>
-            <Button type="button" onClick={handleNext}>
+            <Button type="button" onClick={handleNext} className="space-x-4">
               {currentStep === steps.length - 1 ? "Submit" : "Next"}
             </Button>
           </CardFooter>
