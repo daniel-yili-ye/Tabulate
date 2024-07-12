@@ -31,7 +31,12 @@ export default function Step2ReceiptUpload() {
         <FormItem>
           <FormLabel>Upload Receipt (Optional)</FormLabel>
           <FormControl>
-            <Input type="file" onChange={handleFileChange} {...field} />
+            <Input
+              type="file"
+              onChange={handleFileChange}
+              accept="image/*"
+              {...field}
+            />
           </FormControl>
           {receiptImage && (
             <Image
