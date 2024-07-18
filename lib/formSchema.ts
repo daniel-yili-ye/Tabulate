@@ -30,7 +30,9 @@ const wizardFourSchema = z
 const wizardFiveSchema = z.array(
   z.object({
     foodItemIndex: z.number().int().nonnegative(),
-    participantIndices: z.array(z.number().int().nonnegative()),
+    participantIndices: z
+      .array(z.number().int().nonnegative())
+      .min(1, "At least 1 participant must be selected"),
   })
 );
 
