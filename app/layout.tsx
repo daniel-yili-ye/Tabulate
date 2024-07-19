@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 import { Inter as FontSans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 
 import { cn } from "@/lib/utils";
 const fontSans = FontSans({
@@ -22,6 +23,7 @@ export default function RootLayout({
         suppressHydrationWarning={true}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   );
