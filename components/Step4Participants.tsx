@@ -1,4 +1,5 @@
 // components/Step4Participants.tsx
+import { v4 as uuidv4 } from "uuid";
 import { UseFormReturn, useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -48,7 +49,7 @@ export default function Step4Participants() {
       ))}
       <Button
         type="button"
-        onClick={() => append({ name: "" })}
+        onClick={() => append({ id: uuidv4(), name: "" })}
         className="mt-2"
       >
         <PlusIcon />

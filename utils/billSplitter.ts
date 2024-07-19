@@ -54,10 +54,11 @@ function pppaa(
 interface BillItem {
   item: string;
   price: number;
-  names: string[];
+  participantIds: string[];
 }
 
 export interface PersonAllocation {
+  id: string;
   name: string;
   items: { item: string; price: number }[];
   discount: number;
@@ -87,26 +88,25 @@ export function splitBill(formData: FormData): BillAllocation {
   const billItems: BillItem[] = stepThree.foodItems.map((item, index) => ({
     item: item.item,
     price: toCents(item.price || 0),
-    names: stepFive
-      .filter((allocation) => allocation.foodItemIndex === index)
-      .flatMap((allocation) =>
-        allocation.participantIndices.map((i) => stepFour[i].name)
-      ),
+    participantIds:
+      stepFive.find((allocation) => allocation.foodItemIndex === index)
+        ?.participantIds || [],
   }));
 
-  const people = stepFour.map((p) => p.name);
+  const people = stepFour.map((p) => ({ id: p.id, name: p.name }));
   const peopleIndex: Record<string, number> = {};
   const subtotals: Record<string, number> = {};
 
-  people.forEach((name, index) => {
-    peopleIndex[name] = index;
-    subtotals[name] = 0;
+  people.forEach(({ id, name }, index) => {
+    peopleIndex[id] = index;
+    subtotals[id] = 0;
   });
 
   const allocation: BillAllocation = {
     id: uuidv4(),
     billName: stepOne.mealName,
-    people: people.map((name) => ({
+    people: people.map(({ id, name }) => ({
+      id,
       name,
       items: [],
       discount: 0,
@@ -118,10 +118,10 @@ export function splitBill(formData: FormData): BillAllocation {
 
   // Allocate bill items
   billItems.forEach((billItem) => {
-    const splitValues = ppaa(billItem.price, billItem.names.length);
-    billItem.names.forEach((name, i) => {
-      subtotals[name] += splitValues[i];
-      allocation.people[peopleIndex[name]].items.push({
+    const splitValues = ppaa(billItem.price, billItem.participantIds.length);
+    billItem.participantIds.forEach((id, i) => {
+      subtotals[id] += splitValues[i];
+      allocation.people[peopleIndex[id]].items.push({
         item: billItem.item,
         price: splitValues[i],
       });
@@ -138,9 +138,12 @@ export function splitBill(formData: FormData): BillAllocation {
     { key: "tax", value: tax },
     { key: "tip", value: tip },
   ].forEach(({ key, value }) => {
-    console.log(pppaa(value, subtotals, people));
-    pppaa(value, subtotals, people).forEach(([amount, , name]) => {
-      allocation.people[peopleIndex[name]][key as "discount" | "tax" | "tip"] =
+    pppaa(
+      value,
+      subtotals,
+      people.map((p) => p.id)
+    ).forEach(([amount, , id]) => {
+      allocation.people[peopleIndex[id]][key as "discount" | "tax" | "tip"] =
         amount;
     });
   });
@@ -153,8 +156,6 @@ export function splitBill(formData: FormData): BillAllocation {
       itemsTotal + person.tax + person.tip - person.discount
     );
   });
-
-  console.log(allocation);
 
   return allocation;
 }

@@ -24,14 +24,19 @@ const wizardThreeSchema = z.object({
 });
 
 const wizardFourSchema = z
-  .array(z.object({ name: z.string().min(1, "Participant name is required") }))
+  .array(
+    z.object({
+      id: z.string().uuid("Invalid UUID"),
+      name: z.string().min(1, "Participant name is required"),
+    })
+  )
   .min(2, "At least 2 participants are required");
 
 const wizardFiveSchema = z.array(
   z.object({
     foodItemIndex: z.number().int().nonnegative(),
-    participantIndices: z
-      .array(z.number().int().nonnegative())
+    participantIds: z
+      .array(z.string().uuid("Invalid UUID"))
       .min(1, "At least 1 participant must be selected"),
   })
 );

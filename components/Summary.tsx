@@ -227,7 +227,7 @@ export default function Summary({ formData }: { formData: FormData }) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="space-y-2 md:flex md:justify-between md:items-center md:space-y-0">
           <CardTitle>{formData.stepOne.mealName}</CardTitle>
           <div className="flex space-x-2">
             <ReceiptModal />

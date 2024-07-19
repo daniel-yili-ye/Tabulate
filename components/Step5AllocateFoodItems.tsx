@@ -1,3 +1,4 @@
+// components/Step5AllocateFoodItems.tsx
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import {
@@ -26,7 +27,7 @@ export default function Step5AllocateFoodItems() {
     if (foodItems && allocations.length !== foodItems.length) {
       const newAllocations = foodItems.map((_, index) => ({
         foodItemIndex: index,
-        participantIndices: [],
+        participantIds: [],
       }));
       setValue("stepFive", newAllocations);
     }
@@ -42,25 +43,25 @@ export default function Step5AllocateFoodItems() {
         <FormField
           key={foodItemIndex}
           control={control}
-          name={`stepFive.${foodItemIndex}.participantIndices`}
+          name={`stepFive.${foodItemIndex}.participantIds`}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-base">{foodItem.item}</FormLabel>
-              {participants.map((participant, participantIndex) => (
+              {participants.map((participant) => (
                 <FormItem
-                  key={participantIndex}
+                  key={participant.id}
                   className="flex flex-row items-start space-x-3 space-y-0"
                 >
                   <FormControl>
                     <Checkbox
-                      checked={field.value?.includes(participantIndex)}
+                      checked={field.value?.includes(participant.id)}
                       onCheckedChange={(checked) => {
-                        const updatedIndices = checked
-                          ? [...(field.value || []), participantIndex]
+                        const updatedIds = checked
+                          ? [...(field.value || []), participant.id]
                           : (field.value || []).filter(
-                              (index) => index !== participantIndex
+                              (id) => id !== participant.id
                             );
-                        field.onChange(updatedIndices);
+                        field.onChange(updatedIds);
                       }}
                     />
                   </FormControl>

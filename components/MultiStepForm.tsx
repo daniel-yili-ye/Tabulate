@@ -15,6 +15,7 @@ import Summary from "./Summary";
 import { formSchema, FormData } from "../lib/formSchema";
 import { splitBill } from "@/utils/billSplitter";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import { v4 as uuidv4 } from "uuid";
 
 const steps = [
   "Meal Name",
@@ -33,7 +34,16 @@ const defaultValues: FormData = {
     tip: 0,
     discount: 0,
   },
-  stepFour: [{ name: "" }, { name: "" }],
+  stepFour: [
+    {
+      name: "",
+      id: uuidv4(),
+    },
+    {
+      name: "",
+      id: uuidv4(),
+    },
+  ],
   stepFive: [],
 };
 
@@ -112,13 +122,13 @@ export default function MultiStepForm() {
             {renderStep()}
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button
-              type="button"
-              onClick={handlePrev}
-              disabled={currentStep === 0}
-            >
-              <ChevronLeftIcon /> Previous
-            </Button>
+            {currentStep === 0 ? (
+              <div></div>
+            ) : (
+              <Button type="button" onClick={handlePrev}>
+                <ChevronLeftIcon /> Previous
+              </Button>
+            )}
             <Button type="button" onClick={handleNext} className="space-x-4">
               {currentStep === steps.length - 1 ? (
                 "Submit"
