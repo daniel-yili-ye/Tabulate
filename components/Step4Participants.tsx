@@ -10,7 +10,6 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { FormData } from "../lib/formSchema";
-import { PlusIcon } from "@radix-ui/react-icons";
 
 export default function Step4Participants() {
   const { control } = useFormContext<FormData>();
@@ -51,8 +50,7 @@ export default function Step4Participants() {
         onClick={() => append({ name: "" })}
         className="mt-2"
       >
-        <PlusIcon />
-        &nbsp;Add Participant
+        Add Participant
       </Button>
     </div>
   );
