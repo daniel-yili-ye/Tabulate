@@ -20,6 +20,18 @@ function pppaa(
   peopleArr: string[]
 ): [number, number, string][] {
   const total = Object.values(subtotalsDict).reduce((a, b) => a + b, 0);
+
+  // If total is zero, distribute evenly
+  if (total === 0) {
+    const evenShare = Math.floor(value / peopleArr.length);
+    const remainder = value % peopleArr.length;
+    return peopleArr.map((person, index) => [
+      index < remainder ? evenShare + 1 : evenShare,
+      0,
+      person,
+    ]);
+  }
+
   let qrArr = peopleArr.map((person) => {
     const allocation = (value * subtotalsDict[person]) / total;
     return [
