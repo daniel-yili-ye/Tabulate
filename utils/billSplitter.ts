@@ -77,7 +77,7 @@ export function splitBill(formData: FormData): BillAllocation {
 
   // Validate total bill is not negative
   const totalBill = stepThree.foodItems.reduce(
-    (sum, item) => sum + item.price,
+    (sum, item) => sum + (item.price || 0),
     0
   );
   if (totalBill < 0) {
@@ -86,7 +86,7 @@ export function splitBill(formData: FormData): BillAllocation {
 
   const billItems: BillItem[] = stepThree.foodItems.map((item, index) => ({
     item: item.item,
-    price: toCents(item.price),
+    price: toCents(item.price || 0),
     names: stepFive
       .filter((allocation) => allocation.foodItemIndex === index)
       .flatMap((allocation) =>

@@ -42,7 +42,12 @@ export default function Step3FoodItems() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input placeholder="Price" type="number" {...field} />
+                  <Input
+                    placeholder="Price"
+                    type="number"
+                    {...field}
+                    value={field.value === 0 ? "" : field.value}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -60,7 +65,7 @@ export default function Step3FoodItems() {
       ))}
       <Button
         type="button"
-        onClick={() => append({ item: null, price: null })}
+        onClick={() => append({ item: "", price: 0 })}
         className="mt-2 mb-4"
       >
         <PlusIcon />
@@ -73,7 +78,12 @@ export default function Step3FoodItems() {
           <FormItem>
             <FormLabel>Tax</FormLabel>
             <FormControl>
-              <Input placeholder="Tax amount" type="number" {...field} />
+              <Input
+                placeholder="Tax amount"
+                type="number"
+                {...field}
+                value={field.value === 0 ? "" : field.value}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -86,7 +96,12 @@ export default function Step3FoodItems() {
           <FormItem>
             <FormLabel>Tip</FormLabel>
             <FormControl>
-              <Input placeholder="Tip amount" type="number" {...field} />
+              <Input
+                placeholder="Tip amount"
+                type="number"
+                {...field}
+                value={field.value === 0 ? "" : field.value}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -99,7 +114,12 @@ export default function Step3FoodItems() {
           <FormItem>
             <FormLabel>Discount</FormLabel>
             <FormControl>
-              <Input placeholder="Discount amount" type="number" {...field} />
+              <Input
+                placeholder="Discount amount"
+                type="number"
+                {...field}
+                value={field.value === 0 ? "" : field.value}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

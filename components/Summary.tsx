@@ -166,7 +166,7 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
                 <TableCell className="text-right">
-                  ${(Math.round(item.price * 100) / 100).toFixed(2)}
+                  ${(Math.round((item.price || 0) * 100) / 100).toFixed(2)}
                 </TableCell>
               </TableRow>
             ))}
@@ -178,7 +178,8 @@ export default function Summary({ formData }: { formData: FormData }) {
                 $
                 {formData.stepThree.foodItems
                   .reduce(
-                    (sum, item) => sum + Math.round(item.price * 100) / 100,
+                    (sum, item) =>
+                      sum + Math.round((item.price || 0) * 100) / 100,
                     0
                   )
                   .toFixed(2)}
@@ -187,22 +188,28 @@ export default function Summary({ formData }: { formData: FormData }) {
             <TableRow>
               <TableCell>Tax</TableCell>
               <TableCell className="text-right">
-                ${(Math.round(formData.stepThree.tax * 100) / 100).toFixed(2)}
+                $
+                {(
+                  Math.round((formData.stepThree.tax || 0) * 100) / 100
+                ).toFixed(2)}
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Tip</TableCell>
               <TableCell className="text-right">
-                ${(Math.round(formData.stepThree.tip * 100) / 100).toFixed(2)}
+                $
+                {(
+                  Math.round((formData.stepThree.tip || 0) * 100) / 100
+                ).toFixed(2)}
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Discount</TableCell>
               <TableCell className="text-right">
                 -$
-                {(Math.round(formData.stepThree.discount * 100) / 100).toFixed(
-                  2
-                )}
+                {(
+                  Math.round((formData.stepThree.discount || 0) * 100) / 100
+                ).toFixed(2)}
               </TableCell>
             </TableRow>
             <TableRow>

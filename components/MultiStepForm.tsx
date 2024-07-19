@@ -28,10 +28,10 @@ const defaultValues: FormData = {
   stepOne: { mealName: "" },
   stepTwo: { receiptImage: null },
   stepThree: {
-    foodItems: [{ item: "", price: null }],
-    tax: null,
-    tip: null,
-    discount: null,
+    foodItems: [{ item: "", price: 0 }],
+    tax: 0,
+    tip: 0,
+    discount: 0,
   },
   stepFour: [{ name: "" }, { name: "" }],
   stepFive: [],
@@ -60,13 +60,13 @@ export default function MultiStepForm() {
   }
 
   const handleNext = async () => {
-    const stepNumber: string[] = [
-      "stepOne",
-      "stepTwo",
-      "stepThree",
-      "stepFour",
-      "stepFive",
-    ];
+    const stepNumber: (
+      | "stepOne"
+      | "stepTwo"
+      | "stepThree"
+      | "stepFour"
+      | "stepFive"
+    )[] = ["stepOne", "stepTwo", "stepThree", "stepFour", "stepFive"];
 
     const isValid = await form.trigger(stepNumber[currentStep]);
     if (isValid) {
