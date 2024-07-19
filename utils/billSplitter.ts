@@ -57,7 +57,7 @@ interface BillItem {
   names: string[];
 }
 
-interface PersonAllocation {
+export interface PersonAllocation {
   name: string;
   items: { item: string; price: number }[];
   discount: number;

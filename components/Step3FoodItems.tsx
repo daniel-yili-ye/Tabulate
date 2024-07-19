@@ -60,7 +60,7 @@ export default function Step3FoodItems() {
       ))}
       <Button
         type="button"
-        onClick={() => append({ item: "", price: "" })}
+        onClick={() => append({ item: null, price: null })}
         className="mt-2 mb-4"
       >
         <PlusIcon />

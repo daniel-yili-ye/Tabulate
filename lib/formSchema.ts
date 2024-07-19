@@ -14,13 +14,18 @@ const wizardThreeSchema = z.object({
     .array(
       z.object({
         item: z.string().min(1, "Item name is required"),
-        price: z.coerce.number().multipleOf(0.01).nonnegative(),
+        price: z.coerce.number().multipleOf(0.01).nonnegative().nullable(),
       })
     )
     .min(1, "At least one food item is required"),
-  tax: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
-  tip: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
-  discount: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
+  tax: z.coerce.number().multipleOf(0.01).nonnegative().optional().nullable(),
+  tip: z.coerce.number().multipleOf(0.01).nonnegative().optional().nullable(),
+  discount: z.coerce
+    .number()
+    .multipleOf(0.01)
+    .nonnegative()
+    .optional()
+    .nullable(),
 });
 
 const wizardFourSchema = z
