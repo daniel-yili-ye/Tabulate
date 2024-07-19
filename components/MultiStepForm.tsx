@@ -34,6 +34,7 @@ const defaultValues: FormData = {
     discount: null,
   },
   stepFour: [{ name: "" }, { name: "" }],
+  stepFive: [],
 };
 
 export default function MultiStepForm() {
