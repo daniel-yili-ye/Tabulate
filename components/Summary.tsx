@@ -84,7 +84,7 @@ export default function Summary({ formData }: { formData: FormData }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{person.name}'s Breakdown</DialogTitle>
+          <DialogTitle>{person.name} Breakdown</DialogTitle>
         </DialogHeader>
         <Table>
           <TableHeader>
