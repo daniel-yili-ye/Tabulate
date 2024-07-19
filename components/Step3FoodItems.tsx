@@ -10,6 +10,7 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { FormData } from "../lib/formSchema";
+import { PlusIcon } from "@radix-ui/react-icons";
 
 export default function Step3FoodItems() {
   const { control } = useFormContext<FormData>();
@@ -62,7 +63,8 @@ export default function Step3FoodItems() {
         onClick={() => append({ item: "", price: "" })}
         className="mt-2 mb-4"
       >
-        Add Food Item
+        <PlusIcon />
+        &nbsp;Add Food Item
       </Button>
       <FormField
         control={control}

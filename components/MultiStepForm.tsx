@@ -13,6 +13,8 @@ import Step4Participants from "./Step4Participants";
 import Step5AllocateFoodItems from "./Step5AllocateFoodItems";
 import Summary from "./Summary";
 import { formSchema, FormData } from "../lib/formSchema";
+import { splitBill } from "@/utils/billSplitter";
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 
 const steps = [
   "Meal Name",
@@ -48,7 +50,7 @@ export default function MultiStepForm() {
   const { handleSubmit } = form;
 
   const onSubmit = (data: FormData) => {
-    console.log("Form submitted with data:", data);
+    console.log(data);
     setIsSubmitted(true);
   };
 
@@ -114,10 +116,16 @@ export default function MultiStepForm() {
               onClick={handlePrev}
               disabled={currentStep === 0}
             >
-              Previous
+              <ChevronLeftIcon /> Previous
             </Button>
             <Button type="button" onClick={handleNext} className="space-x-4">
-              {currentStep === steps.length - 1 ? "Submit" : "Next"}
+              {currentStep === steps.length - 1 ? (
+                "Submit"
+              ) : (
+                <>
+                  Next <ChevronRightIcon />
+                </>
+              )}
             </Button>
           </CardFooter>
         </Card>
