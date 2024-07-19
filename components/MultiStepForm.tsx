@@ -28,7 +28,7 @@ const defaultValues: FormData = {
   stepOne: { mealName: "" },
   stepTwo: { receiptImage: null },
   stepThree: {
-    foodItems: [{ item: null, price: null }],
+    foodItems: [{ item: "", price: null }],
     tax: null,
     tip: null,
     discount: null,
