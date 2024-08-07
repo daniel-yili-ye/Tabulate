@@ -1,6 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -23,6 +29,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ImageIcon, Share2Icon } from "@radix-ui/react-icons";
@@ -30,6 +37,38 @@ import { ImageIcon, Share2Icon } from "@radix-ui/react-icons";
 export default function Summary({ formData }: { formData: FormData }) {
   const [allocation, setAllocation] = useState<BillAllocation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const options = {
+    year: "numeric",
+    month: "short", // "Aug"
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true, // 12-hour format
+  };
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleString(
+    "en-US",
+    options as Intl.DateTimeFormatOptions
+  );
+
+  const roundCents = (amount: number | undefined) => {
+    if (amount === undefined || isNaN(amount)) return "0.00";
+    return (amount ? Math.round(amount * 100) / 100 : 0).toFixed(2);
+  };
+
+  const calculateTotals = useMemo(() => {
+    const subtotal = formData.stepThree.foodItems.reduce(
+      (sum, item) => sum + (Number(item.price) || 0),
+      0
+    );
+    const total =
+      subtotal +
+      (Number(formData.stepThree.tax) || 0) +
+      (Number(formData.stepThree.tip) || 0) -
+      (Number(formData.stepThree.discount) || 0);
+    return { subtotal, total };
+  }, [formData.stepThree]);
 
   useEffect(() => {
     const calculateAllocation = async () => {
@@ -46,10 +85,6 @@ export default function Summary({ formData }: { formData: FormData }) {
     calculateAllocation();
   }, [formData]);
 
-  const totalBill = allocation
-    ? allocation.people.reduce((sum, person) => sum + person.subtotal, 0)
-    : 0;
-
   const ReceiptModal = () => (
     <Dialog>
       <DialogTrigger asChild>
@@ -58,9 +93,10 @@ export default function Summary({ formData }: { formData: FormData }) {
           &nbsp;View Receipt
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-screen">
         <DialogHeader>
           <DialogTitle>Receipt</DialogTitle>
+          <DialogDescription>Your receipt image</DialogDescription>
         </DialogHeader>
         {formData.stepTwo.receiptImage && (
           <Image
@@ -82,9 +118,10 @@ export default function Summary({ formData }: { formData: FormData }) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-screen">
         <DialogHeader>
-          <DialogTitle>{person.name} Breakdown</DialogTitle>
+          <DialogTitle>{person.name}</DialogTitle>
+          <DialogDescription>Itemized Tab</DialogDescription>
         </DialogHeader>
         <Table>
           <TableHeader>
@@ -98,7 +135,7 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
                 <TableCell className="text-right">
-                  ${(item.price / 100).toFixed(2)}
+                  ${roundCents(item.price)}
                 </TableCell>
               </TableRow>
             ))}
@@ -107,34 +144,37 @@ export default function Summary({ formData }: { formData: FormData }) {
             <TableRow>
               <TableCell>Subtotal</TableCell>
               <TableCell className="text-right">
-                $
-                {person.items
-                  .reduce((sum, item) => sum + item.price / 100, 0)
-                  .toFixed(2)}
+                ${roundCents(person.subtotal)}
               </TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell>Tax</TableCell>
-              <TableCell className="text-right">
-                ${(person.tax / 100).toFixed(2)}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Tip</TableCell>
-              <TableCell className="text-right">
-                ${(person.tip / 100).toFixed(2)}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Discount</TableCell>
-              <TableCell className="text-right">
-                -${(person.discount / 100).toFixed(2)}
-              </TableCell>
-            </TableRow>
+            {person.tax === 0 || (
+              <TableRow>
+                <TableCell>Tax</TableCell>
+                <TableCell className="text-right">
+                  ${roundCents(person.tax)}
+                </TableCell>
+              </TableRow>
+            )}
+            {person.tip === 0 || (
+              <TableRow>
+                <TableCell>Tip</TableCell>
+                <TableCell className="text-right">
+                  ${roundCents(person.tip)}
+                </TableCell>
+              </TableRow>
+            )}
+            {person.discount === 0 || (
+              <TableRow>
+                <TableCell>Discount</TableCell>
+                <TableCell className="text-right">
+                  -${roundCents(person.discount)}
+                </TableCell>
+              </TableRow>
+            )}
             <TableRow>
               <TableCell>TOTAL</TableCell>
               <TableCell className="text-right">
-                ${(person.subtotal / 100).toFixed(2)}
+                ${roundCents(person.total)}
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -150,9 +190,10 @@ export default function Summary({ formData }: { formData: FormData }) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] overflow-y-auto max-h-screen">
         <DialogHeader>
-          <DialogTitle>Full Receipt</DialogTitle>
+          <DialogTitle>{formData.stepOne.mealName}</DialogTitle>
+          <DialogDescription>Final Tab</DialogDescription>
         </DialogHeader>
         <Table>
           <TableHeader>
@@ -166,7 +207,7 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
                 <TableCell className="text-right">
-                  ${(Math.round((item.price || 0) * 100) / 100).toFixed(2)}
+                  ${roundCents(item.price)}
                 </TableCell>
               </TableRow>
             ))}
@@ -175,47 +216,38 @@ export default function Summary({ formData }: { formData: FormData }) {
             <TableRow>
               <TableCell>Subtotal</TableCell>
               <TableCell className="text-right">
-                $
-                {formData.stepThree.foodItems
-                  .reduce(
-                    (sum, item) =>
-                      sum + Math.round((item.price || 0) * 100) / 100,
-                    0
-                  )
-                  .toFixed(2)}
+                ${roundCents(calculateTotals.subtotal)}
               </TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell>Tax</TableCell>
-              <TableCell className="text-right">
-                $
-                {(
-                  Math.round((formData.stepThree.tax || 0) * 100) / 100
-                ).toFixed(2)}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Tip</TableCell>
-              <TableCell className="text-right">
-                $
-                {(
-                  Math.round((formData.stepThree.tip || 0) * 100) / 100
-                ).toFixed(2)}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Discount</TableCell>
-              <TableCell className="text-right">
-                -$
-                {(
-                  Math.round((formData.stepThree.discount || 0) * 100) / 100
-                ).toFixed(2)}
-              </TableCell>
-            </TableRow>
+            {formData.stepThree.tax === 0 || (
+              <TableRow>
+                <TableCell>Tax</TableCell>
+                <TableCell className="text-right">
+                  ${roundCents(formData.stepThree.tax)}
+                </TableCell>
+              </TableRow>
+            )}
+            {formData.stepThree.tip === 0 || (
+              <TableRow>
+                <TableCell>Tip</TableCell>
+                <TableCell className="text-right">
+                  ${roundCents(formData.stepThree.tip)}
+                </TableCell>
+              </TableRow>
+            )}
+            {formData.stepThree.discount === 0 || (
+              <TableRow>
+                <TableCell>Discount</TableCell>
+                <TableCell className="text-right">
+                  -$
+                  {roundCents(formData.stepThree.discount)}
+                </TableCell>
+              </TableRow>
+            )}
             <TableRow>
               <TableCell>TOTAL</TableCell>
               <TableCell className="text-right">
-                ${(totalBill / 100).toFixed(2)}
+                ${roundCents(calculateTotals.total)}
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -232,11 +264,12 @@ export default function Summary({ formData }: { formData: FormData }) {
           <div className="flex space-x-2">
             <ReceiptModal />
             <Button>
-              Share&nbsp;
               <Share2Icon />
+              &nbsp; Share
             </Button>
           </div>
         </div>
+        <CardDescription>{formattedDate}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -249,7 +282,7 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead className="text-right">Subtotal</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -258,7 +291,7 @@ export default function Summary({ formData }: { formData: FormData }) {
                   <TableRow key={index}>
                     <TableCell>{person.name}</TableCell>
                     <TableCell className="text-right">
-                      ${(person.subtotal / 100).toFixed(2)}
+                      ${roundCents(person.total)}
                     </TableCell>
                     <TableCell>
                       <ItemizedBreakdownModal person={person} />
@@ -270,7 +303,7 @@ export default function Summary({ formData }: { formData: FormData }) {
                 <TableRow>
                   <TableCell>TOTAL</TableCell>
                   <TableCell className="text-right">
-                    ${(totalBill / 100).toFixed(2)}
+                    ${roundCents(calculateTotals.total)}
                   </TableCell>
                   <TableCell>
                     <FullReceiptModal />

@@ -3,54 +3,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { FormData } from "../lib/formSchema";
 
-// Helper function to convert currency to cents
-const toCents = (value: number): number => Math.round(value * 100);
-
-// Penny-Precise Allocation Algorithm
-function ppaa(value: number, nrVariables: number): number[] {
-  const base = Math.floor(value / nrVariables);
-  const rem = value % nrVariables;
-  return [...Array(rem).fill(base + 1), ...Array(nrVariables - rem).fill(base)];
-}
-
-// Proportional Penny-Precise Allocation Algorithm
-function pppaa(
-  value: number,
-  subtotalsDict: Record<string, number>,
-  peopleArr: string[]
-): [number, number, string][] {
-  const total = Object.values(subtotalsDict).reduce((a, b) => a + b, 0);
-
-  // If total is zero, distribute evenly
-  if (total === 0) {
-    const evenShare = Math.floor(value / peopleArr.length);
-    const remainder = value % peopleArr.length;
-    return peopleArr.map((person, index) => [
-      index < remainder ? evenShare + 1 : evenShare,
-      0,
-      person,
-    ]);
-  }
-
-  let qrArr = peopleArr.map((person) => {
-    const allocation = (value * subtotalsDict[person]) / total;
-    return [
-      Math.floor(allocation),
-      Math.round((allocation % 1) * 100),
-      person,
-    ] as [number, number, string];
-  });
-
-  qrArr.sort((a, b) => b[1] - a[1]);
-  const leftoverCents = value - qrArr.reduce((sum, [whole]) => sum + whole, 0);
-
-  for (let i = 0; i < leftoverCents; i++) {
-    qrArr[i][0]++;
-  }
-
-  return qrArr;
-}
-
 interface BillItem {
   item: string;
   price: number;
@@ -61,10 +13,11 @@ export interface PersonAllocation {
   id: string;
   name: string;
   items: { item: string; price: number }[];
+  subtotal: number;
   discount: number;
   tax: number;
   tip: number;
-  subtotal: number;
+  total: number;
 }
 
 export interface BillAllocation {
@@ -73,21 +26,35 @@ export interface BillAllocation {
   people: PersonAllocation[];
 }
 
+// Proportional Allocation Algorithm
+function paa(
+  value: number, // value you want to split
+  subtotalsDict: Record<string, number>, // people and their subtotals
+  peopleArr: string[] // [id, ...]
+): [number, string][] {
+  // calculate denominator
+  const total = Object.values(subtotalsDict).reduce((a, b) => a + b, 0);
+
+  // If total is zero, distribute evenly
+  if (total === 0) {
+    const allocation = value / peopleArr.length;
+    return peopleArr.map((person, index) => [allocation, person]);
+  }
+
+  let qrArr = peopleArr.map((person) => {
+    const allocation = (value * subtotalsDict[person]) / total;
+    return [allocation, person] as [number, string];
+  });
+
+  return qrArr;
+}
+
 export function splitBill(formData: FormData): BillAllocation {
   const { stepOne, stepThree, stepFour, stepFive } = formData;
 
-  // Validate total bill is not negative
-  const totalBill = stepThree.foodItems.reduce(
-    (sum, item) => sum + (item.price || 0),
-    0
-  );
-  if (totalBill < 0) {
-    throw new Error("Bill total cannot be negative. Please check your input.");
-  }
-
   const billItems: BillItem[] = stepThree.foodItems.map((item, index) => ({
     item: item.item,
-    price: toCents(item.price || 0),
+    price: item.price || 0,
     participantIds:
       stepFive.find((allocation) => allocation.foodItemIndex === index)
         ?.participantIds || [],
@@ -109,40 +76,50 @@ export function splitBill(formData: FormData): BillAllocation {
       id,
       name,
       items: [],
+      subtotal: 0,
       discount: 0,
       tax: 0,
       tip: 0,
-      subtotal: 0,
+      total: 0,
     })),
   };
 
   // Allocate bill items
   billItems.forEach((billItem) => {
-    const splitValues = ppaa(billItem.price, billItem.participantIds.length);
-    billItem.participantIds.forEach((id, i) => {
-      subtotals[id] += splitValues[i];
+    const splitValues = billItem.price / billItem.participantIds.length;
+    billItem.participantIds.forEach((id) => {
+      subtotals[id] += splitValues;
       allocation.people[peopleIndex[id]].items.push({
         item: billItem.item,
-        price: splitValues[i],
+        price: splitValues,
       });
     });
   });
 
-  // Allocate discount, tax, and tip
-  const discount = Math.max(0, toCents(stepThree.discount || 0));
-  const tax = Math.max(0, toCents(stepThree.tax || 0));
-  const tip = Math.max(0, toCents(stepThree.tip || 0));
+  const subtotal = stepThree.foodItems.reduce(
+    (sum, item) => sum + (item.price || 0),
+    0
+  );
+  const tax = Math.max(0, stepThree.tax || 0);
+  const tip = Math.max(0, stepThree.tip || 0);
+  const discount = Math.max(0, stepThree.discount || 0);
+  const total = subtotal + tax + tip - discount;
 
-  [
-    { key: "discount", value: discount },
+  const ttd = [
     { key: "tax", value: tax },
     { key: "tip", value: tip },
-  ].forEach(({ key, value }) => {
-    pppaa(
-      value,
-      subtotals,
-      people.map((p) => p.id)
-    ).forEach(([amount, , id]) => {
+    { key: "discount", value: discount },
+  ];
+
+  const peopleID = people.map((p) => p.id);
+
+  // iterate through each key and assign proprotional value to each person
+  ttd.forEach(({ key, value }) => {
+    // value = value you want to split
+    // subtotals = subtotal for each person
+    // peopleID = id of people
+    const paaArr = paa(value, subtotals, peopleID); // [number, string][]
+    paaArr.forEach(([amount, id]) => {
       allocation.people[peopleIndex[id]][key as "discount" | "tax" | "tip"] =
         amount;
     });
@@ -150,10 +127,10 @@ export function splitBill(formData: FormData): BillAllocation {
 
   // Calculate subtotals
   allocation.people.forEach((person) => {
-    const itemsTotal = person.items.reduce((sum, item) => sum + item.price, 0);
-    person.subtotal = Math.max(
+    person.subtotal = person.items.reduce((sum, item) => sum + item.price, 0); // can be decimal
+    person.total = Math.max(
       0,
-      itemsTotal + person.tax + person.tip - person.discount
+      person.subtotal + person.tax + person.tip - person.discount
     );
   });
 

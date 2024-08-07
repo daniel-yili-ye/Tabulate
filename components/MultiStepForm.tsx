@@ -18,7 +18,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { v4 as uuidv4 } from "uuid";
 
 const steps = [
-  "Meal Name",
+  "Tab Name",
   "Receipt Upload",
   "Food Items",
   "Participants",
