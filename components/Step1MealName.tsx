@@ -25,7 +25,7 @@ export default function Step1MealName() {
             <Input placeholder="Enter meal name" {...field} />
           </FormControl>
           <FormDescription>
-            Please enter the name of your meal (ex. Maha's Brunch).
+            Please enter the name of your meal (ex. Maha&apos;s Brunch).
           </FormDescription>
           <FormMessage />
         </FormItem>

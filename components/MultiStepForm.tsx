@@ -33,6 +33,8 @@ const defaultValues: FormData = {
     tax: 0,
     tip: 0,
     discount: 0,
+    subtotal: 0,
+    total: 0,
   },
   stepFour: [
     {
