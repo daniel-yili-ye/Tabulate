@@ -38,7 +38,7 @@ export default function Step5AllocateFoodItems() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {foodItems.map((foodItem, foodItemIndex) => (
         <FormField
           key={foodItemIndex}
