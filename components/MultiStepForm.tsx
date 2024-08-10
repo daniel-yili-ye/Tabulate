@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent, CardFooter } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Button } from "./ui/button";
 import { Form } from "./ui/form";
 import Step1MealName from "./Step1MealName";
@@ -18,11 +25,11 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { v4 as uuidv4 } from "uuid";
 
 const steps = [
-  "Tab Name",
-  "Receipt Upload",
-  "Food Items",
+  "Receipt Name",
+  "Upload Receipt",
+  "Receipt Items",
   "Participants",
-  "Allocate Food Items",
+  "Allocate Receipt Items",
 ];
 
 const defaultValues: FormData = {
@@ -111,18 +118,32 @@ export default function MultiStepForm() {
     }
   };
 
+  const renderDescription = () => {
+    switch (currentStep) {
+      case 0:
+        return "Enter the receipt name (ex. Maha's Brunch).";
+      case 1:
+        return "Upload an image of the receipt. Tabulate will try to automatically input your receipt details for you!";
+      case 2:
+        return "Enter and review the receipt details.";
+      case 3:
+        return "Enter the participant names.";
+      case 4:
+        return "Allocate items to participants. Items can be allocated to mulitiple people.";
+      default:
+        return null;
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={(e) => e.preventDefault()}>
         <Card>
-          <CardContent>
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold pt-6">
-                {steps[currentStep]}
-              </h2>
-            </div>
-            {renderStep()}
-          </CardContent>
+          <CardHeader>
+            <CardTitle>{steps[currentStep]}</CardTitle>
+            <CardDescription>{renderDescription()}</CardDescription>
+          </CardHeader>
+          <CardContent>{renderStep()}</CardContent>
           <CardFooter className="flex justify-between">
             {currentStep === 0 ? (
               <div></div>

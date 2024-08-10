@@ -6,6 +6,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -22,62 +23,67 @@ export default function Step3FoodItems() {
 
   return (
     <div>
-      {fields.map((field, index) => (
-        <div key={field.id} className="flex space-x-2 mb-2">
-          <FormField
-            control={control}
-            name={`stepThree.foodItems.${index}.item`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input placeholder="Food item" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`stepThree.foodItems.${index}.price`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="Price"
-                    type="number"
-                    {...field}
-                    value={field.value === 0 ? "" : field.value}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button
-            type="button"
-            onClick={() => remove(index)}
-            variant="destructive"
-            disabled={fields.length <= 1}
-          >
-            Remove
-          </Button>
+      <div className="mb-4">
+        <div className="space-y-2">
+          <FormLabel>Items</FormLabel>
+          {fields.map((field, index) => (
+            <div key={field.id} className="flex space-x-2 mb-2">
+              <FormField
+                control={control}
+                name={`stepThree.foodItems.${index}.item`}
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <Input placeholder="Food item" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name={`stepThree.foodItems.${index}.price`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="Price"
+                        type="number"
+                        {...field}
+                        value={field.value === 0 ? "" : field.value}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="button"
+                onClick={() => remove(index)}
+                variant="destructive"
+                disabled={fields.length <= 1}
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
         </div>
-      ))}
-      <Button
-        type="button"
-        onClick={() => append({ item: "", price: 0 })}
-        className="mt-2 mb-4"
-      >
-        <PlusIcon />
-        &nbsp;Add Food Item
-      </Button>
-      <div className="space-y-3">
+        <Button
+          type="button"
+          onClick={() => append({ item: "", price: 0 })}
+          className="mt-4 mb-4"
+        >
+          <PlusIcon />
+          &nbsp;Add Food Item
+        </Button>
+      </div>
+      <div className="space-y-4">
         <FormField
           control={control}
           name="stepThree.tax"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tax</FormLabel>
+              <FormLabel>Tax (Optional)</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Tax amount"
@@ -95,7 +101,7 @@ export default function Step3FoodItems() {
           name="stepThree.tip"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tip</FormLabel>
+              <FormLabel>Tip (Optional)</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Tip amount"
@@ -113,7 +119,7 @@ export default function Step3FoodItems() {
           name="stepThree.discount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Discount</FormLabel>
+              <FormLabel>Discount (Optional)</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Discount amount"
@@ -122,6 +128,9 @@ export default function Step3FoodItems() {
                   value={field.value === 0 ? "" : field.value}
                 />
               </FormControl>
+              <FormDescription>
+                Enter the discount as a positive number.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

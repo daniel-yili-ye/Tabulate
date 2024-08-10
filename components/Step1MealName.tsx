@@ -6,7 +6,6 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription,
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { FormData } from "../lib/formSchema";
@@ -20,13 +19,10 @@ export default function Step1MealName() {
       name="stepOne.mealName"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Meal Name</FormLabel>
+          <FormLabel>Receipt Name</FormLabel>
           <FormControl>
-            <Input placeholder="Enter meal name" {...field} />
+            <Input placeholder="Receipt name" {...field} />
           </FormControl>
-          <FormDescription>
-            Please enter the name of your meal (ex. Maha&apos;s Brunch).
-          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

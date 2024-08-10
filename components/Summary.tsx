@@ -260,7 +260,10 @@ export default function Summary({ formData }: { formData: FormData }) {
     <Card>
       <CardHeader>
         <div className="space-y-4 md:flex md:justify-between md:items-center md:space-y-0">
-          <CardTitle>{formData.stepOne.mealName}</CardTitle>
+          <div>
+            <CardTitle>{formData.stepOne.mealName}</CardTitle>
+            <CardDescription>{formattedDate}</CardDescription>
+          </div>
           <div className="flex space-x-2">
             <ReceiptModal />
             <Button>
@@ -269,7 +272,6 @@ export default function Summary({ formData }: { formData: FormData }) {
             </Button>
           </div>
         </div>
-        <CardDescription>{formattedDate}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (

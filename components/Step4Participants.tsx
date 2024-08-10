@@ -29,7 +29,7 @@ export default function Step4Participants() {
             control={control}
             name={`stepFour.${index}.name`}
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormControl>
                   <Input placeholder="Participant name" {...field} />
                 </FormControl>
