@@ -9,19 +9,29 @@ const wizardTwoSchema = z.object({
   receiptImage: z.any().optional(),
 });
 
-const wizardThreeSchema = z.object({
-  foodItems: z
-    .array(
-      z.object({
-        item: z.string().min(1, "Item name is required"),
-        price: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
-      })
-    )
-    .min(1, "At least one food item is required"),
-  tax: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
-  tip: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
-  discount: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
-});
+const wizardThreeSchema = z
+  .object({
+    foodItems: z
+      .array(
+        z.object({
+          item: z.string().min(1, "Item name is required"),
+          price: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
+        })
+      )
+      .min(1, "At least one food item is required"),
+    tax: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
+    tip: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
+    discount: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
+  })
+  .transform((data) => ({
+    ...data,
+    subtotal: data.foodItems.reduce((sum, item) => sum + (item.price || 0), 0),
+    total:
+      data.foodItems.reduce((sum, item) => sum + (item.price || 0), 0) +
+      (data.tax || 0) +
+      (data.tip || 0) -
+      (data.discount || 0),
+  }));
 
 const wizardFourSchema = z
   .array(

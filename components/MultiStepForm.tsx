@@ -18,7 +18,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { v4 as uuidv4 } from "uuid";
 
 const steps = [
-  "Meal Name",
+  "Tab Name",
   "Receipt Upload",
   "Food Items",
   "Participants",
@@ -33,6 +33,8 @@ const defaultValues: FormData = {
     tax: 0,
     tip: 0,
     discount: 0,
+    subtotal: 0,
+    total: 0,
   },
   stepFour: [
     {
