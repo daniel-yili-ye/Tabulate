@@ -14,17 +14,46 @@ import { FormData } from "../lib/formSchema";
 import { PlusIcon } from "@radix-ui/react-icons";
 
 export default function Step4Participants() {
-  const { control } = useFormContext<FormData>();
+  const { control, getValues, setValue } = useFormContext<FormData>();
 
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: "stepFour",
   });
 
+  const handleRemove = (index: number) => {
+    const participantToRemove = fields[index];
+
+    console.log(fields);
+
+    console.log(participantToRemove);
+
+    // Remove the participant from stepFour
+    remove(index);
+
+    // Update stepFive to remove the participant from all allocations
+    const currentStepFive = getValues("stepFive");
+
+    console.log(currentStepFive);
+
+    const updatedStepFive = currentStepFive
+      .map((allocation) => ({
+        ...allocation,
+        participantIds: allocation.participantIds.filter(
+          (id) => id !== participantToRemove.id
+        ),
+      }))
+      .filter((allocation) => allocation.participantIds.length > 0);
+
+    console.log(updatedStepFive);
+
+    setValue("stepFive", updatedStepFive);
+  };
+
   return (
     <div>
       {fields.map((field, index) => (
-        <div key={field.id} className="flex space-x-2 mb-2">
+        <div key={field.id} className="flex space-x-4 mb-2">
           <FormField
             control={control}
             name={`stepFour.${index}.name`}
@@ -39,7 +68,7 @@ export default function Step4Participants() {
           />
           <Button
             type="button"
-            onClick={() => remove(index)}
+            onClick={() => handleRemove(index)}
             variant="destructive"
             disabled={fields.length <= 2}
           >
@@ -49,8 +78,10 @@ export default function Step4Participants() {
       ))}
       <Button
         type="button"
-        onClick={() => append({ id: uuidv4(), name: "" })}
+        variant="outline"
+        size="sm"
         className="mt-2"
+        onClick={() => append({ id: uuidv4(), name: "" })}
       >
         <PlusIcon />
         &nbsp;Add Participant

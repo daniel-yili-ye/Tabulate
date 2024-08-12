@@ -23,11 +23,13 @@ import { formSchema, FormData } from "../lib/formSchema";
 import { splitBill } from "@/utils/billSplitter";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { v4 as uuidv4 } from "uuid";
+import ViewReceipt from "./ViewReceipt";
+import { Separator } from "./ui/separator";
 
 const steps = [
   "Receipt Name",
   "Upload Receipt",
-  "Receipt Items",
+  "Receipt Details",
   "Participants",
   "Allocate Receipt Items",
 ];
@@ -125,11 +127,23 @@ export default function MultiStepForm() {
       case 1:
         return "Upload an image of the receipt. Tabulate will try to automatically input your receipt details for you!";
       case 2:
-        return "Enter and review the receipt details.";
+        return "Review and edit the receipt details.";
       case 3:
         return "Enter the participant names.";
       case 4:
-        return "Allocate items to participants. Items can be allocated to mulitiple people.";
+        return "Allocate items to participants. Items can be allocated to multiple people.";
+      default:
+        return null;
+    }
+  };
+
+  const { watch } = form;
+  const receiptImage = watch("stepTwo.receiptImage");
+
+  const renderReceiptImage = () => {
+    switch (currentStep) {
+      case 2:
+        return <ViewReceipt receiptImage={receiptImage} />;
       default:
         return null;
     }
@@ -139,9 +153,19 @@ export default function MultiStepForm() {
     <Form {...form}>
       <form onSubmit={(e) => e.preventDefault()}>
         <Card>
-          <CardHeader>
-            <CardTitle>{steps[currentStep]}</CardTitle>
-            <CardDescription>{renderDescription()}</CardDescription>
+          <CardHeader className="space-y-4">
+            <div className="space-y-4 md:flex md:justify-between md:items-center md:space-y-0">
+              <div>
+                <CardTitle className="text-lg font-medium">
+                  {steps[currentStep]}
+                </CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  {renderDescription()}
+                </CardDescription>
+              </div>
+              {renderReceiptImage()}
+            </div>
+            <Separator />
           </CardHeader>
           <CardContent>{renderStep()}</CardContent>
           <CardFooter className="flex justify-between">

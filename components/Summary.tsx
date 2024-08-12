@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -32,7 +31,9 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ImageIcon, Share2Icon } from "@radix-ui/react-icons";
+import { Share2Icon } from "@radix-ui/react-icons";
+import ViewReceipt from "./ViewReceipt";
+import { Separator } from "./ui/separator";
 
 export default function Summary({ formData }: { formData: FormData }) {
   const [allocation, setAllocation] = useState<BillAllocation | null>(null);
@@ -40,7 +41,7 @@ export default function Summary({ formData }: { formData: FormData }) {
 
   const options = {
     year: "numeric",
-    month: "short", // "Aug"
+    month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "numeric",
@@ -57,19 +58,6 @@ export default function Summary({ formData }: { formData: FormData }) {
     return (amount ? Math.round(amount * 100) / 100 : 0).toFixed(2);
   };
 
-  const calculateTotals = useMemo(() => {
-    const subtotal = formData.stepThree.foodItems.reduce(
-      (sum, item) => sum + (Number(item.price) || 0),
-      0
-    );
-    const total =
-      subtotal +
-      (Number(formData.stepThree.tax) || 0) +
-      (Number(formData.stepThree.tip) || 0) -
-      (Number(formData.stepThree.discount) || 0);
-    return { subtotal, total };
-  }, [formData.stepThree]);
-
   useEffect(() => {
     const calculateAllocation = async () => {
       try {
@@ -85,31 +73,18 @@ export default function Summary({ formData }: { formData: FormData }) {
     calculateAllocation();
   }, [formData]);
 
-  const ReceiptModal = () => (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" disabled={!formData.stepTwo.receiptImage}>
-          <ImageIcon />
-          &nbsp;View Receipt
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-screen">
-        <DialogHeader>
-          <DialogTitle>Receipt</DialogTitle>
-          <DialogDescription>Your receipt image</DialogDescription>
-        </DialogHeader>
-        {formData.stepTwo.receiptImage && (
-          <Image
-            src={formData.stepTwo.receiptImage}
-            alt="Receipt"
-            width={400}
-            height={600}
-            objectFit="contain"
-          />
-        )}
-      </DialogContent>
-    </Dialog>
-  );
+  const calculateTotals = useMemo(() => {
+    const subtotal = formData.stepThree.foodItems.reduce(
+      (sum, item) => sum + (Number(item.price) || 0),
+      0
+    );
+    const total =
+      subtotal +
+      (Number(formData.stepThree.tax) || 0) +
+      (Number(formData.stepThree.tip) || 0) -
+      (Number(formData.stepThree.discount) || 0);
+    return { subtotal, total };
+  }, [formData.stepThree]);
 
   const ItemizedBreakdownModal = ({ person }: { person: PersonAllocation }) => (
     <Dialog>
@@ -258,20 +233,25 @@ export default function Summary({ formData }: { formData: FormData }) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="space-y-4">
         <div className="space-y-4 md:flex md:justify-between md:items-center md:space-y-0">
           <div>
-            <CardTitle>{formData.stepOne.mealName}</CardTitle>
-            <CardDescription>{formattedDate}</CardDescription>
+            <CardTitle className="text-lg font-medium">
+              {formData.stepOne.mealName}
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              {formattedDate}
+            </CardDescription>
           </div>
-          <div className="flex space-x-2">
-            <ReceiptModal />
+          <div className="flex space-x-4">
+            <ViewReceipt receiptImage={formData.stepTwo.receiptImage} />
             <Button>
               <Share2Icon />
               &nbsp; Share
             </Button>
           </div>
         </div>
+        <Separator />
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (

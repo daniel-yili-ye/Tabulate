@@ -22,6 +22,10 @@ export default function Step5AllocateFoodItems() {
     name: "stepFive",
   });
 
+  useEffect(() => {
+    console.log(allocations);
+  }, [allocations]);
+
   // Use useEffect to initialize allocations
   useEffect(() => {
     if (foodItems && allocations.length !== foodItems.length) {
@@ -50,7 +54,7 @@ export default function Step5AllocateFoodItems() {
               {participants.map((participant) => (
                 <FormItem
                   key={participant.id}
-                  className="flex flex-row items-start space-x-3 space-y-0"
+                  className="flex flex-row items-start space-x-4 space-y-0"
                 >
                   <FormControl>
                     <Checkbox

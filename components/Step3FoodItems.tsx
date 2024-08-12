@@ -14,12 +14,30 @@ import { FormData } from "../lib/formSchema";
 import { PlusIcon } from "@radix-ui/react-icons";
 
 export default function Step3FoodItems() {
-  const { control } = useFormContext<FormData>();
+  const { control, getValues, setValue } = useFormContext<FormData>();
 
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: "stepThree.foodItems",
   });
+
+  const handleRemove = (index: number) => {
+    // Remove the item from stepThree.foodItems
+    remove(index);
+
+    // Update stepFive to remove allocations for the removed item
+    const currentStepFive = getValues("stepFive");
+    const updatedStepFive = currentStepFive
+      .filter((allocation) => allocation.foodItemIndex !== index)
+      .map((allocation) => {
+        if (allocation.foodItemIndex > index) {
+          return { ...allocation, foodItemIndex: allocation.foodItemIndex - 1 };
+        }
+        return allocation;
+      });
+
+    setValue("stepFive", updatedStepFive);
+  };
 
   return (
     <div>
@@ -27,7 +45,7 @@ export default function Step3FoodItems() {
         <div className="space-y-2">
           <FormLabel>Items</FormLabel>
           {fields.map((field, index) => (
-            <div key={field.id} className="flex space-x-2 mb-2">
+            <div key={field.id} className="flex space-x-4">
               <FormField
                 control={control}
                 name={`stepThree.foodItems.${index}.item`}
@@ -59,7 +77,7 @@ export default function Step3FoodItems() {
               />
               <Button
                 type="button"
-                onClick={() => remove(index)}
+                onClick={() => handleRemove(index)}
                 variant="destructive"
                 disabled={fields.length <= 1}
               >
@@ -70,8 +88,10 @@ export default function Step3FoodItems() {
         </div>
         <Button
           type="button"
+          variant="outline"
+          size="sm"
+          className="mt-2"
           onClick={() => append({ item: "", price: 0 })}
-          className="mt-4 mb-4"
         >
           <PlusIcon />
           &nbsp;Add Food Item
