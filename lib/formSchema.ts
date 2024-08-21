@@ -11,6 +11,10 @@ const wizardTwoSchema = z.object({
 
 const wizardThreeSchema = z
   .object({
+    restaurantName: z.string().min(1, "Restaurant name is required"),
+    date: z.date({
+      required_error: "A date is required",
+    }),
     foodItems: z
       .array(
         z.object({
