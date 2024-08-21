@@ -43,12 +43,9 @@ const wizardFourSchema = z
   .min(2, "At least 2 participants are required");
 
 const wizardFiveSchema = z.array(
-  z.object({
-    foodItemIndex: z.number().int().nonnegative(),
-    participantIds: z
-      .array(z.string().uuid("Invalid UUID"))
-      .min(1, "At least 1 participant must be selected"),
-  })
+  z
+    .array(z.string().uuid("Invalid UUID"))
+    .min(1, "At least 1 participant must be selected")
 );
 
 export const formSchema = z.object({

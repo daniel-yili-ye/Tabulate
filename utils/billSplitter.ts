@@ -21,7 +21,6 @@ export interface PersonAllocation {
 }
 
 export interface BillAllocation {
-  id: string;
   billName: string;
   people: PersonAllocation[];
 }
@@ -55,9 +54,7 @@ export function splitBill(formData: FormData): BillAllocation {
   const billItems: BillItem[] = stepThree.foodItems.map((item, index) => ({
     item: item.item,
     price: item.price || 0,
-    participantIds:
-      stepFive.find((allocation) => allocation.foodItemIndex === index)
-        ?.participantIds || [],
+    participantIds: stepFive.find((_, index2) => index2 === index) || [],
   }));
 
   const people = stepFour.map((p) => ({ id: p.id, name: p.name }));
@@ -70,7 +67,6 @@ export function splitBill(formData: FormData): BillAllocation {
   });
 
   const allocation: BillAllocation = {
-    id: uuidv4(),
     billName: stepOne.mealName,
     people: people.map(({ id, name }) => ({
       id,

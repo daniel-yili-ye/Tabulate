@@ -14,29 +14,35 @@ import { FormData } from "../lib/formSchema";
 import { PlusIcon } from "@radix-ui/react-icons";
 
 export default function Step3FoodItems() {
-  const { control, getValues, setValue } = useFormContext<FormData>();
+  const { control } = useFormContext<FormData>();
 
-  const { fields, append, remove } = useFieldArray({
+  const {
+    fields: fieldsFoodItems,
+    append: appendFoodItems,
+    remove: removeFoodItems,
+  } = useFieldArray({
     control: control,
     name: "stepThree.foodItems",
   });
 
+  const {
+    fields: fieldsAllocation,
+    append: appendAllocation,
+    remove: removeAllocation,
+  } = useFieldArray({
+    control: control,
+    name: "stepFive",
+  });
+
+  // handleAdd
+  const handleAdd = () => {
+    appendFoodItems({ item: "", price: 0 });
+    appendAllocation([]);
+  };
+
   const handleRemove = (index: number) => {
-    // Remove the item from stepThree.foodItems
-    remove(index);
-
-    // Update stepFive to remove allocations for the removed item
-    const currentStepFive = getValues("stepFive");
-    const updatedStepFive = currentStepFive
-      .filter((allocation) => allocation.foodItemIndex !== index)
-      .map((allocation) => {
-        if (allocation.foodItemIndex > index) {
-          return { ...allocation, foodItemIndex: allocation.foodItemIndex - 1 };
-        }
-        return allocation;
-      });
-
-    setValue("stepFive", updatedStepFive);
+    removeFoodItems(index);
+    removeAllocation(index);
   };
 
   return (
@@ -44,7 +50,7 @@ export default function Step3FoodItems() {
       <div className="mb-4">
         <div className="space-y-2">
           <FormLabel>Items</FormLabel>
-          {fields.map((field, index) => (
+          {fieldsFoodItems.map((field, index) => (
             <div key={field.id} className="flex space-x-4">
               <FormField
                 control={control}
@@ -79,7 +85,7 @@ export default function Step3FoodItems() {
                 type="button"
                 onClick={() => handleRemove(index)}
                 variant="destructive"
-                disabled={fields.length <= 1}
+                disabled={fieldsFoodItems.length <= 1}
               >
                 Remove
               </Button>
@@ -91,7 +97,7 @@ export default function Step3FoodItems() {
           variant="outline"
           size="sm"
           className="mt-2"
-          onClick={() => append({ item: "", price: 0 })}
+          onClick={() => handleAdd()}
         >
           <PlusIcon />
           &nbsp;Add Food Item

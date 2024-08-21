@@ -17,26 +17,6 @@ export default function Step5AllocateFoodItems() {
   const foodItems = watch("stepThree.foodItems");
   const participants = watch("stepFour");
 
-  const { fields: allocations } = useFieldArray({
-    control,
-    name: "stepFive",
-  });
-
-  useEffect(() => {
-    console.log(allocations);
-  }, [allocations]);
-
-  // Use useEffect to initialize allocations
-  useEffect(() => {
-    if (foodItems && allocations.length !== foodItems.length) {
-      const newAllocations = foodItems.map((_, index) => ({
-        foodItemIndex: index,
-        participantIds: [],
-      }));
-      setValue("stepFive", newAllocations);
-    }
-  }, [foodItems, allocations.length, setValue]);
-
   if (!foodItems || !participants) {
     return <div>Loading...</div>;
   }
@@ -47,7 +27,7 @@ export default function Step5AllocateFoodItems() {
         <FormField
           key={foodItemIndex}
           control={control}
-          name={`stepFive.${foodItemIndex}.participantIds`}
+          name={`stepFive.${foodItemIndex}`}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-base">{foodItem.item}</FormLabel>

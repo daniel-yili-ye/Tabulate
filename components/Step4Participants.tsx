@@ -1,6 +1,6 @@
 // components/Step4Participants.tsx
 import { v4 as uuidv4 } from "uuid";
-import { UseFormReturn, useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -16,43 +16,38 @@ import { PlusIcon } from "@radix-ui/react-icons";
 export default function Step4Participants() {
   const { control, getValues, setValue } = useFormContext<FormData>();
 
-  const { fields, append, remove } = useFieldArray({
+  const {
+    fields: fieldsNames,
+    append: appendNames,
+    remove: removeNames,
+  } = useFieldArray({
     control: control,
     name: "stepFour",
+    keyName: "key",
   });
 
+  const handleAdd = () => {
+    appendNames({ id: uuidv4(), name: "" });
+  };
+
   const handleRemove = (index: number) => {
-    const participantToRemove = fields[index];
-
-    console.log(fields);
-
-    console.log(participantToRemove);
+    // uuid of participant to remove
+    const idToRemove = fieldsNames[index].id; // Ensure to use .id
 
     // Remove the participant from stepFour
-    remove(index);
+    removeNames(index);
 
     // Update stepFive to remove the participant from all allocations
     const currentStepFive = getValues("stepFive");
-
-    console.log(currentStepFive);
-
-    const updatedStepFive = currentStepFive
-      .map((allocation) => ({
-        ...allocation,
-        participantIds: allocation.participantIds.filter(
-          (id) => id !== participantToRemove.id
-        ),
-      }))
-      .filter((allocation) => allocation.participantIds.length > 0);
-
-    console.log(updatedStepFive);
-
+    const updatedStepFive = currentStepFive.map((arr) =>
+      arr.filter((id: string) => id !== idToRemove)
+    );
     setValue("stepFive", updatedStepFive);
   };
 
   return (
     <div>
-      {fields.map((field, index) => (
+      {fieldsNames.map((field, index) => (
         <div key={field.id} className="flex space-x-4 mb-2">
           <FormField
             control={control}
@@ -70,7 +65,7 @@ export default function Step4Participants() {
             type="button"
             onClick={() => handleRemove(index)}
             variant="destructive"
-            disabled={fields.length <= 2}
+            disabled={fieldsNames.length <= 2}
           >
             Remove
           </Button>
@@ -81,7 +76,7 @@ export default function Step4Participants() {
         variant="outline"
         size="sm"
         className="mt-2"
-        onClick={() => append({ id: uuidv4(), name: "" })}
+        onClick={() => handleAdd()}
       >
         <PlusIcon />
         &nbsp;Add Participant

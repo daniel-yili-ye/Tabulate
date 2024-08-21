@@ -62,6 +62,7 @@ export default function Summary({ formData }: { formData: FormData }) {
     const calculateAllocation = async () => {
       try {
         const result = await splitBill(formData);
+        console.log(result);
         setAllocation(result);
       } catch (error) {
         console.error("Error calculating bill split:", error);
