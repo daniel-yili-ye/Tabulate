@@ -43,11 +43,8 @@ export default function Summary({ formData }: { formData: FormData }) {
     year: "numeric",
     month: "short",
     day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true, // 12-hour format
   };
-  const currentDate = new Date();
+  const currentDate = formData.stepThree.date;
   const formattedDate = currentDate.toLocaleString(
     "en-US",
     options as Intl.DateTimeFormatOptions
@@ -240,6 +237,9 @@ export default function Summary({ formData }: { formData: FormData }) {
             <CardTitle className="text-lg font-medium">
               {formData.stepOne.mealName}
             </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              {formData.stepThree.restaurantName}
+            </CardDescription>
             <CardDescription className="text-sm text-muted-foreground">
               {formattedDate}
             </CardDescription>

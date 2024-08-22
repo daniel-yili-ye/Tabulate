@@ -6,17 +6,18 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription
+  FormDescription,
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Calendar } from "./ui/calendar"
-import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover"
+import { Calendar } from "./ui/calendar";
+import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import { FormData } from "../lib/formSchema";
 import { PlusIcon } from "@radix-ui/react-icons";
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Separator } from "./ui/separator";
 
 export default function Step3FoodItems() {
   const { control } = useFormContext<FormData>();

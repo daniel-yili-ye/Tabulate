@@ -20,7 +20,6 @@ import Step4Participants from "./Step4Participants";
 import Step5AllocateFoodItems from "./Step5AllocateFoodItems";
 import Summary from "./Summary";
 import { formSchema, FormData } from "../lib/formSchema";
-import { splitBill } from "@/utils/billSplitter";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { v4 as uuidv4 } from "uuid";
 import ViewReceipt from "./ViewReceipt";
@@ -38,6 +37,8 @@ const defaultValues: FormData = {
   stepOne: { mealName: "" },
   stepTwo: { receiptImage: null },
   stepThree: {
+    restaurantName: "",
+    date: new Date(),
     foodItems: [{ item: "", price: 0 }],
     tax: 0,
     tip: 0,
