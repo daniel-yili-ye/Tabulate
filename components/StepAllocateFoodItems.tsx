@@ -1,4 +1,4 @@
-// components/Step5AllocateFoodItems.tsx
+// components/StepAllocateFoodItems.tsx
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import {
@@ -11,11 +11,11 @@ import {
 import { FormData } from "../lib/formSchema";
 import { Checkbox } from "./ui/checkbox";
 
-export default function Step5AllocateFoodItems() {
+export default function StepAllocateFoodItems() {
   const { control, watch, setValue } = useFormContext<FormData>();
 
-  const foodItems = watch("stepThree.foodItems");
-  const participants = watch("stepFour");
+  const foodItems = watch("stepFoodItems.foodItems");
+  const participants = watch("stepParticipants");
 
   if (!foodItems || !participants) {
     return <div>Loading...</div>;
@@ -27,7 +27,7 @@ export default function Step5AllocateFoodItems() {
         <FormField
           key={foodItemIndex}
           control={control}
-          name={`stepFive.${foodItemIndex}`}
+          name={`stepAllocateFoodItems.${foodItemIndex}`}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-base">{foodItem.item}</FormLabel>

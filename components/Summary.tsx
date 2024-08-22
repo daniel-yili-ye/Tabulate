@@ -44,7 +44,7 @@ export default function Summary({ formData }: { formData: FormData }) {
     month: "short",
     day: "numeric",
   };
-  const currentDate = formData.stepThree.date;
+  const currentDate = formData.stepFoodItems.date;
   const formattedDate = currentDate.toLocaleString(
     "en-US",
     options as Intl.DateTimeFormatOptions
@@ -72,17 +72,17 @@ export default function Summary({ formData }: { formData: FormData }) {
   }, [formData]);
 
   const calculateTotals = useMemo(() => {
-    const subtotal = formData.stepThree.foodItems.reduce(
+    const subtotal = formData.stepFoodItems.foodItems.reduce(
       (sum, item) => sum + (Number(item.price) || 0),
       0
     );
     const total =
       subtotal +
-      (Number(formData.stepThree.tax) || 0) +
-      (Number(formData.stepThree.tip) || 0) -
-      (Number(formData.stepThree.discount) || 0);
+      (Number(formData.stepFoodItems.tax) || 0) +
+      (Number(formData.stepFoodItems.tip) || 0) -
+      (Number(formData.stepFoodItems.discount) || 0);
     return { subtotal, total };
-  }, [formData.stepThree]);
+  }, [formData.stepFoodItems]);
 
   const ItemizedBreakdownModal = ({ person }: { person: PersonAllocation }) => (
     <Dialog>
@@ -165,7 +165,7 @@ export default function Summary({ formData }: { formData: FormData }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] overflow-y-auto max-h-screen">
         <DialogHeader>
-          <DialogTitle>{formData.stepOne.mealName}</DialogTitle>
+          <DialogTitle>{formData.stepFoodItems.restaurantName}</DialogTitle>
           <DialogDescription>Final Tab</DialogDescription>
         </DialogHeader>
         <Table>
@@ -176,7 +176,7 @@ export default function Summary({ formData }: { formData: FormData }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {formData.stepThree.foodItems.map((item, index) => (
+            {formData.stepFoodItems.foodItems.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
                 <TableCell className="text-right">
@@ -192,28 +192,28 @@ export default function Summary({ formData }: { formData: FormData }) {
                 ${roundCents(calculateTotals.subtotal)}
               </TableCell>
             </TableRow>
-            {formData.stepThree.tax === 0 || (
+            {formData.stepFoodItems.tax === 0 || (
               <TableRow>
                 <TableCell>Tax</TableCell>
                 <TableCell className="text-right">
-                  ${roundCents(formData.stepThree.tax)}
+                  ${roundCents(formData.stepFoodItems.tax)}
                 </TableCell>
               </TableRow>
             )}
-            {formData.stepThree.tip === 0 || (
+            {formData.stepFoodItems.tip === 0 || (
               <TableRow>
                 <TableCell>Tip</TableCell>
                 <TableCell className="text-right">
-                  ${roundCents(formData.stepThree.tip)}
+                  ${roundCents(formData.stepFoodItems.tip)}
                 </TableCell>
               </TableRow>
             )}
-            {formData.stepThree.discount === 0 || (
+            {formData.stepFoodItems.discount === 0 || (
               <TableRow>
                 <TableCell>Discount</TableCell>
                 <TableCell className="text-right">
                   -$
-                  {roundCents(formData.stepThree.discount)}
+                  {roundCents(formData.stepFoodItems.discount)}
                 </TableCell>
               </TableRow>
             )}
@@ -235,17 +235,16 @@ export default function Summary({ formData }: { formData: FormData }) {
         <div className="space-y-4 md:flex md:justify-between md:items-center md:space-y-0">
           <div>
             <CardTitle className="text-lg font-medium">
-              {formData.stepOne.mealName}
+              {formData.stepFoodItems.restaurantName}
             </CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
-              {formData.stepThree.restaurantName}
-            </CardDescription>
             <CardDescription className="text-sm text-muted-foreground">
               {formattedDate}
             </CardDescription>
           </div>
           <div className="flex space-x-4">
-            <ViewReceipt receiptImage={formData.stepTwo.receiptImage} />
+            <ViewReceipt
+              receiptImage={formData.stepReceiptUpload.receiptImage}
+            />
             <Button>
               <Share2Icon />
               &nbsp; Share

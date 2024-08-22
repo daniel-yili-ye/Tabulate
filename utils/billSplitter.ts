@@ -21,7 +21,6 @@ export interface PersonAllocation {
 }
 
 export interface BillAllocation {
-  billName: string;
   people: PersonAllocation[];
 }
 
@@ -49,15 +48,16 @@ function paa(
 }
 
 export function splitBill(formData: FormData): BillAllocation {
-  const { stepOne, stepThree, stepFour, stepFive } = formData;
+  const { stepFoodItems, stepParticipants, stepAllocateFoodItems } = formData;
 
-  const billItems: BillItem[] = stepThree.foodItems.map((item, index) => ({
+  const billItems: BillItem[] = stepFoodItems.foodItems.map((item, index) => ({
     item: item.item,
     price: item.price || 0,
-    participantIds: stepFive.find((_, index2) => index2 === index) || [],
+    participantIds:
+      stepAllocateFoodItems.find((_, index2) => index2 === index) || [],
   }));
 
-  const people = stepFour.map((p) => ({ id: p.id, name: p.name }));
+  const people = stepParticipants.map((p) => ({ id: p.id, name: p.name }));
   const peopleIndex: Record<string, number> = {};
   const subtotals: Record<string, number> = {};
 
@@ -67,7 +67,6 @@ export function splitBill(formData: FormData): BillAllocation {
   });
 
   const allocation: BillAllocation = {
-    billName: stepOne.mealName,
     people: people.map(({ id, name }) => ({
       id,
       name,
@@ -92,14 +91,13 @@ export function splitBill(formData: FormData): BillAllocation {
     });
   });
 
-  const subtotal = stepThree.foodItems.reduce(
+  const subtotal = stepFoodItems.foodItems.reduce(
     (sum, item) => sum + (item.price || 0),
     0
   );
-  const tax = Math.max(0, stepThree.tax || 0);
-  const tip = Math.max(0, stepThree.tip || 0);
-  const discount = Math.max(0, stepThree.discount || 0);
-  const total = subtotal + tax + tip - discount;
+  const tax = Math.max(0, stepFoodItems.tax || 0);
+  const tip = Math.max(0, stepFoodItems.tip || 0);
+  const discount = Math.max(0, stepFoodItems.discount || 0);
 
   const ttd = [
     { key: "tax", value: tax },
@@ -109,7 +107,7 @@ export function splitBill(formData: FormData): BillAllocation {
 
   const peopleID = people.map((p) => p.id);
 
-  // iterate through each key and assign proprotional value to each person
+  // iterate through each key and assign proportional value to each person
   ttd.forEach(({ key, value }) => {
     // value = value you want to split
     // subtotals = subtotal for each person

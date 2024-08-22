@@ -1,4 +1,4 @@
-// components/Step3stepThree.foodItems.tsx
+// components/Step3stepFoodItems.foodItems.tsx
 import { UseFormReturn, useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -19,7 +19,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Separator } from "./ui/separator";
 
-export default function Step3FoodItems() {
+export default function StepFoodItems() {
   const { control } = useFormContext<FormData>();
 
   const {
@@ -28,7 +28,7 @@ export default function Step3FoodItems() {
     remove: removeFoodItems,
   } = useFieldArray({
     control: control,
-    name: "stepThree.foodItems",
+    name: "stepFoodItems.foodItems",
   });
 
   const {
@@ -37,7 +37,7 @@ export default function Step3FoodItems() {
     remove: removeAllocation,
   } = useFieldArray({
     control: control,
-    name: "stepFive",
+    name: "stepAllocateFoodItems",
   });
 
   // handleAdd
@@ -56,7 +56,7 @@ export default function Step3FoodItems() {
       <div className="space-y-4">
         <FormField
           control={control}
-          name="stepThree.restaurantName"
+          name="stepFoodItems.restaurantName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Restaurant Name</FormLabel>
@@ -69,7 +69,7 @@ export default function Step3FoodItems() {
         />
         <FormField
           control={control}
-          name="stepThree.date"
+          name="stepFoodItems.date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Receipt Date</FormLabel>
@@ -116,7 +116,7 @@ export default function Step3FoodItems() {
             <div key={field.id} className="flex space-x-4">
               <FormField
                 control={control}
-                name={`stepThree.foodItems.${index}.item`}
+                name={`stepFoodItems.foodItems.${index}.item`}
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormControl>
@@ -128,7 +128,7 @@ export default function Step3FoodItems() {
               />
               <FormField
                 control={control}
-                name={`stepThree.foodItems.${index}.price`}
+                name={`stepFoodItems.foodItems.${index}.price`}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -168,7 +168,7 @@ export default function Step3FoodItems() {
       <div className="space-y-4">
         <FormField
           control={control}
-          name="stepThree.tax"
+          name="stepFoodItems.tax"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tax (Optional)</FormLabel>
@@ -186,7 +186,7 @@ export default function Step3FoodItems() {
         />
         <FormField
           control={control}
-          name="stepThree.tip"
+          name="stepFoodItems.tip"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tip (Optional)</FormLabel>
@@ -204,7 +204,7 @@ export default function Step3FoodItems() {
         />
         <FormField
           control={control}
-          name="stepThree.discount"
+          name="stepFoodItems.discount"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Discount (Optional)</FormLabel>

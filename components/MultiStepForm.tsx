@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -13,11 +13,10 @@ import {
 } from "./ui/card";
 import { Button } from "./ui/button";
 import { Form } from "./ui/form";
-import Step1MealName from "./Step1MealName";
-import Step2ReceiptUpload from "./Step2ReceiptUpload";
-import Step3FoodItems from "./Step3FoodItems";
-import Step4Participants from "./Step4Participants";
-import Step5AllocateFoodItems from "./Step5AllocateFoodItems";
+import StepReceiptUpload from "./StepReceiptUpload";
+import StepFoodItems from "./StepFoodItems";
+import StepParticipants from "./StepParticipants";
+import StepAllocateFoodItems from "./StepAllocateFoodItems";
 import Summary from "./Summary";
 import { formSchema, FormData } from "../lib/formSchema";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
@@ -26,7 +25,6 @@ import ViewReceipt from "./ViewReceipt";
 import { Separator } from "./ui/separator";
 
 const steps = [
-  "Receipt Name",
   "Upload Receipt",
   "Receipt Details",
   "Participants",
@@ -34,9 +32,8 @@ const steps = [
 ];
 
 const defaultValues: FormData = {
-  stepOne: { mealName: "" },
-  stepTwo: { receiptImage: null },
-  stepThree: {
+  stepReceiptUpload: { receiptImage: null },
+  stepFoodItems: {
     restaurantName: "",
     date: new Date(),
     foodItems: [{ item: "", price: 0 }],
@@ -46,7 +43,7 @@ const defaultValues: FormData = {
     subtotal: 0,
     total: 0,
   },
-  stepFour: [
+  stepParticipants: [
     {
       name: "",
       id: uuidv4(),
@@ -56,7 +53,7 @@ const defaultValues: FormData = {
       id: uuidv4(),
     },
   ],
-  stepFive: [],
+  stepAllocateFoodItems: [],
 };
 
 export default function MultiStepForm() {
@@ -83,12 +80,16 @@ export default function MultiStepForm() {
 
   const handleNext = async () => {
     const stepNumber: (
-      | "stepOne"
-      | "stepTwo"
-      | "stepThree"
-      | "stepFour"
-      | "stepFive"
-    )[] = ["stepOne", "stepTwo", "stepThree", "stepFour", "stepFive"];
+      | "stepReceiptUpload"
+      | "stepFoodItems"
+      | "stepParticipants"
+      | "stepAllocateFoodItems"
+    )[] = [
+      "stepReceiptUpload",
+      "stepFoodItems",
+      "stepParticipants",
+      "stepAllocateFoodItems",
+    ];
 
     const isValid = await form.trigger(stepNumber[currentStep]);
     if (isValid) {
@@ -107,15 +108,13 @@ export default function MultiStepForm() {
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <Step1MealName />;
+        return <StepReceiptUpload />;
       case 1:
-        return <Step2ReceiptUpload />;
+        return <StepFoodItems />;
       case 2:
-        return <Step3FoodItems />;
+        return <StepParticipants />;
       case 3:
-        return <Step4Participants />;
-      case 4:
-        return <Step5AllocateFoodItems />;
+        return <StepAllocateFoodItems />;
       default:
         return null;
     }
@@ -124,14 +123,12 @@ export default function MultiStepForm() {
   const renderDescription = () => {
     switch (currentStep) {
       case 0:
-        return "Enter the receipt name (ex. Maha's Brunch).";
-      case 1:
         return "Upload an image of the receipt. Tabulate will try to automatically input your receipt details for you!";
-      case 2:
+      case 1:
         return "Review and edit the receipt details.";
-      case 3:
+      case 2:
         return "Enter the participant names.";
-      case 4:
+      case 3:
         return "Allocate items to participants. Items can be allocated to multiple people.";
       default:
         return null;
@@ -139,11 +136,11 @@ export default function MultiStepForm() {
   };
 
   const { watch } = form;
-  const receiptImage = watch("stepTwo.receiptImage");
+  const receiptImage = watch("stepReceiptUpload.receiptImage");
 
   const renderReceiptImage = () => {
     switch (currentStep) {
-      case 2:
+      case 1:
         return <ViewReceipt receiptImage={receiptImage} />;
       default:
         return null;

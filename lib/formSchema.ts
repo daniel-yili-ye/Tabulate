@@ -1,10 +1,6 @@
 // lib/formSchema.ts
 import * as z from "zod";
 
-const wizardOneSchema = z.object({
-  mealName: z.string().min(1, "Meal name is required"),
-});
-
 const wizardTwoSchema = z.object({
   receiptImage: z.any().optional(),
 });
@@ -53,11 +49,10 @@ const wizardFiveSchema = z.array(
 );
 
 export const formSchema = z.object({
-  stepOne: wizardOneSchema,
-  stepTwo: wizardTwoSchema,
-  stepThree: wizardThreeSchema,
-  stepFour: wizardFourSchema,
-  stepFive: wizardFiveSchema,
+  stepReceiptUpload: wizardTwoSchema,
+  stepFoodItems: wizardThreeSchema,
+  stepParticipants: wizardFourSchema,
+  stepAllocateFoodItems: wizardFiveSchema,
 });
 
 export type FormData = z.infer<typeof formSchema>;
