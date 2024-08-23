@@ -11,7 +11,7 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { FormData } from "../lib/formSchema";
-import { PlusIcon } from "@radix-ui/react-icons";
+import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 
 export default function StepParticipants() {
   const { control, getValues, setValue } = useFormContext<FormData>();
@@ -67,7 +67,7 @@ export default function StepParticipants() {
             variant="destructive"
             disabled={fieldsNames.length <= 2}
           >
-            Remove
+            <TrashIcon />
           </Button>
         </div>
       ))}

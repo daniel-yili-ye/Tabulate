@@ -13,7 +13,7 @@ import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import { FormData } from "../lib/formSchema";
-import { PlusIcon } from "@radix-ui/react-icons";
+import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -113,7 +113,7 @@ export default function StepFoodItems() {
         <div className="space-y-2">
           <FormLabel>Items</FormLabel>
           {fieldsFoodItems.map((field, index) => (
-            <div key={field.id} className="flex space-x-4">
+            <div key={field.id} className="flex space-x-2">
               <FormField
                 control={control}
                 name={`stepFoodItems.foodItems.${index}.item`}
@@ -149,7 +149,7 @@ export default function StepFoodItems() {
                 variant="destructive"
                 disabled={fieldsFoodItems.length <= 1}
               >
-                Remove
+                <TrashIcon />
               </Button>
             </div>
           ))}
