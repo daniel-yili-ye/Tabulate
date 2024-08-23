@@ -1,4 +1,4 @@
-// components/Step4Participants.tsx
+// components/StepParticipants.tsx
 import { v4 as uuidv4 } from "uuid";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import {
@@ -13,7 +13,7 @@ import { Button } from "./ui/button";
 import { FormData } from "../lib/formSchema";
 import { PlusIcon } from "@radix-ui/react-icons";
 
-export default function Step4Participants() {
+export default function StepParticipants() {
   const { control, getValues, setValue } = useFormContext<FormData>();
 
   const {
@@ -22,7 +22,7 @@ export default function Step4Participants() {
     remove: removeNames,
   } = useFieldArray({
     control: control,
-    name: "stepFour",
+    name: "stepParticipants",
     keyName: "key",
   });
 
@@ -34,15 +34,15 @@ export default function Step4Participants() {
     // uuid of participant to remove
     const idToRemove = fieldsNames[index].id; // Ensure to use .id
 
-    // Remove the participant from stepFour
+    // Remove the participant from stepParticipants
     removeNames(index);
 
-    // Update stepFive to remove the participant from all allocations
-    const currentStepFive = getValues("stepFive");
-    const updatedStepFive = currentStepFive.map((arr) =>
-      arr.filter((id: string) => id !== idToRemove)
+    // Update stepAllocateFoodItems to remove the participant from all allocations
+    const currentstepAllocateFoodItems = getValues("stepAllocateFoodItems");
+    const updatedstepAllocateFoodItems = currentstepAllocateFoodItems.map(
+      (arr) => arr.filter((id: string) => id !== idToRemove)
     );
-    setValue("stepFive", updatedStepFive);
+    setValue("stepAllocateFoodItems", updatedstepAllocateFoodItems);
   };
 
   return (
@@ -51,7 +51,7 @@ export default function Step4Participants() {
         <div key={field.id} className="flex space-x-4 mb-2">
           <FormField
             control={control}
-            name={`stepFour.${index}.name`}
+            name={`stepParticipants.${index}.name`}
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
