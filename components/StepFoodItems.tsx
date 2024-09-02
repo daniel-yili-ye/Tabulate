@@ -135,8 +135,7 @@ export default function StepFoodItems() {
                       <Input
                         placeholder="Price"
                         type="number"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
+                        inputMode="decimal"
                         {...field}
                         value={field.value === 0 ? "" : field.value}
                       />
@@ -178,7 +177,7 @@ export default function StepFoodItems() {
                 <Input
                   placeholder="Tax amount"
                   type="number"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   pattern="[0-9]*"
                   {...field}
                   value={field.value === 0 ? "" : field.value}
@@ -198,7 +197,7 @@ export default function StepFoodItems() {
                 <Input
                   placeholder="Tip amount"
                   type="number"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   pattern="[0-9]*"
                   {...field}
                   value={field.value === 0 ? "" : field.value}
@@ -218,7 +217,7 @@ export default function StepFoodItems() {
                 <Input
                   placeholder="Discount amount"
                   type="number"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   pattern="[0-9]*"
                   {...field}
                   value={field.value === 0 ? "" : field.value}
