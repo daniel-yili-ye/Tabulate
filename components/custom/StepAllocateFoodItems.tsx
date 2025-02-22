@@ -11,6 +11,7 @@ import {
 import { FormData } from "../../schema/formSchema";
 import { Checkbox } from "../ui/checkbox";
 import { Loader2 } from "lucide-react";
+import { Separator } from "../ui/separator";
 
 export default function StepAllocateFoodItems() {
   const { control, watch, setValue } = useFormContext<FormData>();
@@ -25,40 +26,45 @@ export default function StepAllocateFoodItems() {
   return (
     <div className="space-y-4">
       {foodItems.map((foodItem, foodItemIndex) => (
-        <FormField
-          key={foodItemIndex}
-          control={control}
-          name={`stepAllocateFoodItems.${foodItemIndex}`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-base">{foodItem.item}</FormLabel>
-              {participants.map((participant) => (
-                <FormItem
-                  key={participant.id}
-                  className="flex flex-row items-center space-x-4 space-y-0"
-                >
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value?.includes(participant.id)}
-                      onCheckedChange={(checked) => {
-                        const updatedIds = checked
-                          ? [...(field.value || []), participant.id]
-                          : (field.value || []).filter(
-                              (id) => id !== participant.id
-                            );
-                        field.onChange(updatedIds);
-                      }}
-                    />
-                  </FormControl>
-                  <FormLabel className="font-normal">
-                    {participant.name}
-                  </FormLabel>
-                </FormItem>
-              ))}
-              <FormMessage />
-            </FormItem>
+        <div key={foodItemIndex}>
+          <FormField
+            control={control}
+            name={`stepAllocateFoodItems.${foodItemIndex}`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base">{foodItem.item}</FormLabel>
+                {participants.map((participant) => (
+                  <FormItem
+                    key={participant.id}
+                    className="flex flex-row items-center space-x-4 space-y-0"
+                  >
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value?.includes(participant.id)}
+                        onCheckedChange={(checked) => {
+                          const updatedIds = checked
+                            ? [...(field.value || []), participant.id]
+                            : (field.value || []).filter(
+                                (id) => id !== participant.id
+                              );
+                          field.onChange(updatedIds);
+                        }}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      {participant.name}
+                    </FormLabel>
+                  </FormItem>
+                ))}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Separator */}
+          {foodItemIndex < foodItems.length - 1 && (
+            <Separator className="my-4" />
           )}
-        />
+        </div>
       ))}
     </div>
   );
