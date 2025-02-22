@@ -48,7 +48,7 @@ export default function Summary({ formData }: { formData: FormData }) {
     month: "short",
     day: "numeric",
   };
-  const currentDate = formData.stepFoodItems.date;
+  const currentDate = formData.stepItems.date;
 
   const dateObject =
     typeof currentDate === "string" ? new Date(currentDate) : currentDate;
@@ -88,17 +88,17 @@ export default function Summary({ formData }: { formData: FormData }) {
   }, [formData]);
 
   const calculateTotals = useMemo(() => {
-    const subtotal = formData.stepFoodItems.foodItems.reduce(
+    const subtotal = formData.stepItems.Items.reduce(
       (sum, item) => sum + (Number(item.price) || 0),
       0
     );
     const total =
       subtotal +
-      (Number(formData.stepFoodItems.tax) || 0) +
-      (Number(formData.stepFoodItems.tip) || 0) -
-      (Number(formData.stepFoodItems.discount) || 0);
+      (Number(formData.stepItems.tax) || 0) +
+      (Number(formData.stepItems.tip) || 0) -
+      (Number(formData.stepItems.discount) || 0);
     return { subtotal, total };
-  }, [formData.stepFoodItems]);
+  }, [formData.stepItems]);
 
   const ItemizedBreakdownModal = ({ person }: { person: PersonAllocation }) => (
     <Dialog>
@@ -181,7 +181,7 @@ export default function Summary({ formData }: { formData: FormData }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] overflow-y-auto max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>{formData.stepFoodItems.restaurantName}</DialogTitle>
+          <DialogTitle>{formData.stepItems.businessName}</DialogTitle>
           <DialogDescription>Final Tab</DialogDescription>
         </DialogHeader>
         <Table>
@@ -192,7 +192,7 @@ export default function Summary({ formData }: { formData: FormData }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {formData.stepFoodItems.foodItems.map((item, index) => (
+            {formData.stepItems.Items.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
                 <TableCell className="text-right">
@@ -208,27 +208,27 @@ export default function Summary({ formData }: { formData: FormData }) {
                 {roundCents(calculateTotals.subtotal)}
               </TableCell>
             </TableRow>
-            {formData.stepFoodItems.tax === 0 || (
+            {formData.stepItems.tax === 0 || (
               <TableRow>
                 <TableCell>Tax</TableCell>
                 <TableCell className="text-right">
-                  {roundCents(formData.stepFoodItems.tax)}
+                  {roundCents(formData.stepItems.tax)}
                 </TableCell>
               </TableRow>
             )}
-            {formData.stepFoodItems.tip === 0 || (
+            {formData.stepItems.tip === 0 || (
               <TableRow>
                 <TableCell>Tip</TableCell>
                 <TableCell className="text-right">
-                  {roundCents(formData.stepFoodItems.tip)}
+                  {roundCents(formData.stepItems.tip)}
                 </TableCell>
               </TableRow>
             )}
-            {formData.stepFoodItems.discount === 0 || (
+            {formData.stepItems.discount === 0 || (
               <TableRow>
                 <TableCell>Discount</TableCell>
                 <TableCell className="text-right">
-                  -{roundCents(formData.stepFoodItems.discount)}
+                  -{roundCents(formData.stepItems.discount)}
                 </TableCell>
               </TableRow>
             )}
@@ -250,7 +250,7 @@ export default function Summary({ formData }: { formData: FormData }) {
         <div className="space-y-4 md:flex md:justify-between md:items-center md:space-y-0">
           <div>
             <CardTitle className="text-lg font-medium">
-              {formData.stepFoodItems.restaurantName}
+              {formData.stepItems.businessName}
             </CardTitle>
             <CardDescription className="text-base text-muted-foreground">
               {formattedDate}

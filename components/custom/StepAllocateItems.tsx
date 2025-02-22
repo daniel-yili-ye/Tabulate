@@ -1,4 +1,4 @@
-// components/StepAllocateFoodItems.tsx
+// components/StepAllocateItems.tsx
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import {
@@ -13,26 +13,26 @@ import { Checkbox } from "../ui/checkbox";
 import { Loader2 } from "lucide-react";
 import { Separator } from "../ui/separator";
 
-export default function StepAllocateFoodItems() {
+export default function StepAllocateItems() {
   const { control, watch, setValue } = useFormContext<FormData>();
 
-  const foodItems = watch("stepFoodItems.foodItems");
+  const Items = watch("stepItems.Items");
   const participants = watch("stepParticipants");
 
-  if (!foodItems || !participants) {
+  if (!Items || !participants) {
     return <Loader2 className="h-8 w-8 animate-spin" />;
   }
 
   return (
     <div className="space-y-4">
-      {foodItems.map((foodItem, foodItemIndex) => (
-        <div key={foodItemIndex}>
+      {Items.map((Item, ItemIndex) => (
+        <div key={ItemIndex}>
           <FormField
             control={control}
-            name={`stepAllocateFoodItems.${foodItemIndex}`}
+            name={`stepAllocateItems.${ItemIndex}`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base">{foodItem.item}</FormLabel>
+                <FormLabel className="text-base">{Item.item}</FormLabel>
                 {participants.map((participant) => (
                   <FormItem
                     key={participant.id}
@@ -61,9 +61,7 @@ export default function StepAllocateFoodItems() {
             )}
           />
           {/* Separator */}
-          {foodItemIndex < foodItems.length - 1 && (
-            <Separator className="my-4" />
-          )}
+          {ItemIndex < Items.length - 1 && <Separator className="my-4" />}
         </div>
       ))}
     </div>

@@ -46,13 +46,13 @@ function paa(
 }
 
 export function splitBill(formData: FormData): BillAllocation {
-  const { stepFoodItems, stepParticipants, stepAllocateFoodItems } = formData;
+  const { stepItems, stepParticipants, stepAllocateItems } = formData;
 
-  const billItems: BillItem[] = stepFoodItems.foodItems.map((item, index) => ({
+  const billItems: BillItem[] = stepItems.Items.map((item, index) => ({
     item: item.item,
     price: item.price || 0,
     participantIds:
-      stepAllocateFoodItems.find((_, index2) => index2 === index) || [],
+      stepAllocateItems.find((_, index2) => index2 === index) || [],
   }));
 
   const people = stepParticipants.map((p) => ({ id: p.id, name: p.name }));
@@ -89,9 +89,9 @@ export function splitBill(formData: FormData): BillAllocation {
     });
   });
 
-  const tax = Math.max(0, stepFoodItems.tax || 0);
-  const tip = Math.max(0, stepFoodItems.tip || 0);
-  const discount = Math.max(0, stepFoodItems.discount || 0);
+  const tax = Math.max(0, stepItems.tax || 0);
+  const tip = Math.max(0, stepItems.tip || 0);
+  const discount = Math.max(0, stepItems.discount || 0);
 
   const ttd = [
     { key: "tax", value: tax },

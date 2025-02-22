@@ -21,7 +21,7 @@ const wizard1Schema = z.object({
 
 const wizard2Schema = z
   .object({
-    restaurantName: z.string().min(1, "Restaurant name is required"),
+    businessName: z.string().min(1, "Business name is required"),
     date: z
       .union([
         z.date({
@@ -35,23 +35,23 @@ const wizard2Schema = z
         if (val instanceof Date) return val;
         return new Date(val);
       }),
-    foodItems: z
+    Items: z
       .array(
         z.object({
           item: z.string().min(1, "Item name is required"),
           price: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
         })
       )
-      .min(1, "At least one food item is required"),
+      .min(1, "At least one Item is required"),
     tax: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
     tip: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
     discount: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
   })
   .transform((data) => ({
     ...data,
-    subtotal: data.foodItems.reduce((sum, item) => sum + (item.price || 0), 0),
+    subtotal: data.Items.reduce((sum, item) => sum + (item.price || 0), 0),
     total:
-      data.foodItems.reduce((sum, item) => sum + (item.price || 0), 0) +
+      data.Items.reduce((sum, item) => sum + (item.price || 0), 0) +
       (data.tax || 0) +
       (data.tip || 0) -
       (data.discount || 0),
@@ -74,9 +74,9 @@ const wizard4Schema = z.array(
 
 export const formSchema = z.object({
   stepReceiptUpload: wizard1Schema,
-  stepFoodItems: wizard2Schema,
+  stepItems: wizard2Schema,
   stepParticipants: wizard3Schema,
-  stepAllocateFoodItems: wizard4Schema,
+  stepAllocateItems: wizard4Schema,
 });
 
 export type FormData = z.infer<typeof formSchema>;

@@ -14,9 +14,9 @@ import {
 import { Button } from "../ui/button";
 import { Form } from "../ui/form";
 import StepReceiptUpload from "./StepReceiptUpload";
-import StepFoodItems from "./StepFoodItems";
+import StepItems from "./StepItems";
 import StepParticipants from "./StepParticipants";
-import StepAllocateFoodItems from "./StepAllocateFoodItems";
+import StepAllocateItems from "./StepAllocateItems";
 import Summary from "./Summary";
 import { formSchema, FormData } from "../../schema/formSchema";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
@@ -33,10 +33,10 @@ const steps = [
 
 const defaultValues: FormData = {
   stepReceiptUpload: { receiptImageURL: undefined, image: undefined },
-  stepFoodItems: {
-    restaurantName: "",
+  stepItems: {
+    businessName: "",
     date: new Date(),
-    foodItems: [{ item: "", price: 0 }],
+    Items: [{ item: "", price: 0 }],
     tax: 0,
     tip: 0,
     discount: 0,
@@ -53,7 +53,7 @@ const defaultValues: FormData = {
       id: uuidv4(),
     },
   ],
-  stepAllocateFoodItems: [],
+  stepAllocateItems: [],
 };
 
 export default function MultiStepForm() {
@@ -81,14 +81,14 @@ export default function MultiStepForm() {
   const handleNext = async () => {
     const stepNumber: (
       | "stepReceiptUpload"
-      | "stepFoodItems"
+      | "stepItems"
       | "stepParticipants"
-      | "stepAllocateFoodItems"
+      | "stepAllocateItems"
     )[] = [
       "stepReceiptUpload",
-      "stepFoodItems",
+      "stepItems",
       "stepParticipants",
-      "stepAllocateFoodItems",
+      "stepAllocateItems",
     ];
 
     const isValid = await form.trigger(stepNumber[currentStep]);
@@ -111,11 +111,11 @@ export default function MultiStepForm() {
       case 0:
         return <StepReceiptUpload />;
       case 1:
-        return <StepFoodItems />;
+        return <StepItems />;
       case 2:
         return <StepParticipants />;
       case 3:
-        return <StepAllocateFoodItems />;
+        return <StepAllocateItems />;
       default:
         return null;
     }

@@ -1,4 +1,4 @@
-// components/Step3stepFoodItems.foodItems.tsx
+// components/Step3stepItems.Items.tsx
 import { UseFormReturn, useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -7,27 +7,27 @@ import {
   FormControl,
   FormMessage,
   FormDescription,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Calendar } from "./ui/calendar";
-import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
-import { FormData } from "../schema/formSchema";
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
+import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
+import { FormData } from "../../schema/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/utils/utils";
 
-export default function StepFoodItems() {
+export default function StepItems() {
   const { control } = useFormContext<FormData>();
 
   const {
-    fields: fieldsFoodItems,
-    append: appendFoodItems,
-    remove: removeFoodItems,
+    fields: fieldsItems,
+    append: appendItems,
+    remove: removeItems,
   } = useFieldArray({
     control: control,
-    name: "stepFoodItems.foodItems",
+    name: "stepItems.Items",
   });
 
   const {
@@ -36,17 +36,17 @@ export default function StepFoodItems() {
     remove: removeAllocation,
   } = useFieldArray({
     control: control,
-    name: "stepAllocateFoodItems",
+    name: "stepAllocateItems",
   });
 
   // handleAdd
   const handleAdd = () => {
-    appendFoodItems({ item: "", price: 0 });
+    appendItems({ item: "", price: 0 });
     appendAllocation([]);
   };
 
   const handleRemove = (index: number) => {
-    removeFoodItems(index);
+    removeItems(index);
     removeAllocation(index);
   };
 
@@ -55,12 +55,12 @@ export default function StepFoodItems() {
       <div className="space-y-4">
         <FormField
           control={control}
-          name="stepFoodItems.restaurantName"
+          name="stepItems.businessName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Restaurant Name</FormLabel>
+              <FormLabel>Business Name</FormLabel>
               <FormControl>
-                <Input placeholder="Restaurant name" {...field} />
+                <Input placeholder="Business name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -68,7 +68,7 @@ export default function StepFoodItems() {
         />
         <FormField
           control={control}
-          name="stepFoodItems.date"
+          name="stepItems.date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Receipt Date</FormLabel>
@@ -111,15 +111,15 @@ export default function StepFoodItems() {
       <div>
         <div className="space-y-2">
           <FormLabel>Items</FormLabel>
-          {fieldsFoodItems.map((field, index) => (
+          {fieldsItems.map((field, index) => (
             <div key={field.id} className="flex space-x-2">
               <FormField
                 control={control}
-                name={`stepFoodItems.foodItems.${index}.item`}
+                name={`stepItems.Items.${index}.item`}
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormControl>
-                      <Input placeholder="Food item" {...field} />
+                      <Input placeholder="Item" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -127,7 +127,7 @@ export default function StepFoodItems() {
               />
               <FormField
                 control={control}
-                name={`stepFoodItems.foodItems.${index}.price`}
+                name={`stepItems.Items.${index}.price`}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -147,7 +147,7 @@ export default function StepFoodItems() {
                 type="button"
                 onClick={() => handleRemove(index)}
                 variant="destructive"
-                disabled={fieldsFoodItems.length <= 1}
+                disabled={fieldsItems.length <= 1}
               >
                 <TrashIcon />
               </Button>
@@ -162,13 +162,13 @@ export default function StepFoodItems() {
           onClick={() => handleAdd()}
         >
           <PlusIcon />
-          &nbsp;Add Food Item
+          &nbsp;Add Item
         </Button>
       </div>
       <div className="space-y-4">
         <FormField
           control={control}
-          name="stepFoodItems.tax"
+          name="stepItems.tax"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tax (Optional)</FormLabel>
@@ -188,7 +188,7 @@ export default function StepFoodItems() {
         />
         <FormField
           control={control}
-          name="stepFoodItems.tip"
+          name="stepItems.tip"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tip (Optional)</FormLabel>
@@ -208,7 +208,7 @@ export default function StepFoodItems() {
         />
         <FormField
           control={control}
-          name="stepFoodItems.discount"
+          name="stepItems.discount"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Discount (Optional)</FormLabel>

@@ -37,12 +37,12 @@ export default function StepParticipants() {
     // Remove the participant from stepParticipants
     removeNames(index);
 
-    // Update stepAllocateFoodItems to remove the participant from all allocations
-    const currentstepAllocateFoodItems = getValues("stepAllocateFoodItems");
-    const updatedstepAllocateFoodItems = currentstepAllocateFoodItems.map(
-      (arr) => arr.filter((id: string) => id !== idToRemove)
+    // Update stepAllocateItems to remove the participant from all allocations
+    const currentstepAllocateItems = getValues("stepAllocateItems");
+    const updatedstepAllocateItems = currentstepAllocateItems.map((arr) =>
+      arr.filter((id: string) => id !== idToRemove)
     );
-    setValue("stepAllocateFoodItems", updatedstepAllocateFoodItems);
+    setValue("stepAllocateItems", updatedstepAllocateItems);
   };
 
   return (
