@@ -155,10 +155,10 @@ export default function MultiStepForm() {
           <CardHeader className="space-y-4">
             <div className="space-y-4 md:flex md:justify-between md:items-center md:space-y-0">
               <div>
-                <CardTitle className="text-lg font-medium">
+                <CardTitle className="text-xl font-medium">
                   {steps[currentStep]}
                 </CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
+                <CardDescription className="text-base text-muted-foreground">
                   {renderDescription()}
                 </CardDescription>
               </div>

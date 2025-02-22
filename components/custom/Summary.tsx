@@ -252,7 +252,7 @@ export default function Summary({ formData }: { formData: FormData }) {
             <CardTitle className="text-lg font-medium">
               {formData.stepFoodItems.restaurantName}
             </CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">
+            <CardDescription className="text-base text-muted-foreground">
               {formattedDate}
             </CardDescription>
           </div>

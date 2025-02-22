@@ -35,7 +35,7 @@ export default function StepAllocateFoodItems() {
               {participants.map((participant) => (
                 <FormItem
                   key={participant.id}
-                  className="flex flex-row items-start space-x-4 space-y-0"
+                  className="flex flex-row items-center space-x-4 space-y-0"
                 >
                   <FormControl>
                     <Checkbox
