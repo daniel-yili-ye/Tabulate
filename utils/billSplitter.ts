@@ -1,7 +1,5 @@
 // utils/billSplitter.ts
-
-import { v4 as uuidv4 } from "uuid";
-import { FormData } from "../lib/formSchema";
+import { FormData } from "../schema/formSchema";
 
 interface BillItem {
   item: string;
@@ -91,10 +89,6 @@ export function splitBill(formData: FormData): BillAllocation {
     });
   });
 
-  const subtotal = stepFoodItems.foodItems.reduce(
-    (sum, item) => sum + (item.price || 0),
-    0
-  );
   const tax = Math.max(0, stepFoodItems.tax || 0);
   const tip = Math.max(0, stepFoodItems.tip || 0);
   const discount = Math.max(0, stepFoodItems.discount || 0);

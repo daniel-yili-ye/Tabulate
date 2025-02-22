@@ -7,26 +7,27 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { FormData } from "../lib/formSchema";
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { FormData } from "../../schema/formSchema";
 
 export default function StepReceiptUpload() {
   const { control, watch, setValue } = useFormContext<FormData>();
-  const receiptImage = watch("stepReceiptUpload.receiptImage");
+  const receiptImageURL = watch("stepReceiptUpload.receiptImageURL");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      setValue("stepReceiptUpload.receiptImage", imageUrl);
+      setValue("stepReceiptUpload.receiptImageURL", imageUrl);
+      setValue("stepReceiptUpload.image", file);
     }
   };
 
   return (
     <FormField
       control={control}
-      name="stepReceiptUpload.receiptImage"
+      name="stepReceiptUpload.receiptImageURL"
       render={({ field: { value, onChange, ...field } }) => (
         <FormItem>
           <FormLabel>Upload Receipt (Optional)</FormLabel>
@@ -38,13 +39,12 @@ export default function StepReceiptUpload() {
               {...field}
             />
           </FormControl>
-          {receiptImage && (
+          {receiptImageURL && (
             <Image
-              src={receiptImage}
+              src={receiptImageURL}
               alt="Receipt"
               width={300}
               height={300}
-              objectFit="contain"
             />
           )}
           <FormMessage />

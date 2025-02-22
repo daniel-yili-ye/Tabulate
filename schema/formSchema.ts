@@ -1,16 +1,41 @@
 // lib/formSchema.ts
 import * as z from "zod";
+const MAX_FILE_SIZE = 5000000;
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
 
-const wizardTwoSchema = z.object({
-  receiptImage: z.any().optional(),
+const wizard1Schema = z.object({
+  receiptImageURL: z.any().optional(),
+  image: z
+    .any()
+    .refine((file) => file?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
+      "Only .jpg, .jpeg, .png and .webp formats are supported."
+    )
+    .optional(),
 });
 
-const wizardThreeSchema = z
+const wizard2Schema = z
   .object({
     restaurantName: z.string().min(1, "Restaurant name is required"),
-    date: z.date({
-      required_error: "A date is required",
-    }),
+    date: z
+      .union([
+        z.date({
+          required_error: "A date is required",
+        }),
+        z.string().refine((dateString) => !isNaN(Date.parse(dateString)), {
+          message: "Invalid date format",
+        }),
+      ])
+      .transform((val) => {
+        if (val instanceof Date) return val;
+        return new Date(val);
+      }),
     foodItems: z
       .array(
         z.object({
@@ -33,7 +58,7 @@ const wizardThreeSchema = z
       (data.discount || 0),
   }));
 
-const wizardFourSchema = z
+const wizard3Schema = z
   .array(
     z.object({
       id: z.string().uuid("Invalid UUID"),
@@ -42,17 +67,17 @@ const wizardFourSchema = z
   )
   .min(2, "At least 2 participants are required");
 
-const wizardFiveSchema = z.array(
+const wizard4Schema = z.array(
   z
     .array(z.string().uuid("Invalid UUID"))
     .min(1, "At least 1 participant must be selected")
 );
 
 export const formSchema = z.object({
-  stepReceiptUpload: wizardTwoSchema,
-  stepFoodItems: wizardThreeSchema,
-  stepParticipants: wizardFourSchema,
-  stepAllocateFoodItems: wizardFiveSchema,
+  stepReceiptUpload: wizard1Schema,
+  stepFoodItems: wizard2Schema,
+  stepParticipants: wizard3Schema,
+  stepAllocateFoodItems: wizard4Schema,
 });
 
 export type FormData = z.infer<typeof formSchema>;

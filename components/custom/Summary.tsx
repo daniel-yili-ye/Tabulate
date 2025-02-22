@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useMemo } from "react";
 import {
   Card,
@@ -16,7 +18,7 @@ import {
   TableRow,
   TableFooter,
 } from "@/components/ui/table";
-import { FormData } from "@/lib/formSchema";
+import { FormData } from "@/schema/formSchema";
 import {
   splitBill,
   BillAllocation,
@@ -33,9 +35,11 @@ import {
 } from "@/components/ui/dialog";
 import { Share2Icon } from "@radix-ui/react-icons";
 import ViewReceipt from "./ViewReceipt";
-import { Separator } from "./ui/separator";
+import { Separator } from "../ui/separator";
+import { useToast } from "@/components/hooks/use-toast";
 
 export default function Summary({ formData }: { formData: FormData }) {
+  const [fullUrl, setFullUrl] = useState("");
   const [allocation, setAllocation] = useState<BillAllocation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -45,7 +49,11 @@ export default function Summary({ formData }: { formData: FormData }) {
     day: "numeric",
   };
   const currentDate = formData.stepFoodItems.date;
-  const formattedDate = currentDate.toLocaleString(
+
+  const dateObject =
+    typeof currentDate === "string" ? new Date(currentDate) : currentDate;
+
+  const formattedDate = dateObject.toLocaleString(
     "en-US",
     options as Intl.DateTimeFormatOptions
   );
@@ -54,6 +62,14 @@ export default function Summary({ formData }: { formData: FormData }) {
     if (amount === undefined || isNaN(amount)) return "0.00";
     return (amount ? Math.round(amount * 100) / 100 : 0).toFixed(2);
   };
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setFullUrl(window.location.href);
+    }
+  }, []);
 
   useEffect(() => {
     const calculateAllocation = async () => {
@@ -108,7 +124,7 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
                 <TableCell className="text-right">
-                  ${roundCents(item.price)}
+                  {roundCents(item.price)}
                 </TableCell>
               </TableRow>
             ))}
@@ -117,14 +133,14 @@ export default function Summary({ formData }: { formData: FormData }) {
             <TableRow>
               <TableCell>Subtotal</TableCell>
               <TableCell className="text-right">
-                ${roundCents(person.subtotal)}
+                {roundCents(person.subtotal)}
               </TableCell>
             </TableRow>
             {person.tax === 0 || (
               <TableRow>
                 <TableCell>Tax</TableCell>
                 <TableCell className="text-right">
-                  ${roundCents(person.tax)}
+                  {roundCents(person.tax)}
                 </TableCell>
               </TableRow>
             )}
@@ -132,7 +148,7 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableRow>
                 <TableCell>Tip</TableCell>
                 <TableCell className="text-right">
-                  ${roundCents(person.tip)}
+                  {roundCents(person.tip)}
                 </TableCell>
               </TableRow>
             )}
@@ -140,14 +156,14 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableRow>
                 <TableCell>Discount</TableCell>
                 <TableCell className="text-right">
-                  -${roundCents(person.discount)}
+                  -{roundCents(person.discount)}
                 </TableCell>
               </TableRow>
             )}
             <TableRow>
               <TableCell>TOTAL</TableCell>
               <TableCell className="text-right">
-                ${roundCents(person.total)}
+                {roundCents(person.total)}
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -180,7 +196,7 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
                 <TableCell className="text-right">
-                  ${roundCents(item.price)}
+                  {roundCents(item.price)}
                 </TableCell>
               </TableRow>
             ))}
@@ -189,14 +205,14 @@ export default function Summary({ formData }: { formData: FormData }) {
             <TableRow>
               <TableCell>Subtotal</TableCell>
               <TableCell className="text-right">
-                ${roundCents(calculateTotals.subtotal)}
+                {roundCents(calculateTotals.subtotal)}
               </TableCell>
             </TableRow>
             {formData.stepFoodItems.tax === 0 || (
               <TableRow>
                 <TableCell>Tax</TableCell>
                 <TableCell className="text-right">
-                  ${roundCents(formData.stepFoodItems.tax)}
+                  {roundCents(formData.stepFoodItems.tax)}
                 </TableCell>
               </TableRow>
             )}
@@ -204,7 +220,7 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableRow>
                 <TableCell>Tip</TableCell>
                 <TableCell className="text-right">
-                  ${roundCents(formData.stepFoodItems.tip)}
+                  {roundCents(formData.stepFoodItems.tip)}
                 </TableCell>
               </TableRow>
             )}
@@ -212,15 +228,14 @@ export default function Summary({ formData }: { formData: FormData }) {
               <TableRow>
                 <TableCell>Discount</TableCell>
                 <TableCell className="text-right">
-                  -$
-                  {roundCents(formData.stepFoodItems.discount)}
+                  -{roundCents(formData.stepFoodItems.discount)}
                 </TableCell>
               </TableRow>
             )}
             <TableRow>
               <TableCell>TOTAL</TableCell>
               <TableCell className="text-right">
-                ${roundCents(calculateTotals.total)}
+                {roundCents(calculateTotals.total)}
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -243,9 +258,25 @@ export default function Summary({ formData }: { formData: FormData }) {
           </div>
           <div className="flex space-x-4">
             <ViewReceipt
-              receiptImage={formData.stepReceiptUpload.receiptImage}
+              receiptImageURL={formData.stepReceiptUpload.receiptImageURL}
             />
-            <Button>
+            <Button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: "Tabulate",
+                    text: "View your tab split results!",
+                    url: fullUrl,
+                  });
+                } else {
+                  navigator.clipboard.writeText(fullUrl);
+                  toast({
+                    title: "Link copied to clipboard!",
+                    description: fullUrl,
+                  });
+                }
+              }}
+            >
               <Share2Icon />
               &nbsp; Share
             </Button>
@@ -273,7 +304,7 @@ export default function Summary({ formData }: { formData: FormData }) {
                   <TableRow key={index}>
                     <TableCell>{person.name}</TableCell>
                     <TableCell className="text-right">
-                      ${roundCents(person.total)}
+                      {roundCents(person.total)}
                     </TableCell>
                     <TableCell>
                       <ItemizedBreakdownModal person={person} />
@@ -285,7 +316,7 @@ export default function Summary({ formData }: { formData: FormData }) {
                 <TableRow>
                   <TableCell>TOTAL</TableCell>
                   <TableCell className="text-right">
-                    ${roundCents(calculateTotals.total)}
+                    {roundCents(calculateTotals.total)}
                   </TableCell>
                   <TableCell>
                     <FullReceiptModal />
