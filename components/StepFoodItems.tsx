@@ -12,12 +12,11 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
-import { FormData } from "../lib/formSchema";
+import { FormData } from "../schema/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Separator } from "./ui/separator";
+import { cn } from "@/utils/utils";
 
 export default function StepFoodItems() {
   const { control } = useFormContext<FormData>();
