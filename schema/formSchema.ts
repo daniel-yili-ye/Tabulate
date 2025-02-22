@@ -1,4 +1,3 @@
-// lib/formSchema.ts
 import * as z from "zod";
 const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = [

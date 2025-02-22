@@ -10,7 +10,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { FormData } from "../lib/formSchema";
+import { FormData } from "../schema/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 
 export default function StepParticipants() {
