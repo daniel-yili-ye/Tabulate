@@ -107,7 +107,7 @@ export default function Summary({ formData }: { formData: FormData }) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-screen">
+      <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{person.name}</DialogTitle>
           <DialogDescription>Itemized Tab</DialogDescription>
@@ -179,7 +179,7 @@ export default function Summary({ formData }: { formData: FormData }) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] overflow-y-auto max-h-screen">
+      <DialogContent className="sm:max-w-[600px] overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{formData.stepFoodItems.restaurantName}</DialogTitle>
           <DialogDescription>Final Tab</DialogDescription>
