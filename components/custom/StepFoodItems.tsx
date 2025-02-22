@@ -7,16 +7,17 @@ import {
   FormControl,
   FormMessage,
   FormDescription,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Calendar } from "./ui/calendar";
-import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
-import { FormData } from "../schema/formSchema";
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
+import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
+import { FormData } from "../../schema/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/utils/utils";
+import { Separator } from "../ui/separator";
 
 export default function StepFoodItems() {
   const { control } = useFormContext<FormData>();
@@ -60,7 +61,7 @@ export default function StepFoodItems() {
             <FormItem>
               <FormLabel>Restaurant Name</FormLabel>
               <FormControl>
-                <Input placeholder="Restaurant name" {...field} />
+                <Input placeholder="Restaurant name" tabIndex={-1} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -7,10 +7,10 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { FormData } from "../schema/formSchema";
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { FormData } from "../../schema/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 
 export default function StepParticipants() {

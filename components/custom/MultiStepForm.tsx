@@ -10,19 +10,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Button } from "./ui/button";
-import { Form } from "./ui/form";
+} from "../ui/card";
+import { Button } from "../ui/button";
+import { Form } from "../ui/form";
 import StepReceiptUpload from "./StepReceiptUpload";
 import StepFoodItems from "./StepFoodItems";
 import StepParticipants from "./StepParticipants";
 import StepAllocateFoodItems from "./StepAllocateFoodItems";
 import Summary from "./Summary";
-import { formSchema, FormData } from "../lib/formSchema";
+import { formSchema, FormData } from "../../schema/formSchema";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { v4 as uuidv4 } from "uuid";
 import ViewReceipt from "./ViewReceipt";
-import { Separator } from "./ui/separator";
+import { Separator } from "../ui/separator";
 
 const steps = [
   "Upload Receipt",
@@ -32,7 +32,7 @@ const steps = [
 ];
 
 const defaultValues: FormData = {
-  stepReceiptUpload: { receiptImage: null },
+  stepReceiptUpload: { receiptImageURL: undefined, image: undefined },
   stepFoodItems: {
     restaurantName: "",
     date: new Date(),
@@ -92,6 +92,7 @@ export default function MultiStepForm() {
     ];
 
     const isValid = await form.trigger(stepNumber[currentStep]);
+    console.log(stepNumber[currentStep], isValid);
     if (isValid) {
       if (currentStep === steps.length - 1) {
         handleSubmit(onSubmit)();
@@ -136,12 +137,12 @@ export default function MultiStepForm() {
   };
 
   const { watch } = form;
-  const receiptImage = watch("stepReceiptUpload.receiptImage");
+  const receiptImageURL = watch("stepReceiptUpload.receiptImageURL");
 
-  const renderReceiptImage = () => {
+  const renderReceiptImageURL = () => {
     switch (currentStep) {
       case 1:
-        return <ViewReceipt receiptImage={receiptImage} />;
+        return <ViewReceipt receiptImageURL={receiptImageURL} />;
       default:
         return null;
     }
@@ -161,7 +162,7 @@ export default function MultiStepForm() {
                   {renderDescription()}
                 </CardDescription>
               </div>
-              {renderReceiptImage()}
+              {renderReceiptImageURL()}
             </div>
             <Separator />
           </CardHeader>

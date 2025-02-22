@@ -7,9 +7,10 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "./ui/form";
-import { FormData } from "../lib/formSchema";
-import { Checkbox } from "./ui/checkbox";
+} from "../ui/form";
+import { FormData } from "../../schema/formSchema";
+import { Checkbox } from "../ui/checkbox";
+import { Loader2 } from "lucide-react";
 
 export default function StepAllocateFoodItems() {
   const { control, watch, setValue } = useFormContext<FormData>();
@@ -18,7 +19,7 @@ export default function StepAllocateFoodItems() {
   const participants = watch("stepParticipants");
 
   if (!foodItems || !participants) {
-    return <div>Loading...</div>;
+    return <Loader2 className="h-8 w-8 animate-spin" />;
   }
 
   return (
