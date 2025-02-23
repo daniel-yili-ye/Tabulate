@@ -33,7 +33,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Share2Icon, PersonIcon } from "@radix-ui/react-icons";
+import { Share2Icon } from "@radix-ui/react-icons";
 import ViewReceipt from "./ViewReceipt";
 import { Separator } from "../ui/separator";
 import { useToast } from "@/components/hooks/use-toast";
@@ -188,7 +188,7 @@ export default function Summary({ formData }: { formData: FormData }) {
           <Eye className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] overflow-y-auto max-h-[90vh]">
+      <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>{formData.stepItems.businessName}</DialogTitle>
           <DialogDescription>Final Tab</DialogDescription>
