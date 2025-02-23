@@ -33,7 +33,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Share2Icon } from "@radix-ui/react-icons";
+import { Share2Icon, PersonIcon } from "@radix-ui/react-icons";
 import ViewReceipt from "./ViewReceipt";
 import { Separator } from "../ui/separator";
 import { useToast } from "@/components/hooks/use-toast";
@@ -116,6 +116,7 @@ export default function Summary({ formData }: { formData: FormData }) {
           <TableHeader>
             <TableRow>
               <TableHead>Item</TableHead>
+              <TableHead className="text-right">Calculation</TableHead>
               <TableHead className="text-right">Amount</TableHead>
             </TableRow>
           </TableHeader>
@@ -123,6 +124,9 @@ export default function Summary({ formData }: { formData: FormData }) {
             {person.items.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
+                <TableCell className="text-right">
+                  {roundCents(item.fullPrice)} / {item.participants}
+                </TableCell>
                 <TableCell className="text-right">
                   {roundCents(item.price)}
                 </TableCell>
@@ -132,6 +136,7 @@ export default function Summary({ formData }: { formData: FormData }) {
           <TableFooter>
             <TableRow>
               <TableCell>Subtotal</TableCell>
+              <TableCell></TableCell>
               <TableCell className="text-right">
                 {roundCents(person.subtotal)}
               </TableCell>
@@ -139,6 +144,7 @@ export default function Summary({ formData }: { formData: FormData }) {
             {person.tax === 0 || (
               <TableRow>
                 <TableCell>Tax</TableCell>
+                <TableCell></TableCell>
                 <TableCell className="text-right">
                   {roundCents(person.tax)}
                 </TableCell>
@@ -147,6 +153,7 @@ export default function Summary({ formData }: { formData: FormData }) {
             {person.tip === 0 || (
               <TableRow>
                 <TableCell>Tip</TableCell>
+                <TableCell></TableCell>
                 <TableCell className="text-right">
                   {roundCents(person.tip)}
                 </TableCell>
@@ -155,6 +162,7 @@ export default function Summary({ formData }: { formData: FormData }) {
             {person.discount === 0 || (
               <TableRow>
                 <TableCell>Discount</TableCell>
+                <TableCell></TableCell>
                 <TableCell className="text-right">
                   -{roundCents(person.discount)}
                 </TableCell>
@@ -162,6 +170,7 @@ export default function Summary({ formData }: { formData: FormData }) {
             )}
             <TableRow>
               <TableCell>TOTAL</TableCell>
+              <TableCell></TableCell>
               <TableCell className="text-right">
                 {roundCents(person.total)}
               </TableCell>

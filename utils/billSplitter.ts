@@ -10,7 +10,12 @@ interface BillItem {
 export interface PersonAllocation {
   id: string;
   name: string;
-  items: { item: string; price: number }[];
+  items: {
+    item: string;
+    price: number;
+    fullPrice: number;
+    participants: number;
+  }[];
   subtotal: number;
   discount: number;
   tax: number;
@@ -85,6 +90,8 @@ export function splitBill(formData: FormData): BillAllocation {
       allocation.people[peopleIndex[id]].items.push({
         item: billItem.item,
         price: splitValues,
+        fullPrice: billItem.price,
+        participants: billItem.participantIds.length,
       });
     });
   });
