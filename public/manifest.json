@@ -11,6 +11,11 @@
       "src": "/favicon.svg",
       "sizes": "64x64",
       "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/icon.png",
+      "sizes": "160x160",
+      "type": "image/png"
     }
   ]
 }
