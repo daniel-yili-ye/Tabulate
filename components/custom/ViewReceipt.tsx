@@ -23,7 +23,7 @@ export default function ViewReceipt({
           &nbsp;View Receipt
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-screen">
+      <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Receipt</DialogTitle>
           <DialogDescription>Your receipt image</DialogDescription>

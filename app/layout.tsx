@@ -1,7 +1,7 @@
 import "@/app/globals.css";
 import { Inter as FontSans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/utils/utils";
 
 const fontSans = FontSans({

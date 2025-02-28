@@ -8,12 +8,11 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription,
 } from "../ui/form";
 import { Input } from "../ui/input";
 import type { FormData } from "../../schema/formSchema";
-import { Loader2, CheckCircle2, Upload } from "lucide-react";
-import { useToast } from "../hooks/use-toast";
+import { CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface StepReceiptUploadProps {
   onProcessingSuccess?: () => void;
@@ -28,7 +27,6 @@ export default function StepReceiptUpload({
   const receiptImageURL = watch("stepReceiptUpload.receiptImageURL");
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   // Update the parent component when processing state changes
   const updateProcessingState = (state: boolean) => {
@@ -57,14 +55,14 @@ export default function StepReceiptUpload({
     updateProcessingState(true);
     setProcessingError(null);
 
+    // Create a unique toast ID to reference later
+    const toastId = toast.loading("Processing receipt...", {
+      description: "Please wait while we analyze your receipt.",
+    });
+
     try {
       const formData = new FormData();
       formData.append("image", file);
-
-      toast({
-        title: "Processing receipt...",
-        description: "Please wait while we analyze your receipt.",
-      });
 
       const response = await fetch("/api/parse-image", {
         method: "POST",
@@ -78,8 +76,8 @@ export default function StepReceiptUpload({
       }
 
       // Successfully processed the receipt, update the form data
-      toast({
-        title: "Receipt processed successfully!",
+      toast.success("Receipt processed successfully!", {
+        id: toastId, // Update the existing toast
         description: "The receipt details have been filled out for you.",
       });
 
@@ -114,11 +112,12 @@ export default function StepReceiptUpload({
       setProcessingError(
         error instanceof Error ? error.message : "Failed to process receipt"
       );
-      toast({
-        title: "Error processing receipt",
+
+      // Update the loading toast to an error toast
+      toast.error("Error processing receipt", {
+        id: toastId, // Update the existing toast
         description:
           error instanceof Error ? error.message : "Failed to process receipt",
-        variant: "destructive",
       });
     } finally {
       updateProcessingState(false);
@@ -142,12 +141,6 @@ export default function StepReceiptUpload({
                 {...field}
               />
             </FormControl>
-            {isProcessing && (
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Processing receipt...</span>
-              </div>
-            )}
             {receiptImageURL && (
               <div className="mt-4 rounded-md border p-4 bg-muted/50">
                 <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">

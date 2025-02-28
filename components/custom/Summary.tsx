@@ -36,7 +36,7 @@ import {
 import { Share2Icon } from "@radix-ui/react-icons";
 import ViewReceipt from "./ViewReceipt";
 import { Separator } from "../ui/separator";
-import { useToast } from "@/components/hooks/use-toast";
+import { toast } from "sonner";
 
 export default function Summary({ formData }: { formData: FormData }) {
   const [fullUrl, setFullUrl] = useState("");
@@ -62,8 +62,6 @@ export default function Summary({ formData }: { formData: FormData }) {
     if (amount === undefined || isNaN(amount)) return "0.00";
     return (amount ? Math.round(amount * 100) / 100 : 0).toFixed(2);
   };
-
-  const { toast } = useToast();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -279,8 +277,7 @@ export default function Summary({ formData }: { formData: FormData }) {
                   });
                 } else {
                   navigator.clipboard.writeText(fullUrl);
-                  toast({
-                    title: "Link copied to clipboard!",
+                  toast("Link copied to clipboard!", {
                     description: fullUrl,
                   });
                 }

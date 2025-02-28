@@ -23,7 +23,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { v4 as uuidv4 } from "uuid";
 import ViewReceipt from "./ViewReceipt";
 import { Separator } from "../ui/separator";
-import { Toaster } from "../ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
 
 const steps = [
