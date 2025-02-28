@@ -9,6 +9,15 @@ const fontSans = FontSans({
   variable: "--font-sans",
 });
 
+export const metadata = {
+  title: "Tabulate",
+  description: "Split bills with friends easily",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
+  manifest: "/manifest.json",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -16,6 +25,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
@@ -29,7 +42,7 @@ export default function RootLayout({
           </header>
           <div className="py-4 m-auto md:max-w-xl">{children}</div>
         </main>
-        <Toaster />
+        <Toaster richColors />
         <Analytics />
       </body>
     </html>

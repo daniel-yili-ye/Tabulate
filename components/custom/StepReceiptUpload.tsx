@@ -95,13 +95,10 @@ export default function StepReceiptUpload({
       }
 
       // Handle optional fields
-      if (data.tax !== undefined) setValue("stepItems.tax", data.tax);
-      if (data.tip !== undefined) setValue("stepItems.tip", data.tip);
-      if (data.discount !== undefined)
-        setValue("stepItems.discount", data.discount);
-      if (data.subtotal !== undefined)
-        setValue("stepItems.subtotal", data.subtotal);
-      if (data.total !== undefined) setValue("stepItems.total", data.total);
+      if (data.tax) setValue("stepItems.tax", data.tax);
+      if (data.tip) setValue("stepItems.tip", data.tip);
+      if (data.discount) setValue("stepItems.discount", data.discount);
+      if (data.total) setValue("stepItems.total", data.total);
 
       // Notify parent component that processing was successful
       if (onProcessingSuccess) {
