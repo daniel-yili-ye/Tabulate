@@ -1,5 +1,4 @@
-// components/Step3stepItems.Items.tsx
-import { UseFormReturn, useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -171,7 +170,7 @@ export default function StepItems() {
           name="stepItems.tax"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tax (Optional)</FormLabel>
+              <FormLabel>Tax (optional)</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Tax amount"
@@ -191,7 +190,7 @@ export default function StepItems() {
           name="stepItems.tip"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tip (Optional)</FormLabel>
+              <FormLabel>Tip (optional)</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Tip amount"
@@ -211,7 +210,7 @@ export default function StepItems() {
           name="stepItems.discount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Discount (Optional)</FormLabel>
+              <FormLabel>Discount (optional)</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Discount amount"

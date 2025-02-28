@@ -23,6 +23,8 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { v4 as uuidv4 } from "uuid";
 import ViewReceipt from "./ViewReceipt";
 import { Separator } from "../ui/separator";
+import { Toaster } from "../ui/toaster";
+import { Loader2 } from "lucide-react";
 
 const steps = [
   "Upload Receipt",
@@ -59,6 +61,7 @@ const defaultValues: FormData = {
 export default function MultiStepForm() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isReceiptProcessing, setIsReceiptProcessing] = useState(false);
 
   const form = useForm<FormData>({
     shouldUnregister: false,
@@ -106,10 +109,19 @@ export default function MultiStepForm() {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
+  const handleReceiptProcessingStateChange = (isProcessing: boolean) => {
+    setIsReceiptProcessing(isProcessing);
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <StepReceiptUpload />;
+        return (
+          <StepReceiptUpload
+            onProcessingSuccess={handleNext}
+            onProcessingStateChange={handleReceiptProcessingStateChange}
+          />
+        );
       case 1:
         return <StepItems />;
       case 2:
@@ -149,44 +161,60 @@ export default function MultiStepForm() {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={(e) => e.preventDefault()}>
-        <Card>
-          <CardHeader className="space-y-4">
-            <div className="space-y-4 md:flex md:justify-between md:items-center md:space-y-0">
-              <div>
-                <CardTitle className="text-xl font-medium">
-                  {steps[currentStep]}
-                </CardTitle>
-                <CardDescription className="text-base text-muted-foreground">
-                  {renderDescription()}
-                </CardDescription>
+    <>
+      <Form {...form}>
+        <form onSubmit={(e) => e.preventDefault()}>
+          <Card>
+            <CardHeader className="space-y-4">
+              <div className="space-y-4 md:flex md:justify-between md:items-center md:space-y-0">
+                <div>
+                  <CardTitle className="text-xl font-medium">
+                    {steps[currentStep]}
+                  </CardTitle>
+                  <CardDescription className="text-base text-muted-foreground">
+                    {renderDescription()}
+                  </CardDescription>
+                </div>
+                {renderReceiptImageURL()}
               </div>
-              {renderReceiptImageURL()}
-            </div>
-            <Separator />
-          </CardHeader>
-          <CardContent>{renderStep()}</CardContent>
-          <CardFooter className="flex justify-between">
-            {currentStep === 0 ? (
-              <div></div>
-            ) : (
-              <Button type="button" onClick={handlePrev}>
-                <ChevronLeftIcon /> Previous
-              </Button>
-            )}
-            <Button type="button" onClick={handleNext} className="space-x-4">
-              {currentStep === steps.length - 1 ? (
-                "Submit"
+              <Separator />
+            </CardHeader>
+            <CardContent>{renderStep()}</CardContent>
+            <CardFooter className="flex justify-between">
+              {currentStep === 0 ? (
+                <div></div>
               ) : (
-                <>
-                  Next <ChevronRightIcon />
-                </>
+                <Button type="button" onClick={handlePrev}>
+                  <ChevronLeftIcon /> Previous
+                </Button>
               )}
-            </Button>
-          </CardFooter>
-        </Card>
-      </form>
-    </Form>
+              <Button
+                type="button"
+                onClick={handleNext}
+                disabled={currentStep === 0 && isReceiptProcessing}
+              >
+                {currentStep === steps.length - 1 ? (
+                  "Submit"
+                ) : (
+                  <>
+                    {currentStep === 0 && isReceiptProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Next <ChevronRightIcon />
+                      </>
+                    )}
+                  </>
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        </form>
+      </Form>
+      <Toaster />
+    </>
   );
 }

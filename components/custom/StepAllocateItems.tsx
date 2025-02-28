@@ -1,4 +1,3 @@
-// components/StepAllocateItems.tsx
 import React, { useEffect } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import {
