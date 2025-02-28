@@ -5,7 +5,7 @@ Effortlessly divide bills, including taxes, tips, and discounts, among multiple 
 ## TODO
 
 - [x] visible math calcs
-- [ ] receipt OCR to JSON -> Gemini Flash 2.0
+- [x] receipt OCR to JSON -> Gemini Flash 2.0
 - [ ] user accounts
 - [ ] user dashboard
 - [ ] link sharing
