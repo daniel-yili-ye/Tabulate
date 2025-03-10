@@ -38,7 +38,13 @@ import { Separator } from "../ui/separator";
 import { toast } from "sonner";
 import ShareModal from "./ShareModal";
 
-export default function Summary({ formData }: { formData: FormData }) {
+export default function Summary({
+  formData,
+  billId,
+}: {
+  formData: FormData;
+  billId?: string;
+}) {
   const [fullUrl, setFullUrl] = useState("");
   const [shareUrl, setShareUrl] = useState("");
   const [allocation, setAllocation] = useState<BillAllocation | null>(null);
@@ -272,8 +278,21 @@ export default function Summary({ formData }: { formData: FormData }) {
     }
   };
 
-  // Function to save bill data and generate a share URL
-  const saveBillData = async () => {
+  // Function to handle share button click - only generates a new URL if one doesn't exist
+  const handleShare = async (): Promise<string> => {
+    setIsOpen(true);
+    // If we already have a share URL, return it
+    if (shareUrl) {
+      console.log("shareUrl exists");
+      return shareUrl;
+    }
+    // If we have a billId, construct and return the URL
+    if (billId) {
+      const shareableUrl = `${window.location.origin}/bills/${billId}`;
+      setShareUrl(shareableUrl);
+      return shareableUrl;
+    }
+
     try {
       setIsSaving(true);
 
@@ -319,24 +338,18 @@ export default function Summary({ formData }: { formData: FormData }) {
         throw new Error(data.error || "Failed to save bill data");
       }
 
-      setShareUrl(data.shareUrl);
-      return data.shareUrl;
+      const shareableUrl = data.shareUrl;
+      setShareUrl(shareableUrl);
+      return shareableUrl;
     } catch (error) {
       console.error("Error saving bill data:", error);
       toast.error("Failed to generate share link");
-      return null;
+      throw new Error(
+        error instanceof Error ? error.message : "Failed to generate share link"
+      );
     } finally {
       setIsSaving(false);
     }
-  };
-
-  // Function to handle share button click
-  const handleShare = async () => {
-    // If we don't have a share URL yet, save the bill data first
-    if (!shareUrl) {
-      await saveBillData();
-    }
-    setIsOpen(true);
   };
 
   return (

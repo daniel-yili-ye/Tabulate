@@ -58,5 +58,5 @@ export default function BillPage() {
     );
   }
 
-  return <Summary formData={billData.form_data} />;
+  return <Summary formData={billData.form_data} billId={billId} />;
 }
