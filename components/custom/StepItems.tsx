@@ -15,7 +15,7 @@ import { FormData } from "../../schema/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/utils/utils";
+import { cn } from "@/lib/utils";
 
 export default function StepItems() {
   const { control } = useFormContext<FormData>();

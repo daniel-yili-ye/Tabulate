@@ -12,7 +12,6 @@ const prompt = `Parse the following receipt into a structured JSON format.
 I need you to extract:
 - Business name
 - Date of transaction
-- Subtotal
 - Total amount
 - Tax amount (if present)
 - Tip amount (if present)
@@ -21,7 +20,6 @@ I need you to extract:
 
 Format the extracted information in this exact JSON schema:
 {
-  "subtotal": number,
   "total": number,
   "businessName": string,
   "date": string,

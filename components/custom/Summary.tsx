@@ -33,15 +33,18 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Share2Icon } from "@radix-ui/react-icons";
 import ViewReceipt from "./ViewReceipt";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
+import ShareModal from "./ShareModal";
 
 export default function Summary({ formData }: { formData: FormData }) {
   const [fullUrl, setFullUrl] = useState("");
+  const [shareUrl, setShareUrl] = useState("");
   const [allocation, setAllocation] = useState<BillAllocation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const options = {
     year: "numeric",
@@ -251,6 +254,91 @@ export default function Summary({ formData }: { formData: FormData }) {
     </Dialog>
   );
 
+  // Helper function to convert blob URL to base64
+  const blobUrlToBase64 = async (blobUrl: string): Promise<string> => {
+    try {
+      const response = await fetch(blobUrl);
+      const blob = await response.blob();
+
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error("Error converting blob to base64:", error);
+      throw error;
+    }
+  };
+
+  // Function to save bill data and generate a share URL
+  const saveBillData = async () => {
+    try {
+      setIsSaving(true);
+
+      // Check if we need to convert the receipt image
+      let modifiedFormData = { ...formData };
+      const receiptImageURL = formData.stepReceiptUpload.receiptImageURL;
+
+      if (receiptImageURL?.startsWith("blob:")) {
+        // Convert blob URL to base64
+        const base64Image = await blobUrlToBase64(receiptImageURL);
+
+        // Update the form data with base64 image
+        modifiedFormData = {
+          ...formData,
+          stepReceiptUpload: {
+            ...formData.stepReceiptUpload,
+            receiptImageURL: base64Image,
+          },
+        };
+      }
+
+      // Prepare the data to save
+      const billData = {
+        form_data: modifiedFormData,
+        allocation,
+        business_name: formData.stepItems.businessName,
+        total_amount: calculateTotals.total,
+        bill_date: formData.stepItems.date,
+      };
+
+      // Send data to API route
+      const response = await fetch("/api/bills", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(billData),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "Failed to save bill data");
+      }
+
+      setShareUrl(data.shareUrl);
+      return data.shareUrl;
+    } catch (error) {
+      console.error("Error saving bill data:", error);
+      toast.error("Failed to generate share link");
+      return null;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Function to handle share button click
+  const handleShare = async () => {
+    // If we don't have a share URL yet, save the bill data first
+    if (!shareUrl) {
+      await saveBillData();
+    }
+    setIsOpen(true);
+  };
+
   return (
     <Card>
       <CardHeader className="space-y-4">
@@ -267,25 +355,14 @@ export default function Summary({ formData }: { formData: FormData }) {
             <ViewReceipt
               receiptImageURL={formData.stepReceiptUpload.receiptImageURL}
             />
-            <Button
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({
-                    title: "Tabulate",
-                    text: "View your tab split results!",
-                    url: fullUrl,
-                  });
-                } else {
-                  navigator.clipboard.writeText(fullUrl);
-                  toast("Link copied to clipboard!", {
-                    description: fullUrl,
-                  });
-                }
-              }}
-            >
-              <Share2Icon />
-              &nbsp; Share
-            </Button>
+            <ShareModal
+              url={shareUrl || fullUrl}
+              onShare={handleShare}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              isSaving={isSaving}
+              setIsSaving={setIsSaving}
+            />
           </div>
         </div>
         <Separator />

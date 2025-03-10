@@ -2,7 +2,7 @@ import "@/app/globals.css";
 import { Inter as FontSans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/utils/utils";
+import { cn } from "@/lib/utils";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -27,6 +27,37 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+        {/* iPhone/iPad (iOS 7+) */}
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/icons/icon-180x180.png"
+        />
+
+        {/* iPad Pro */}
+        <link
+          rel="apple-touch-icon"
+          sizes="167x167"
+          href="/icons/icon-167x167.png"
+        />
+
+        {/* iPad & iPad mini */}
+        <link
+          rel="apple-touch-icon"
+          sizes="152x152"
+          href="/icons/icon-152x152.png"
+        />
+
+        {/* iPhone */}
+        <link
+          rel="apple-touch-icon"
+          sizes="120x120"
+          href="/icons/icon-120x120.png"
+        />
+
+        {/* Fallback */}
+        <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body
