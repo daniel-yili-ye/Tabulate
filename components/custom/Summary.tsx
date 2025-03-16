@@ -37,6 +37,7 @@ import ViewReceipt from "./ViewReceipt";
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
 import ShareModal from "./ShareModal";
+import { uploadReceiptImage } from "@/utils/supabase";
 
 export default function Summary({
   formData,
@@ -260,68 +261,72 @@ export default function Summary({
     </Dialog>
   );
 
-  // Helper function to convert blob URL to base64
-  const blobUrlToBase64 = async (blobUrl: string): Promise<string> => {
-    try {
-      const response = await fetch(blobUrl);
-      const blob = await response.blob();
-
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error("Error converting blob to base64:", error);
-      throw error;
-    }
-  };
-
-  // Function to handle share button click - only generates a new URL if one doesn't exist
-  const handleShare = async (): Promise<string> => {
+  const handleShare = async (): Promise<void> => {
     setIsOpen(true);
-    // If we already have a share URL, return it
+
+    // Early return if we already have a share URL
     if (shareUrl) {
       console.log("shareUrl exists");
-      return shareUrl;
+      return;
     }
-    // If we have a billId, construct and return the URL
+
+    // Early return if we have a billId
     if (billId) {
       const shareableUrl = `${window.location.origin}/bills/${billId}`;
       setShareUrl(shareableUrl);
-      return shareableUrl;
+      return;
     }
 
     try {
       setIsSaving(true);
 
-      // Check if we need to convert the receipt image
-      let modifiedFormData = { ...formData };
-      const receiptImageURL = formData.stepReceiptUpload.receiptImageURL;
+      // Create a deep copy of formData for modification
+      let modifiedFormData = {
+        ...formData,
+        stepReceiptUpload: {
+          ...formData.stepReceiptUpload,
+        },
+      };
 
-      if (receiptImageURL?.startsWith("blob:")) {
-        // Convert blob URL to base64
-        const base64Image = await blobUrlToBase64(receiptImageURL);
+      // Check if we need to upload the image to Supabase
+      const receiptImageURL = formData.stepReceiptUpload?.receiptImageURL;
+      const receiptImage = formData.stepReceiptUpload?.image;
 
-        // Update the form data with base64 image
-        modifiedFormData = {
-          ...formData,
-          stepReceiptUpload: {
-            ...formData.stepReceiptUpload,
-            receiptImageURL: base64Image,
-          },
-        };
+      if (
+        receiptImageURL?.startsWith("blob:") &&
+        receiptImage instanceof File
+      ) {
+        console.log("Uploading blob image to Supabase...");
+
+        try {
+          // Upload the image to Supabase
+          const permanentUrl = await uploadReceiptImage(receiptImage);
+
+          // Update the form data with the permanent URL
+          modifiedFormData.stepReceiptUpload.receiptImageURL = permanentUrl;
+          // Remove the File object as it can't be serialized
+          modifiedFormData.stepReceiptUpload.image = {};
+
+          console.log(
+            "Image uploaded successfully, permanent URL:",
+            permanentUrl
+          );
+        } catch (uploadError) {
+          console.error("Error uploading image to Supabase:", uploadError);
+          toast.error("Failed to upload receipt image");
+        }
       }
 
-      // Prepare the data to save
+      // Prepare the data to save with potentially updated image URL
       const billData = {
         form_data: modifiedFormData,
         allocation,
-        business_name: formData.stepItems.businessName,
+        business_name: modifiedFormData.stepItems.businessName,
         total_amount: calculateTotals.total,
-        bill_date: formData.stepItems.date,
+        bill_date: modifiedFormData.stepItems.date,
       };
+
+      console.log("Sending bill data to API:", billData);
 
       // Send data to API route
       const response = await fetch("/api/bills", {
@@ -340,13 +345,9 @@ export default function Summary({
 
       const shareableUrl = data.shareUrl;
       setShareUrl(shareableUrl);
-      return shareableUrl;
     } catch (error) {
       console.error("Error saving bill data:", error);
       toast.error("Failed to generate share link");
-      throw new Error(
-        error instanceof Error ? error.message : "Failed to generate share link"
-      );
     } finally {
       setIsSaving(false);
     }

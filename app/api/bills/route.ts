@@ -5,7 +5,6 @@ import { saveBillData, getBillData } from "@/utils/supabase";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-
     // Save bill data to Supabase
     const billId = await saveBillData(body);
 

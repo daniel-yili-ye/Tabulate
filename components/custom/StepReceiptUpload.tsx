@@ -37,6 +37,7 @@ export default function StepReceiptUpload({
   };
 
   const handleFileChange = async (file: File | undefined) => {
+    // Early return if no file
     if (!file) return;
 
     // Reset error state when a new file is uploaded
