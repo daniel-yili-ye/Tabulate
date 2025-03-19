@@ -69,7 +69,9 @@ export default function RootLayout({
       >
         <main className="container">
           <header className="py-4 sticky top-0 z-50 w-full bg-background m-auto md:max-w-xl">
-            <h1 className="text-2xl font-bold">Tabulate</h1>
+            <a href="/" className="hover:opacity-80 transition-opacity">
+              <h1 className="text-2xl font-bold">Tabulate</h1>
+            </a>
           </header>
           <div className="py-4 m-auto md:max-w-xl">{children}</div>
         </main>

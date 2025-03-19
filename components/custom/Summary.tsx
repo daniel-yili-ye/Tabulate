@@ -305,12 +305,7 @@ export default function Summary({
           // Update the form data with the permanent URL
           modifiedFormData.stepReceiptUpload.receiptImageURL = permanentUrl;
           // Remove the File object as it can't be serialized
-          modifiedFormData.stepReceiptUpload.image = {};
-
-          console.log(
-            "Image uploaded successfully, permanent URL:",
-            permanentUrl
-          );
+          delete modifiedFormData.stepReceiptUpload.image;
         } catch (uploadError) {
           console.error("Error uploading image to Supabase:", uploadError);
           toast.error("Failed to upload receipt image");

@@ -4,9 +4,6 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-// Log the Supabase URL for debugging
-console.log("Supabase URL:", supabaseUrl);
-
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Function to upload a receipt image from a File object
@@ -15,9 +12,6 @@ export async function uploadReceiptImage(file: File): Promise<string> {
     // Generate a unique filename with original extension
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}.${fileExt}`;
-
-    console.log("Uploading to bucket:", "receipt-images");
-    console.log("File name:", fileName);
 
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -32,14 +26,11 @@ export async function uploadReceiptImage(file: File): Promise<string> {
       throw uploadError;
     }
 
-    console.log("Upload successful, data:", uploadData);
-
     // Get the public URL
     const { data } = supabase.storage
       .from("receipt-images")
       .getPublicUrl(fileName);
 
-    console.log("Generated public URL:", data.publicUrl);
     return data.publicUrl;
   } catch (error) {
     console.error("Error uploading receipt image:", error);
