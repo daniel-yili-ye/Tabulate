@@ -3,7 +3,9 @@ import MultiStepForm from "@/components/custom/MultiStepForm";
 export default function Home() {
   return (
     <>
-      <MultiStepForm />
+      <div className="flex flex-col items-center mb-6">
+        <MultiStepForm />
+      </div>
     </>
   );
 }

@@ -31,7 +31,12 @@ export default function StepAllocateItems() {
             name={`stepAllocateItems.${ItemIndex}`}
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base">{Item.item}</FormLabel>
+                <div className="space-x-2">
+                  <FormLabel className="text-base">{Item.item}</FormLabel>
+                  <FormLabel className="text-sm text-muted-foreground">
+                    {Number(Item.price).toFixed(2)}
+                  </FormLabel>
+                </div>
                 {participants.map((participant) => (
                   <FormItem
                     key={participant.id}
@@ -48,6 +53,7 @@ export default function StepAllocateItems() {
                               );
                           field.onChange(updatedIds);
                         }}
+                        className="h-5 w-5"
                       />
                     </FormControl>
                     <FormLabel className="font-normal">

@@ -129,7 +129,6 @@ export default function StepReceiptUpload({
         name="stepReceiptUpload.receiptImageURL"
         render={({ field: { value, onChange, ...field } }) => (
           <FormItem>
-            <FormLabel>Upload Receipt (optional)</FormLabel>
             <FormControl>
               <Input
                 type="file"

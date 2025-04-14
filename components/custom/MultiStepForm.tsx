@@ -27,7 +27,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
 
 const steps = [
-  "Upload Receipt",
+  "Upload Receipt (optional)",
   "Receipt Details",
   "Participants",
   "Allocate Receipt Items",
@@ -204,7 +204,15 @@ export default function MultiStepForm() {
                       </>
                     ) : (
                       <>
-                        Next <ChevronRightIcon />
+                        {currentStep === 0 ? (
+                          <>
+                            Skip <ChevronRightIcon />
+                          </>
+                        ) : (
+                          <>
+                            Next <ChevronRightIcon />
+                          </>
+                        )}
                       </>
                     )}
                   </>

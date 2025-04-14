@@ -316,9 +316,6 @@ export default function Summary({
       const billData = {
         form_data: modifiedFormData,
         allocation,
-        business_name: modifiedFormData.stepItems.businessName,
-        total_amount: calculateTotals.total,
-        bill_date: modifiedFormData.stepItems.date,
       };
 
       console.log("Sending bill data to API:", billData);
