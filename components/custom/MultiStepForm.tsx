@@ -95,7 +95,7 @@ export default function MultiStepForm() {
     ];
 
     const isValid = await form.trigger(stepNumber[currentStep]);
-    console.log(stepNumber[currentStep], isValid);
+    console.log(stepNumber[currentStep], isValid, currentStep);
     if (isValid) {
       if (currentStep === steps.length - 1) {
         handleSubmit(onSubmit)();

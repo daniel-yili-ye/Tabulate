@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { FormField, FormItem, FormControl, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
 import type { FormData } from "../../schema/formSchema";
+import { ACCEPTED_IMAGE_TYPES } from "../../schema/formSchema";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -127,7 +128,7 @@ export default function StepReceiptUpload({
               <Input
                 type="file"
                 onChange={(e) => handleFileChange(e.target.files?.[0])}
-                accept="image/*"
+                accept={ACCEPTED_IMAGE_TYPES.join(",")}
                 disabled={mutation.isPending}
                 {...field}
               />
@@ -151,12 +152,6 @@ export default function StepReceiptUpload({
           </FormItem>
         )}
       />
-
-      {mutation.isError && (
-        <div className="text-destructive text-sm mt-2">
-          {mutation.error.message}
-        </div>
-      )}
     </div>
   );
 }

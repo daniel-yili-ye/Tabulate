@@ -20,11 +20,8 @@ import {
   TableFooter,
 } from "@/components/ui/table";
 import { FormData } from "@/schema/formSchema";
-import {
-  splitBill,
-  BillAllocation,
-  PersonAllocation,
-} from "@/utils/billSplitter";
+import { splitBill } from "@/utils/billSplitter";
+import { BillAllocation, PersonAllocation } from "@/schema/allocationSchema";
 import { Loader2, Eye } from "lucide-react";
 import {
   Dialog,

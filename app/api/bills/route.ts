@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveBillData, getBillData } from "@/utils/supabase";
 import { formSchema } from "@/schema/formSchema";
+import { z } from "zod";
+// Import the allocation schema
+import { billAllocationSchema } from "@/schema/allocationSchema";
+
+// Define the schema for the entire request body
+const billApiRequestBodySchema = z.object({
+  form_data: formSchema,
+  allocation: billAllocationSchema,
+});
 
 // POST /api/bills - Create a new bill
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validate the request body against the schema
-    const validationResult = formSchema.safeParse(body);
+    // Validate the whole body against the schema
+    const validationResult = billApiRequestBodySchema.safeParse(body);
 
     if (!validationResult.success) {
       // If validation fails, return a 400 error with details
@@ -22,11 +31,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If validation succeeds, use the validated data
-    const validatedData = validationResult.data;
-
-    // Save bill data to Supabase using the validated data
-    const billId = await saveBillData(validatedData);
+    const billId = await saveBillData(validationResult.data);
 
     return NextResponse.json({
       success: true,

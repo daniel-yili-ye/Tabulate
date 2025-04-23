@@ -181,6 +181,9 @@ export default function StepItems() {
                   value={field.value === 0 ? "" : field.value}
                 />
               </FormControl>
+              <FormDescription>
+                Leave tax blank if tax-inclusive pricing is used.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

@@ -1,30 +1,11 @@
 // utils/billSplitter.ts
 import { FormData } from "../schema/formSchema";
+import { BillAllocation } from "@/schema/allocationSchema";
 
 interface BillItem {
   item: string;
   price: number;
   participantIds: string[];
-}
-
-export interface PersonAllocation {
-  id: string;
-  name: string;
-  items: {
-    item: string;
-    price: number;
-    fullPrice: number;
-    participants: number;
-  }[];
-  subtotal: number;
-  discount: number;
-  tax: number;
-  tip: number;
-  total: number;
-}
-
-export interface BillAllocation {
-  people: PersonAllocation[];
 }
 
 // Proportional Allocation Algorithm
