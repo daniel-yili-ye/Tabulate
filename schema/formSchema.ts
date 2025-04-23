@@ -19,7 +19,7 @@ const wizard1Schema = z.object({
     .optional(),
 });
 
-const wizard2Schema = z
+export const wizard2Schema = z
   .object({
     businessName: z.string().min(1, "Business name is required"),
     date: z

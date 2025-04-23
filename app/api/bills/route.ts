@@ -1,12 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveBillData, getBillData } from "@/utils/supabase";
+import { formSchema } from "@/schema/formSchema";
 
 // POST /api/bills - Create a new bill
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    // Save bill data to Supabase
-    const billId = await saveBillData(body);
+
+    // Validate the request body against the schema
+    const validationResult = formSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      // If validation fails, return a 400 error with details
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid request body",
+          details: validationResult.error.flatten(), // Provides detailed errors
+        },
+        { status: 400 }
+      );
+    }
+
+    // If validation succeeds, use the validated data
+    const validatedData = validationResult.data;
+
+    // Save bill data to Supabase using the validated data
+    const billId = await saveBillData(validatedData);
 
     return NextResponse.json({
       success: true,

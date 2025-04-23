@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
+import { wizard2Schema } from "@/schema/formSchema";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -99,7 +100,26 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: parsedData.error }, { status: 400 });
       }
 
-      return NextResponse.json(parsedData);
+      // Validate the structure of the parsed data against the schema
+      const validationResult = wizard2Schema.safeParse(parsedData);
+
+      if (!validationResult.success) {
+        console.error(
+          "AI response failed schema validation:",
+          validationResult.error.flatten()
+        );
+        return NextResponse.json(
+          {
+            error:
+              "AI failed to return data in the expected format. Please try again.",
+            details: validationResult.error.flatten(),
+          },
+          { status: 500 } // Internal server error because the AI response format is wrong
+        );
+      }
+
+      // Return the validated (and potentially transformed) data
+      return NextResponse.json(validationResult.data);
     } catch (parseError) {
       console.error("Error parsing JSON response:", parseError, text);
       return NextResponse.json(

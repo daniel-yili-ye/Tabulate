@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useMutation } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -39,6 +40,95 @@ import { toast } from "sonner";
 import ShareModal from "./ShareModal";
 import { uploadReceiptImage } from "@/utils/supabase";
 
+// Define expected success response from /api/bills POST
+interface SaveBillSuccessResponse {
+  success: boolean;
+  billId: string;
+  shareUrl: string;
+}
+
+// Define potential error response
+interface SaveBillErrorResponse {
+  success: boolean;
+  error: string;
+  details?: any;
+}
+
+// Define the input type for the mutation
+interface SaveBillInput {
+  formData: FormData;
+  allocation: BillAllocation | null;
+}
+
+// Define the mutation function
+async function saveBill(
+  input: SaveBillInput
+): Promise<SaveBillSuccessResponse> {
+  const { formData, allocation } = input;
+
+  // Create a deep copy of formData for modification
+  let modifiedFormData = JSON.parse(JSON.stringify(formData)); // Simple deep copy for this structure
+
+  // Check if we need to upload the image to Supabase
+  const receiptImageURL = formData.stepReceiptUpload?.receiptImageURL;
+  const receiptImage = formData.stepReceiptUpload?.image;
+
+  // Check specifically for blob URLs and ensure image is a File
+  if (
+    typeof receiptImageURL === "string" &&
+    receiptImageURL.startsWith("blob:") &&
+    receiptImage instanceof File
+  ) {
+    console.log("Uploading blob image to Supabase...");
+    try {
+      // Upload the image to Supabase
+      const permanentUrl = await uploadReceiptImage(receiptImage);
+      // Update the form data with the permanent URL
+      modifiedFormData.stepReceiptUpload.receiptImageURL = permanentUrl;
+      // Remove the File object as it can't be serialized
+      delete modifiedFormData.stepReceiptUpload.image;
+    } catch (uploadError) {
+      console.error("Error uploading image to Supabase:", uploadError);
+      toast.error("Failed to upload receipt image. Bill not saved.");
+      // Re-throw or throw a specific error to stop the save process
+      throw new Error("Image upload failed");
+    }
+  } else {
+    // If not uploading a blob, still remove potential File object before sending to API
+    if (modifiedFormData.stepReceiptUpload?.image) {
+      delete modifiedFormData.stepReceiptUpload.image;
+    }
+  }
+
+  // Prepare the data to save
+  const billData = {
+    form_data: modifiedFormData,
+    allocation,
+  };
+
+  console.log("Sending bill data to API:", billData);
+
+  // Send data to API route
+  const response = await fetch("/api/bills", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(billData),
+  });
+
+  const data: SaveBillSuccessResponse | SaveBillErrorResponse =
+    await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(
+      (data as SaveBillErrorResponse).error || "Failed to save bill data"
+    );
+  }
+
+  return data as SaveBillSuccessResponse;
+}
+
 export default function Summary({
   formData,
   billId,
@@ -51,7 +141,6 @@ export default function Summary({
   const [allocation, setAllocation] = useState<BillAllocation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
   const options = {
     year: "numeric",
@@ -261,88 +350,56 @@ export default function Summary({
     </Dialog>
   );
 
+  const mutation = useMutation<SaveBillSuccessResponse, Error, SaveBillInput>({
+    mutationFn: saveBill,
+    onMutate: () => {
+      // Called before saveBill runs
+      // Can optionally return context to onSuccess/onError
+    },
+    onSuccess: (data) => {
+      // data is the result from saveBill (SaveBillSuccessResponse)
+      setShareUrl(data.shareUrl);
+      // Optionally, trigger refetch of queries if needed, e.g., queryClient.invalidateQueries(['bills'])
+      // Toast notification can be moved here if preferred
+    },
+    onError: (error) => {
+      // error is the Error thrown from saveBill
+      console.error("Error saving bill data:", error);
+      toast.error(error.message || "Failed to generate share link");
+    },
+    onSettled: () => {
+      // Called after success or error
+      // This replaces the finally block logic for isSaving
+    },
+  });
+
   const handleShare = async (): Promise<void> => {
     setIsOpen(true);
 
-    // Early return if we already have a share URL
-    if (shareUrl) {
-      console.log("shareUrl exists");
+    // Early return if we already have a share URL from a previous successful mutation or from props
+    if (shareUrl || mutation.data?.shareUrl) {
+      setShareUrl(shareUrl || mutation.data!.shareUrl); // Ensure state is set if using mutation data
+      console.log("Share URL already exists or generated.");
       return;
     }
 
-    // Early return if we have a billId
+    // Early return if we have a billId from props (viewing an existing bill)
     if (billId) {
-      const shareableUrl = `${window.location.origin}/bills/${billId}`;
-      setShareUrl(shareableUrl);
+      const existingShareUrl = `${window.location.origin}/bills/${billId}`;
+      setShareUrl(existingShareUrl);
+      console.log("Using existing billId for share URL.");
       return;
     }
 
-    try {
-      setIsSaving(true);
-
-      // Create a deep copy of formData for modification
-      let modifiedFormData = {
-        ...formData,
-        stepReceiptUpload: {
-          ...formData.stepReceiptUpload,
-        },
-      };
-
-      // Check if we need to upload the image to Supabase
-      const receiptImageURL = formData.stepReceiptUpload?.receiptImageURL;
-      const receiptImage = formData.stepReceiptUpload?.image;
-
-      if (
-        receiptImageURL?.startsWith("blob:") &&
-        receiptImage instanceof File
-      ) {
-        console.log("Uploading blob image to Supabase...");
-
-        try {
-          // Upload the image to Supabase
-          const permanentUrl = await uploadReceiptImage(receiptImage);
-
-          // Update the form data with the permanent URL
-          modifiedFormData.stepReceiptUpload.receiptImageURL = permanentUrl;
-          // Remove the File object as it can't be serialized
-          delete modifiedFormData.stepReceiptUpload.image;
-        } catch (uploadError) {
-          console.error("Error uploading image to Supabase:", uploadError);
-          toast.error("Failed to upload receipt image");
-        }
-      }
-
-      // Prepare the data to save with potentially updated image URL
-      const billData = {
-        form_data: modifiedFormData,
-        allocation,
-      };
-
-      console.log("Sending bill data to API:", billData);
-
-      // Send data to API route
-      const response = await fetch("/api/bills", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(billData),
-      });
-
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error || "Failed to save bill data");
-      }
-
-      const shareableUrl = data.shareUrl;
-      setShareUrl(shareableUrl);
-    } catch (error) {
-      console.error("Error saving bill data:", error);
-      toast.error("Failed to generate share link");
-    } finally {
-      setIsSaving(false);
+    // Trigger the mutation if we don't have a URL and are not viewing an existing bill
+    if (!allocation) {
+      console.error("Allocation not calculated yet, cannot save.");
+      toast.error("Cannot generate link until allocation is calculated.");
+      setIsOpen(false); // Close modal if we can't proceed
+      return;
     }
+
+    mutation.mutate({ formData, allocation });
   };
 
   return (
@@ -362,12 +419,12 @@ export default function Summary({
               receiptImageURL={formData.stepReceiptUpload.receiptImageURL}
             />
             <ShareModal
-              url={shareUrl || fullUrl}
+              url={shareUrl || mutation.data?.shareUrl || fullUrl}
               onShare={handleShare}
               isOpen={isOpen}
               setIsOpen={setIsOpen}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
+              isSaving={mutation.isPending}
+              setIsSaving={() => {}}
             />
           </div>
         </div>

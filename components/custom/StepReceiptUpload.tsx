@@ -2,17 +2,51 @@
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import Image from "next/image";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "../ui/form";
+import { useMutation } from "@tanstack/react-query";
+import { FormField, FormItem, FormControl, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
 import type { FormData } from "../../schema/formSchema";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+
+// Define the expected API response structure for successful parse
+interface ParseSuccessResponse {
+  businessName?: string;
+  date?: string; // API returns string, form expects Date
+  Items?: { item: string; price?: number }[];
+  tax?: number;
+  tip?: number;
+  discount?: number;
+  total?: number;
+}
+
+// Define the structure for API errors
+interface ParseErrorResponse {
+  error: string;
+  details?: any; // Optional: include if your API returns details
+}
+
+// Define the mutation function
+async function parseReceiptImage(file: File): Promise<ParseSuccessResponse> {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await fetch("/api/parse-image", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data: ParseSuccessResponse | ParseErrorResponse = await response.json();
+
+  if (!response.ok || "error" in data) {
+    const errorMessage =
+      "error" in data ? data.error : "Failed to process receipt";
+    // You could potentially use data.details here if needed
+    throw new Error(errorMessage);
+  }
+
+  return data; // Return only the success data
+}
 
 interface StepReceiptUploadProps {
   onProcessingSuccess?: () => void;
@@ -25,101 +59,61 @@ export default function StepReceiptUpload({
 }: StepReceiptUploadProps) {
   const { control, watch, setValue } = useFormContext<FormData>();
   const receiptImageURL = watch("stepReceiptUpload.receiptImageURL");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingError, setProcessingError] = useState<string | null>(null);
 
-  // Update the parent component when processing state changes
-  const updateProcessingState = (state: boolean) => {
-    setIsProcessing(state);
-    if (onProcessingStateChange) {
-      onProcessingStateChange(state);
-    }
-  };
-
-  const handleFileChange = async (file: File | undefined) => {
-    // Early return if no file
-    if (!file) return;
-
-    // Reset error state when a new file is uploaded
-    setProcessingError(null);
-
-    // Set the image in the form
-    const imageUrl = URL.createObjectURL(file);
-    setValue("stepReceiptUpload.receiptImageURL", imageUrl);
-    setValue("stepReceiptUpload.image", file);
-
-    // Process the receipt immediately
-    await processReceipt(file);
-  };
-
-  const processReceipt = async (file: File | Blob) => {
-    updateProcessingState(true);
-    setProcessingError(null);
-
-    // Create a unique toast ID to reference later
-    const toastId = toast.loading("Processing receipt...", {
-      description: "Please wait while we analyze your receipt.",
-    });
-
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const response = await fetch("/api/parse-image", {
-        method: "POST",
-        body: formData,
+  // Setup the mutation
+  const mutation = useMutation<
+    ParseSuccessResponse, // Success type
+    Error, // Error type
+    File, // Input type
+    { toastId?: string | number } // Context type
+  >({
+    mutationFn: parseReceiptImage,
+    onMutate: () => {
+      const toastId = toast.loading("Processing receipt...", {
+        description: "Please wait while we analyze your receipt.",
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to process receipt");
-      }
-
-      // Successfully processed the receipt, update the form data
+      if (onProcessingStateChange) onProcessingStateChange(true);
+      return { toastId };
+    },
+    onSuccess: (data, _variables, context) => {
       toast.success("Receipt processed successfully!", {
-        id: toastId, // Update the existing toast
+        id: context?.toastId,
         description: "The receipt details have been filled out for you.",
       });
 
-      // Update the form with the parsed data
       setValue("stepItems.businessName", data.businessName || "");
-
-      // Handle date - convert string to Date object if needed
-      if (data.date) {
-        setValue("stepItems.date", new Date(data.date));
-      }
-
-      // Handle items
-      if (data.Items && Array.isArray(data.Items) && data.Items.length > 0) {
-        setValue("stepItems.Items", data.Items);
-      }
-
-      // Handle optional fields
+      if (data.date) setValue("stepItems.date", new Date(data.date));
+      if (data.Items?.length) setValue("stepItems.Items", data.Items);
       if (data.tax) setValue("stepItems.tax", data.tax);
       if (data.tip) setValue("stepItems.tip", data.tip);
       if (data.discount) setValue("stepItems.discount", data.discount);
       if (data.total) setValue("stepItems.total", data.total);
 
-      // Notify parent component that processing was successful
-      if (onProcessingSuccess) {
-        onProcessingSuccess();
-      }
-    } catch (error) {
+      if (onProcessingSuccess) onProcessingSuccess();
+    },
+    onError: (error, _variables, context) => {
       console.error("Error processing receipt:", error);
-      setProcessingError(
-        error instanceof Error ? error.message : "Failed to process receipt"
-      );
-
-      // Update the loading toast to an error toast
       toast.error("Error processing receipt", {
-        id: toastId, // Update the existing toast
-        description:
-          error instanceof Error ? error.message : "Failed to process receipt",
+        id: context?.toastId,
+        description: error.message,
       });
-    } finally {
-      updateProcessingState(false);
-    }
+    },
+    onSettled: (_data, _error, _variables, context) => {
+      // Called after mutation is successful or errors out
+      // Ensures loading state is turned off
+      if (onProcessingStateChange) onProcessingStateChange(false);
+      // Toast dismissal/update is handled by onSuccess/onError via id
+    },
+  });
+
+  const handleFileChange = async (file: File | undefined) => {
+    if (!file) return;
+
+    const imageUrl = URL.createObjectURL(file);
+    setValue("stepReceiptUpload.receiptImageURL", imageUrl);
+    setValue("stepReceiptUpload.image", file);
+
+    mutation.mutate(file);
   };
 
   return (
@@ -134,7 +128,7 @@ export default function StepReceiptUpload({
                 type="file"
                 onChange={(e) => handleFileChange(e.target.files?.[0])}
                 accept="image/*"
-                disabled={isProcessing}
+                disabled={mutation.isPending}
                 {...field}
               />
             </FormControl>
@@ -158,8 +152,10 @@ export default function StepReceiptUpload({
         )}
       />
 
-      {processingError && (
-        <div className="text-destructive text-sm mt-2">{processingError}</div>
+      {mutation.isError && (
+        <div className="text-destructive text-sm mt-2">
+          {mutation.error.message}
+        </div>
       )}
     </div>
   );

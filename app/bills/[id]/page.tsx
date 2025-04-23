@@ -1,47 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import Summary from "@/components/custom/Summary";
 import BillSkeleton from "@/components/custom/BillSkeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { FormData } from "@/schema/formSchema";
 
+interface BillApiResponse {
+  success: boolean;
+  data?: { form_data: FormData };
+  error?: string;
+}
+
+async function fetchBillData(billId: string): Promise<{ form_data: FormData }> {
+  const response = await fetch(`/api/bills?id=${billId}`);
+  const data: BillApiResponse = await response.json();
+
+  if (!response.ok || !data.success || !data.data) {
+    throw new Error(data.error || "Failed to load bill data");
+  }
+
+  return data.data;
+}
+
 export default function BillPage() {
   const params = useParams();
   const billId = params.id as string;
-  const [billData, setBillData] = useState<{ form_data: FormData } | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchBillData() {
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/bills?id=${billId}`);
-        const data = await response.json();
+  const {
+    data: billData,
+    error,
+    isLoading,
+  } = useQuery<{ form_data: FormData }, Error>({
+    queryKey: ["bill", billId],
+    queryFn: () => fetchBillData(billId),
+    enabled: !!billId,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
 
-        if (!data.success) {
-          throw new Error(data.error || "Failed to load bill data");
-        }
-
-        setBillData(data.data);
-      } catch (err) {
-        console.error("Error fetching bill:", err);
-        setError(err instanceof Error ? err.message : "Failed to load bill");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (billId) {
-      fetchBillData();
-    }
-  }, [billId]);
-
-  if (loading) {
+  if (isLoading) {
     return <BillSkeleton />;
   }
 
@@ -51,7 +50,7 @@ export default function BillPage() {
         <CardContent className="pt-6">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-destructive">Error</h2>
-            <p className="mt-2">{error || "Bill data not found"}</p>
+            <p className="mt-2">{error?.message || "Bill data not found"}</p>
           </div>
         </CardContent>
       </Card>

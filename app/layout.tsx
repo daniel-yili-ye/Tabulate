@@ -3,6 +3,7 @@ import { Inter as FontSans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -67,14 +68,16 @@ export default function RootLayout({
         )}
         suppressHydrationWarning={true}
       >
-        <main className="container">
-          <header className="py-4 sticky top-0 z-50 w-full bg-background m-auto md:max-w-xl">
-            <a href="/" className="hover:opacity-80 transition-opacity">
-              <h1 className="text-2xl font-bold">Tabulate</h1>
-            </a>
-          </header>
-          <div className="py-4 m-auto md:max-w-xl mb-6">{children}</div>
-        </main>
+        <QueryProvider>
+          <main className="container">
+            <header className="py-4 sticky top-0 z-50 w-full bg-background m-auto md:max-w-xl">
+              <a href="/" className="hover:opacity-80 transition-opacity">
+                <h1 className="text-2xl font-bold">Tabulate</h1>
+              </a>
+            </header>
+            <div className="py-4 m-auto md:max-w-xl mb-6">{children}</div>
+          </main>
+        </QueryProvider>
         <Toaster richColors />
         <Analytics />
       </body>
