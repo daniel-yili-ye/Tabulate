@@ -45,7 +45,7 @@ export function splitBill(formData: FormData): BillAllocation {
   const peopleIndex: Record<string, number> = {};
   const subtotals: Record<string, number> = {};
 
-  people.forEach(({ id, name }, index) => {
+  people.forEach(({ id }, index) => {
     peopleIndex[id] = index;
     subtotals[id] = 0;
   });

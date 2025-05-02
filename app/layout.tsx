@@ -75,7 +75,7 @@ export default function RootLayout({
                 <h1 className="text-2xl font-bold">Tabulate</h1>
               </a>
             </header>
-            <div className="py-4 m-auto md:max-w-xl mb-6">{children}</div>
+            <div className="py-4 m-auto md:max-w-xl">{children}</div>
           </main>
         </QueryProvider>
         <Toaster richColors />

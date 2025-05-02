@@ -21,7 +21,10 @@ const wizard1Schema = z.object({
 
 export const wizard2Schema = z
   .object({
-    businessName: z.string().min(1, "Business name is required"),
+    businessName: z.preprocess(
+      (arg) => (arg === null || arg === undefined ? "" : arg),
+      z.string()
+    ),
     date: z
       .union([
         z.date({
@@ -30,19 +33,28 @@ export const wizard2Schema = z
         z.string().refine((dateString) => !isNaN(Date.parse(dateString)), {
           message: "Invalid date format",
         }),
+        z.null(),
+        z.undefined(),
       ])
       .transform((val) => {
+        if (val === null || val === undefined) return new Date();
         if (val instanceof Date) return val;
         return new Date(val);
       }),
     Items: z
       .array(
         z.object({
-          item: z.string().min(1, "Item name is required"),
+          item: z.string().optional(),
           price: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
         })
       )
-      .min(1, "At least one Item is required"),
+      .transform((items) => {
+        // If the array is empty, return the default items
+        if (items.length === 0) {
+          return [{ item: "", price: 0 }];
+        }
+        return items;
+      }),
     tax: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
     tip: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
     discount: z.coerce.number().multipleOf(0.01).nonnegative().optional(),
