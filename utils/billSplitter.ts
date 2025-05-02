@@ -36,7 +36,7 @@ export function splitBill(formData: FormData): BillAllocation {
 
   const billItems: BillItem[] = stepItems.Items.map((item, index) => ({
     item: item.item,
-    price: item.price || 0,
+    price: Number(item.price) || 0,
     participantIds:
       stepAllocateItems.find((_, index2) => index2 === index) || [],
   }));
