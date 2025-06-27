@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -11,19 +12,45 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import { FormData } from "../../schema/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Split, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/components/lib/utils";
+import { Label } from "../ui/label";
 
 export default function StepItems() {
-  const { control } = useFormContext<FormData>();
+  const { control, getValues, setValue } = useFormContext<FormData>();
+  const [splitDialogOpen, setSplitDialogOpen] = useState(false);
+  const [currentSplitItem, setCurrentSplitItem] = useState<{
+    index: number;
+    item: string;
+    price: number;
+  } | null>(null);
+  const [splitCount, setSplitCount] = useState<number>(2);
 
   const {
     fields: fieldsItems,
     append: appendItems,
     remove: removeItems,
+    update: updateItems,
+    insert: insertItems,
   } = useFieldArray({
     control: control,
     name: "stepItems.Items",
@@ -33,6 +60,7 @@ export default function StepItems() {
     fields: fieldsAllocation,
     append: appendAllocation,
     remove: removeAllocation,
+    insert: insertAllocation,
   } = useFieldArray({
     control: control,
     name: "stepAllocateItems",
@@ -49,9 +77,66 @@ export default function StepItems() {
     removeAllocation(index);
   };
 
+  const handleSplitItem = (index: number) => {
+    console.log(getValues("stepItems.Items"));
+    console.log(getValues("stepAllocateItems"));
+    const currentItems = getValues("stepItems.Items");
+    const itemToSplit = currentItems[index];
+
+    setCurrentSplitItem({
+      index,
+      item: itemToSplit.item || "",
+      price: Number(itemToSplit.price) || 0,
+    });
+    setSplitDialogOpen(true);
+  };
+
+  const confirmSplit = () => {
+    if (!currentSplitItem || splitCount < 2) return;
+
+    const { index, item, price } = currentSplitItem;
+    const dividedPrice = Math.round((price / splitCount) * 100) / 100;
+
+    // Get current state
+    const currentItems = getValues("stepItems.Items");
+    const currentAllocations = getValues("stepAllocateItems");
+
+    // Ensure allocations array is same length as items and has no undefined values
+    const normalizedAllocations = currentItems.map(
+      (_, i) => currentAllocations[i] || []
+    );
+
+    // Update the existing item to have the divided price
+    updateItems(index, { item, price: dividedPrice });
+
+    // Insert new items for the remaining splits at consecutive indices
+    for (let i = 1; i < splitCount; i++) {
+      insertItems(index + i, { item, price: dividedPrice });
+    }
+
+    // Rebuild the allocation array with proper shifting
+    const newAllocations = [
+      ...normalizedAllocations.slice(0, index + 1), // Keep up to split item
+      ...Array(splitCount - 1).fill([]), // Empty arrays for new splits
+      ...normalizedAllocations.slice(index + 1), // Shift remaining allocations
+    ];
+
+    // Replace entire allocation array to ensure sync
+    setValue("stepAllocateItems", newAllocations);
+
+    console.log("After split:");
+    console.log("Items:", getValues("stepItems.Items"));
+    console.log("Allocations:", getValues("stepAllocateItems"));
+
+    setSplitDialogOpen(false);
+    setCurrentSplitItem(null);
+    setSplitCount(2);
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-4">
+        {/* business name */}
         <FormField
           control={control}
           name="stepItems.businessName"
@@ -65,6 +150,7 @@ export default function StepItems() {
             </FormItem>
           )}
         />
+        {/* date */}
         <FormField
           control={control}
           name="stepItems.date"
@@ -108,8 +194,11 @@ export default function StepItems() {
         />
       </div>
       <div>
+        {/* items */}
         <div className="space-y-2">
-          <FormLabel>Items</FormLabel>
+          <h3 className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Items
+          </h3>
           {fieldsItems.map((field, index) => (
             <div key={field.id} className="flex space-x-2">
               <FormField
@@ -118,7 +207,7 @@ export default function StepItems() {
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormControl>
-                      <Input placeholder="Item" {...field} />
+                      <Input placeholder="Item name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -142,14 +231,40 @@ export default function StepItems() {
                   </FormItem>
                 )}
               />
-              <Button
-                type="button"
-                onClick={() => handleRemove(index)}
-                variant="destructive"
-                disabled={fieldsItems.length <= 1}
-              >
-                <TrashIcon />
-              </Button>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" type="button">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  onCloseAutoFocus={(e) => e.preventDefault()}
+                  avoidCollisions={true}
+                >
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleSplitItem(index);
+                    }}
+                  >
+                    <Split className="h-4 w-4 mr-2" />
+                    Split Item
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleRemove(index);
+                    }}
+                    className="text-destructive focus:text-destructive"
+                    disabled={fieldsItems.length <= 1}
+                  >
+                    <TrashIcon className="h-4 w-4 mr-2" />
+                    Delete Item
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ))}
         </div>
@@ -164,56 +279,73 @@ export default function StepItems() {
           &nbsp;Add Item
         </Button>
       </div>
+
+      {/* Split Item Dialog */}
+      <Dialog open={splitDialogOpen} onOpenChange={setSplitDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Split Item</DialogTitle>
+            <DialogDescription>
+              Split "{currentSplitItem?.item}" into multiple instances. The
+              price will be divided equally.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="split-count" className="text-sm font-medium">
+                Split into:
+              </Label>
+              <Input
+                id="split-count"
+                type="number"
+                min="2"
+                max="50"
+                value={splitCount}
+                onChange={(e) => setSplitCount(parseInt(e.target.value) || 2)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Original price: {Number(currentSplitItem?.price || 0).toFixed(2)}
+              <br />
+              Price per item:{" "}
+              {splitCount > 0
+                ? (Number(currentSplitItem?.price || 0) / splitCount).toFixed(2)
+                : "--"}
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSplitDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmSplit}
+              disabled={!(splitCount >= 2 && splitCount <= 50)}
+            >
+              Split Item
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* discounts */}
       <div className="space-y-4">
-        <FormField
-          control={control}
-          name="stepItems.tax"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tax (optional)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Tax amount"
-                  type="number"
-                  inputMode="decimal"
-                  pattern="[0-9]*"
-                  {...field}
-                  value={field.value === 0 ? "" : field.value}
-                />
-              </FormControl>
-              <FormDescription>
-                Leave tax blank if tax-inclusive pricing is used.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="stepItems.tip"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tip (optional)</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Tip amount"
-                  type="number"
-                  inputMode="decimal"
-                  pattern="[0-9]*"
-                  {...field}
-                  value={field.value === 0 ? "" : field.value}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={control}
           name="stepItems.discount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Discount (optional)</FormLabel>
+              <FormLabel>
+                Discount{" "}
+                <span className="text-sm text-gray-500 font-normal">
+                  (Optional)
+                </span>
+              </FormLabel>
               <FormControl>
                 <Input
                   placeholder="Discount amount"
@@ -225,7 +357,66 @@ export default function StepItems() {
                 />
               </FormControl>
               <FormDescription>
-                Enter the discount as a positive number.
+                Enter a positive amount not a percentage.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* tax */}
+        <FormField
+          control={control}
+          name="stepItems.tax"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Tax{" "}
+                <span className="text-sm text-gray-500 font-normal">
+                  (Optional)
+                </span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Tax amount"
+                  type="number"
+                  inputMode="decimal"
+                  pattern="[0-9]*"
+                  {...field}
+                  value={field.value === 0 ? "" : field.value}
+                />
+              </FormControl>
+              <FormDescription>
+                Enter an amount not a percentage. Leave blank if bill is
+                tax-inclusive.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* tip */}
+        <FormField
+          control={control}
+          name="stepItems.tip"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Tip{" "}
+                <span className="text-sm text-gray-500 font-normal">
+                  (Optional)
+                </span>
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Tip amount"
+                  type="number"
+                  inputMode="decimal"
+                  pattern="[0-9]*"
+                  {...field}
+                  value={field.value === 0 ? "" : field.value}
+                />
+              </FormControl>
+              <FormDescription>
+                Enter an amount not a percentage.
               </FormDescription>
               <FormMessage />
             </FormItem>

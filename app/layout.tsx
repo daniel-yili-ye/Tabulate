@@ -1,13 +1,14 @@
 import "@/app/globals.css";
-import { Inter as FontSans } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/components/lib/utils";
 import QueryProvider from "@/components/providers/QueryProvider";
 
-const fontSans = FontSans({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata = {
@@ -64,7 +65,7 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
+          inter.variable
         )}
         suppressHydrationWarning={true}
       >

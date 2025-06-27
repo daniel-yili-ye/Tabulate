@@ -27,7 +27,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
 
 const steps = [
-  "Upload Receipt (optional)",
+  "Upload Receipt",
   "Receipt Details",
   "Participants",
   "Allocate Receipt Items",
