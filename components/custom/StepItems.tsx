@@ -286,8 +286,7 @@ export default function StepItems() {
           <DialogHeader>
             <DialogTitle>Split Item</DialogTitle>
             <DialogDescription>
-              Split "{currentSplitItem?.item}" into multiple instances. The
-              price will be divided equally.
+              {`Split "${currentSplitItem?.item}" into multiple instances. The price will be divided equally.`}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
