@@ -95,38 +95,46 @@ export default function StepItems() {
     if (!currentSplitItem || splitCount < 2) return;
 
     const { index, item, price } = currentSplitItem;
-    const dividedPrice = Math.round((price / splitCount) * 100) / 100;
+
+    // 🔧 FIXED: Proper penny allocation
+    const totalCents = Math.round(price * 100);
+    const baseCents = Math.floor(totalCents / splitCount);
+    const remainderCents = totalCents % splitCount;
+
+    // Create array of split amounts
+    const splitAmounts = Array(splitCount).fill(baseCents);
+
+    // Distribute remainder cents to first N items
+    for (let i = 0; i < remainderCents; i++) {
+      splitAmounts[i] += 1;
+    }
+
+    // Convert back to dollars
+    const splitPrices = splitAmounts.map((cents) => cents / 100);
 
     // Get current state
     const currentItems = getValues("stepItems.Items");
     const currentAllocations = getValues("stepAllocateItems");
-
-    // Ensure allocations array is same length as items and has no undefined values
     const normalizedAllocations = currentItems.map(
       (_, i) => currentAllocations[i] || []
     );
 
-    // Update the existing item to have the divided price
-    updateItems(index, { item, price: dividedPrice });
+    // Update the existing item with the first split amount
+    updateItems(index, { item, price: splitPrices[0] });
 
-    // Insert new items for the remaining splits at consecutive indices
+    // Insert new items with their respective split amounts
     for (let i = 1; i < splitCount; i++) {
-      insertItems(index + i, { item, price: dividedPrice });
+      insertItems(index + i, { item, price: splitPrices[i] });
     }
 
-    // Rebuild the allocation array with proper shifting
+    // Handle allocations
     const newAllocations = [
-      ...normalizedAllocations.slice(0, index + 1), // Keep up to split item
-      ...Array(splitCount - 1).fill([]), // Empty arrays for new splits
-      ...normalizedAllocations.slice(index + 1), // Shift remaining allocations
+      ...normalizedAllocations.slice(0, index + 1),
+      ...Array(splitCount - 1).fill([]),
+      ...normalizedAllocations.slice(index + 1),
     ];
 
-    // Replace entire allocation array to ensure sync
     setValue("stepAllocateItems", newAllocations);
-
-    console.log("After split:");
-    console.log("Items:", getValues("stepItems.Items"));
-    console.log("Allocations:", getValues("stepAllocateItems"));
 
     setSplitDialogOpen(false);
     setCurrentSplitItem(null);
