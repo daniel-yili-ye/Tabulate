@@ -305,6 +305,7 @@ export default function StepItems() {
               <Input
                 id="split-count"
                 type="number"
+                inputMode="numeric"
                 min="2"
                 max="50"
                 value={splitCount}
