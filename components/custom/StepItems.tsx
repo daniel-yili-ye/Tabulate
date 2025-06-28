@@ -129,8 +129,8 @@ export default function StepItems() {
 
     // Handle allocations
     const newAllocations = [
-      ...normalizedAllocations.slice(0, index + 1),
-      ...Array(splitCount - 1).fill([]),
+      ...normalizedAllocations.slice(0, index),
+      ...Array(splitCount).fill([]),
       ...normalizedAllocations.slice(index + 1),
     ];
 
@@ -305,6 +305,7 @@ export default function StepItems() {
               <Input
                 id="split-count"
                 type="number"
+                inputMode="numeric"
                 min="2"
                 max="50"
                 value={splitCount}
