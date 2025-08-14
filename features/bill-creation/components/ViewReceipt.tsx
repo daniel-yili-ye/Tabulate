@@ -1,5 +1,5 @@
 import { ImageIcon } from "@radix-ui/react-icons";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import {
   Dialog,
@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "@/components/ui/dialog";
 
 export default function ViewReceipt({
   receiptImageURL,

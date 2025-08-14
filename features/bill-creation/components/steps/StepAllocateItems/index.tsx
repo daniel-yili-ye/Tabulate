@@ -1,16 +1,15 @@
-import React, { useEffect } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
   FormLabel,
   FormControl,
   FormMessage,
-} from "../ui/form";
-import { FormData } from "../../schema/formSchema";
-import { Checkbox } from "../ui/checkbox";
+} from "@/components/ui/form";
+import { FormData } from "@/features/bill-creation/schemas/formSchema";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
 
 export default function StepAllocateItems() {
   const { control, watch, setValue } = useFormContext<FormData>();

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveBillData, getBillData } from "@/utils/supabase";
-import { formSchema } from "@/schema/formSchema";
+import { saveBillData, getBillData } from "@/services/storage/supabase";
+import { formSchema } from "@/features/bill-creation/schemas/formSchema";
 import { z } from "zod";
 // Import the allocation schema
-import { billAllocationSchema } from "@/schema/allocationSchema";
+import { billAllocationSchema } from "@/features/bill-splitting/schemas/allocationSchema";
 
 // Define the schema for the entire request body
 const billApiRequestBodySchema = z.object({
@@ -11,7 +11,7 @@ const billApiRequestBodySchema = z.object({
   allocation: billAllocationSchema,
 });
 
-// POST /api/bills - Create a new bill
+// POST /api/tab - Create a new tab
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       billId,
-      shareUrl: `${request.nextUrl.origin}/bills/${billId}`,
+      shareUrl: `${request.nextUrl.origin}/tab/${billId}`,
     });
   } catch (error) {
     console.error("Error creating bill:", error);
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/bills?id=123 - Get a bill by ID
+// GET /api/tabs?id=123 - Get a tab by ID
 export async function GET(request: NextRequest) {
   try {
     const id = request.nextUrl.searchParams.get("id");

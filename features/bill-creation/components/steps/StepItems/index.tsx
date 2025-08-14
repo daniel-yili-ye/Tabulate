@@ -7,11 +7,15 @@ import {
   FormControl,
   FormMessage,
   FormDescription,
-} from "../ui/form";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Calendar } from "../ui/calendar";
-import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -20,20 +24,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { FormData } from "../../schema/formSchema";
+} from "@/components/ui/dropdown-menu";
+import { FormData } from "@/features/bill-creation/schemas/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { CalendarIcon, Split, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/components/lib/utils";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
 
 export default function StepItems() {
   const { control, getValues, setValue } = useFormContext<FormData>();
@@ -171,7 +175,7 @@ export default function StepItems() {
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
+                        "pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground"
                       )}
                     >

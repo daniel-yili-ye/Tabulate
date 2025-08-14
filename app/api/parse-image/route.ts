@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
-import { wizard2Schema } from "@/schema/formSchema";
+import { wizard2Schema } from "@/features/bill-creation/schemas/formSchema";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash",
 });
 
 const prompt = `Parse the following receipt into a structured JSON format. 
@@ -27,12 +27,12 @@ Format the extracted information in this exact JSON schema:
   "Items": [
     {
       "item": string,
-      "price": number (or undefined if not available)
+      "price": number (or null if not available)
     }
   ],
-  "tax": number (or undefined if not present),
-  "tip": number (or undefined if not present),
-  "discount": number (or undefined if not present)
+  "discount": number (or null if not present),
+  "tax": number (or null if not present),
+  "tip": number (or null if not present)
 }
 
 A few important notes:

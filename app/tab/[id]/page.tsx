@@ -2,10 +2,10 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import Summary from "@/components/custom/Summary";
-import BillSkeleton from "@/components/custom/BillSkeleton";
+import Summary from "@/features/bill-splitting/components/Summary";
+import BillSkeleton from "@/features/bill-splitting/components/BillSkeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { FormData } from "@/schema/formSchema";
+import { FormData } from "@/features/bill-creation/schemas/formSchema";
 
 interface BillApiResponse {
   success: boolean;
@@ -14,7 +14,7 @@ interface BillApiResponse {
 }
 
 async function fetchBillData(billId: string): Promise<{ form_data: FormData }> {
-  const response = await fetch(`/api/bills?id=${billId}`);
+  const response = await fetch(`/api/tab?id=${billId}`);
   const data: BillApiResponse = await response.json();
 
   if (!response.ok || !data.success || !data.data) {

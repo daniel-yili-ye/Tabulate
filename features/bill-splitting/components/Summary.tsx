@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -19,9 +17,12 @@ import {
   TableRow,
   TableFooter,
 } from "@/components/ui/table";
-import { FormData } from "@/schema/formSchema";
-import { splitBill } from "@/utils/billSplitter";
-import { BillAllocation, PersonAllocation } from "@/schema/allocationSchema";
+import { FormData } from "@/features/bill-creation/schemas/formSchema";
+import { splitBill } from "@/features/bill-splitting/utils/billSplitter";
+import {
+  BillAllocation,
+  PersonAllocation,
+} from "@/features/bill-splitting/schemas/allocationSchema";
 import { Loader2, Eye } from "lucide-react";
 import {
   Dialog,
@@ -31,13 +32,13 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import ViewReceipt from "./ViewReceipt";
-import { Separator } from "../ui/separator";
+import ViewReceipt from "@/features/bill-creation/components/ViewReceipt";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import ShareModal from "./ShareModal";
-import { uploadReceiptImage } from "@/utils/supabase";
+import ShareModal from "@/features/bill-sharing/components/ShareModal";
+import { uploadReceiptImage } from "@/services/storage/supabase";
 
-// Define expected success response from /api/bills POST
+// Define expected success response from /api/tab POST
 interface SaveBillSuccessResponse {
   success: boolean;
   billId: string;
@@ -106,7 +107,7 @@ async function saveBill(
   console.log("Sending bill data to API:", billData);
 
   // Send data to API route
-  const response = await fetch("/api/bills", {
+  const response = await fetch("/api/tab", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -166,9 +167,9 @@ export default function Summary({
   }, []);
 
   useEffect(() => {
-    const calculateAllocation = async () => {
+    const calculateAllocation = () => {
       try {
-        const result = await splitBill(formData);
+        const result = splitBill(formData);
         console.log(result);
         setAllocation(result);
       } catch (error) {
@@ -382,7 +383,7 @@ export default function Summary({
 
     // Early return if we have a billId from props (viewing an existing bill)
     if (billId) {
-      const existingShareUrl = `${window.location.origin}/bills/${billId}`;
+      const existingShareUrl = `${window.location.origin}/tab/${billId}`;
       setShareUrl(existingShareUrl);
       console.log("Using existing billId for share URL.");
       return;
