@@ -32,7 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FormData } from "@/features/bill-creation/schemas/formSchema";
+import { FormData } from "@/lib/validation/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
 import { CalendarIcon, Split, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
@@ -255,8 +255,7 @@ export default function StepItems() {
                   avoidCollisions={true}
                 >
                   <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
+                    onClick={() => {
                       handleSplitItem(index);
                     }}
                   >
@@ -265,8 +264,7 @@ export default function StepItems() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
+                    onClick={() => {
                       handleRemove(index);
                     }}
                     className="text-destructive focus:text-destructive"

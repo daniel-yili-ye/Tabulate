@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { FormData } from "@/features/bill-creation/schemas/formSchema";
+import { FormData } from "@/lib/validation/formSchema";
 
 export const useParticipantManager = () => {
   const { control, getValues, setValue } = useFormContext<FormData>();
@@ -20,16 +20,13 @@ export const useParticipantManager = () => {
   };
 
   const deleteParticipant = (index: number) => {
-    // Get the participant ID that's being removed
     const participantToRemove = participantFields[index];
     if (!participantToRemove) return;
 
     const idToRemove = participantToRemove.id;
 
-    // Remove the participant from stepParticipants
     removeParticipant(index);
 
-    // Update stepAllocateItems to remove the participant from all allocations
     const currentAllocations = getValues("stepAllocateItems");
     const updatedAllocations = currentAllocations.map((allocation) =>
       allocation.filter((participantId: string) => participantId !== idToRemove)

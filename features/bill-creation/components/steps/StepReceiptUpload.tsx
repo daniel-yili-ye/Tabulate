@@ -8,8 +8,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { FormData } from "@/features/bill-creation/schemas/formSchema";
-import { ACCEPTED_IMAGE_TYPES } from "@/features/bill-creation/schemas/formSchema";
+import type { FormData } from "@/lib/validation/formSchema";
+import { ACCEPTED_IMAGE_TYPES } from "@/lib/validation/formSchema";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 

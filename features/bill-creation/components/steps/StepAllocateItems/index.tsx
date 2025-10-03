@@ -6,7 +6,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { FormData } from "@/features/bill-creation/schemas/formSchema";
+import { FormData } from "@/lib/validation/formSchema";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";

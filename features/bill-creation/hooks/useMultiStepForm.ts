@@ -2,10 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
-import {
-  formSchema,
-  FormData,
-} from "@/features/bill-creation/schemas/formSchema";
+import { formSchema, FormData } from "@/lib/validation/formSchema";
 
 const defaultValues: FormData = {
   stepReceiptUpload: { receiptImageURL: undefined, image: undefined },
@@ -61,7 +58,6 @@ export const useMultiStepForm = () => {
     
     if (isValid) {
       if (currentStep === totalSteps - 1) {
-        // Submit form
         const formData = form.getValues();
         console.log(formData);
         setIsSubmitted(true);
@@ -87,22 +83,18 @@ export const useMultiStepForm = () => {
   };
 
   return {
-    // Form state
     form,
     currentStep,
     isSubmitted,
     isReceiptProcessing,
     
-    // Form data
     formData: form.getValues(),
     
-    // Actions
     handleNext,
     handlePrevious,
     handleReceiptProcessingStateChange,
     reset,
     
-    // Computed properties
     isFirstStep: currentStep === 0,
     isLastStep: currentStep === totalSteps - 1,
     canGoBack: currentStep > 0,

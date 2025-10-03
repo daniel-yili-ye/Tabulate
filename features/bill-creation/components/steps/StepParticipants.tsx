@@ -1,53 +1,29 @@
 // components/StepParticipants.tsx
-import { v4 as uuidv4 } from "uuid";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FormData } from "@/features/bill-creation/schemas/formSchema";
+import { FormData } from "@/lib/validation/formSchema";
 import { PlusIcon, TrashIcon } from "@radix-ui/react-icons";
+import { useParticipantManager } from "../../hooks/useParticipantManager";
 
 export default function StepParticipants() {
-  const { control, getValues, setValue } = useFormContext<FormData>();
-
+  const { control } = useFormContext<FormData>();
   const {
-    fields: fieldsNames,
-    append: appendNames,
-    remove: removeNames,
-  } = useFieldArray({
-    control: control,
-    name: "stepParticipants",
-    keyName: "key",
-  });
-
-  const handleAdd = () => {
-    appendNames({ id: uuidv4(), name: "" });
-  };
-
-  const handleRemove = (index: number) => {
-    // uuid of participant to remove
-    const idToRemove = fieldsNames[index].id; // Ensure to use .id
-
-    // Remove the participant from stepParticipants
-    removeNames(index);
-
-    // Update stepAllocateItems to remove the participant from all allocations
-    const currentstepAllocateItems = getValues("stepAllocateItems");
-    const updatedstepAllocateItems = currentstepAllocateItems.map((arr) =>
-      arr.filter((id: string) => id !== idToRemove)
-    );
-    setValue("stepAllocateItems", updatedstepAllocateItems);
-  };
+    participantFields,
+    addParticipant,
+    deleteParticipant,
+    canRemoveParticipant,
+  } = useParticipantManager();
 
   return (
     <div>
-      {fieldsNames.map((field, index) => (
+      {participantFields.map((field, index) => (
         <div key={field.id} className="flex space-x-4 mb-2">
           <FormField
             control={control}
@@ -63,9 +39,9 @@ export default function StepParticipants() {
           />
           <Button
             type="button"
-            onClick={() => handleRemove(index)}
+            onClick={() => deleteParticipant(index)}
             variant="destructive"
-            disabled={fieldsNames.length <= 2}
+            disabled={!canRemoveParticipant}
           >
             <TrashIcon />
           </Button>
@@ -76,7 +52,7 @@ export default function StepParticipants() {
         variant="outline"
         size="sm"
         className="mt-2"
-        onClick={() => handleAdd()}
+        onClick={addParticipant}
       >
         <PlusIcon />
         &nbsp;Add Participant

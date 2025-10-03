@@ -49,7 +49,6 @@ export const wizard2Schema = z
         })
       )
       .transform((items) => {
-        // If the array is empty, return the default items
         if (items.length === 0) {
           return [{ item: "", price: 0 }];
         }

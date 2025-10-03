@@ -17,12 +17,12 @@ import {
   TableRow,
   TableFooter,
 } from "@/components/ui/table";
-import { FormData } from "@/features/bill-creation/schemas/formSchema";
-import { splitBill } from "@/features/bill-splitting/utils/billSplitter";
+import { FormData } from "@/lib/validation/formSchema";
+import { splitBill } from "@/lib/billing/billSplitter";
 import {
   BillAllocation,
   PersonAllocation,
-} from "@/features/bill-splitting/schemas/allocationSchema";
+} from "@/lib/validation/allocationSchema";
 import { Loader2, Eye } from "lucide-react";
 import {
   Dialog,
@@ -36,7 +36,7 @@ import ViewReceipt from "@/features/bill-creation/components/ViewReceipt";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import ShareModal from "@/features/bill-sharing/components/ShareModal";
-import { uploadReceiptImage } from "@/services/storage/supabase";
+import { uploadReceiptImage } from "@/lib/supabase/client";
 
 // Define expected success response from /api/tab POST
 interface SaveBillSuccessResponse {

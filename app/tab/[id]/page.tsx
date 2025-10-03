@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import Summary from "@/features/bill-splitting/components/Summary";
 import BillSkeleton from "@/features/bill-splitting/components/BillSkeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { FormData } from "@/features/bill-creation/schemas/formSchema";
+import { FormData } from "@/lib/validation/formSchema";
 
 interface BillApiResponse {
   success: boolean;

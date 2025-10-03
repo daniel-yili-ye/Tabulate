@@ -1,31 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveBillData, getBillData } from "@/services/storage/supabase";
-import { formSchema } from "@/features/bill-creation/schemas/formSchema";
+import { saveBillData, getBillData } from "@/lib/supabase/server";
+import { formSchema } from "@/lib/validation/formSchema";
 import { z } from "zod";
-// Import the allocation schema
-import { billAllocationSchema } from "@/features/bill-splitting/schemas/allocationSchema";
+import { billAllocationSchema } from "@/lib/validation/allocationSchema";
 
-// Define the schema for the entire request body
 const billApiRequestBodySchema = z.object({
   form_data: formSchema,
   allocation: billAllocationSchema,
 });
 
-// POST /api/tab - Create a new tab
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-
-    // Validate the whole body against the schema
     const validationResult = billApiRequestBodySchema.safeParse(body);
 
     if (!validationResult.success) {
-      // If validation fails, return a 400 error with details
       return NextResponse.json(
         {
           success: false,
           error: "Invalid request body",
-          details: validationResult.error.flatten(), // Provides detailed errors
+          details: validationResult.error.flatten(),
         },
         { status: 400 }
       );
@@ -47,7 +41,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/tabs?id=123 - Get a tab by ID
 export async function GET(request: NextRequest) {
   try {
     const id = request.nextUrl.searchParams.get("id");
