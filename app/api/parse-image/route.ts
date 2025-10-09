@@ -2,10 +2,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 import { wizard2Schema } from "@/lib/validation/formSchema";
 
+// Use Edge Runtime for better performance (still 10s limit on free plan)
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
+  model: "gemini-2.0-flash-exp",
 });
 
 const prompt = `Parse the following receipt into a structured JSON format. 
@@ -13,15 +17,14 @@ const prompt = `Parse the following receipt into a structured JSON format.
 I need you to extract:
 - Business name
 - Date of transaction
-- Total amount
+- Discount amount (if present)
 - Tax amount (if present)
 - Tip amount (if present)
-- Discount amount (if present)
 - All individual items purchased with their prices
+- Total amount
 
 Format the extracted information in this exact JSON schema:
 {
-  "total": number,
   "businessName": string,
   "date": string,
   "Items": [
@@ -32,7 +35,8 @@ Format the extracted information in this exact JSON schema:
   ],
   "discount": number (or null if not present),
   "tax": number (or null if not present),
-  "tip": number (or null if not present)
+  "tip": number (or null if not present),
+  "total": number
 }
 
 A few important notes:
@@ -68,9 +72,15 @@ export async function POST(request: NextRequest) {
       { text: prompt },
     ];
 
+    console.log("Starting Gemini API call...");
+    const startTime = Date.now();
+    
     const result = await model.generateContent({
       contents: [{ role: "user", parts }],
     });
+    
+    const endTime = Date.now();
+    console.log(`Gemini API call completed in ${endTime - startTime}ms`);
 
     const response = result.response;
     const text = response.text();
