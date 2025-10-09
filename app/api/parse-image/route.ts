@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
-import { wizard2Schema } from "@/schema/formSchema";
+import { wizard2Schema } from "@/lib/validation/formSchema";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash",
 });
 
 const prompt = `Parse the following receipt into a structured JSON format. 
@@ -27,12 +27,12 @@ Format the extracted information in this exact JSON schema:
   "Items": [
     {
       "item": string,
-      "price": number (or undefined if not available)
+      "price": number (or null if not available)
     }
   ],
-  "tax": number (or undefined if not present),
-  "tip": number (or undefined if not present),
-  "discount": number (or undefined if not present)
+  "discount": number (or null if not present),
+  "tax": number (or null if not present),
+  "tip": number (or null if not present)
 }
 
 A few important notes:
@@ -56,10 +56,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert the file to a byte array
     const imageBytes = await imageFile.arrayBuffer();
 
-    // Create a parts array with the image and prompt
     const parts = [
       {
         inlineData: {
@@ -70,7 +68,6 @@ export async function POST(request: NextRequest) {
       { text: prompt },
     ];
 
-    // Generate content with the image and prompt
     const result = await model.generateContent({
       contents: [{ role: "user", parts }],
     });
@@ -80,27 +77,21 @@ export async function POST(request: NextRequest) {
     console.log(text);
 
     try {
-      // Extract JSON from markdown code blocks if present
       let jsonText = text;
 
-      // Check if the response is wrapped in markdown code blocks
       const jsonRegex = /```(?:json)?\s*([\s\S]*?)```/;
       const match = text.match(jsonRegex);
 
       if (match && match[1]) {
-        // Extract just the JSON part
         jsonText = match[1].trim();
       }
 
-      // Try to parse the response as JSON
       const parsedData = JSON.parse(jsonText);
 
-      // Check if there's an error field in the response
       if (parsedData.error) {
         return NextResponse.json({ error: parsedData.error }, { status: 400 });
       }
 
-      // Validate the structure of the parsed data against the schema
       const validationResult = wizard2Schema.safeParse(parsedData);
 
       if (!validationResult.success) {
@@ -114,11 +105,10 @@ export async function POST(request: NextRequest) {
               "AI failed to return data in the expected format. Please try again.",
             details: validationResult.error.flatten(),
           },
-          { status: 500 } // Internal server error because the AI response format is wrong
+          { status: 500 }
         );
       }
 
-      // Return the validated (and potentially transformed) data
       return NextResponse.json(validationResult.data);
     } catch (parseError) {
       console.error("Error parsing JSON response:", parseError, text);

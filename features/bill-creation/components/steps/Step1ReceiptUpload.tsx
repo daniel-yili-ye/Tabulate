@@ -1,12 +1,15 @@
-// components/StepReceiptUpload.tsx
-import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
-import { FormField, FormItem, FormControl, FormMessage } from "../ui/form";
-import { Input } from "../ui/input";
-import type { FormData } from "../../schema/formSchema";
-import { ACCEPTED_IMAGE_TYPES } from "../../schema/formSchema";
+import {
+  FormField,
+  FormItem,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import type { FormData } from "@/lib/validation/formSchema";
+import { ACCEPTED_IMAGE_TYPES } from "@/lib/validation/formSchema";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
