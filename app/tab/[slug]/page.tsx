@@ -13,12 +13,12 @@ interface BillApiResponse {
   error?: string;
 }
 
-async function fetchBillData(billId: string): Promise<{ form_data: FormData }> {
-  const response = await fetch(`/api/tab?id=${billId}`);
+async function fetchTabData(tabSlug: string): Promise<{ form_data: FormData }> {
+  const response = await fetch(`/api/tab?slug=${tabSlug}`);
   const data: BillApiResponse = await response.json();
 
   if (!response.ok || !data.success || !data.data) {
-    throw new Error(data.error || "Failed to load bill data");
+    throw new Error(data.error || "Failed to load tab data");
   }
 
   return data.data;
@@ -26,16 +26,16 @@ async function fetchBillData(billId: string): Promise<{ form_data: FormData }> {
 
 export default function BillPage() {
   const params = useParams();
-  const billId = params.id as string;
+  const tabSlug = params.slug as string;
 
   const {
-    data: billData,
+    data: tabData,
     error,
     isLoading,
   } = useQuery<{ form_data: FormData }, Error>({
-    queryKey: ["bill", billId],
-    queryFn: () => fetchBillData(billId),
-    enabled: !!billId,
+    queryKey: ["tab", tabSlug],
+    queryFn: () => fetchTabData(tabSlug),
+    enabled: !!tabSlug,
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });
@@ -44,18 +44,18 @@ export default function BillPage() {
     return <BillSkeleton />;
   }
 
-  if (error || !billData?.form_data) {
+  if (error || !tabData?.form_data) {
     return (
       <Card>
         <CardContent className="pt-6">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-destructive">Error</h2>
-            <p className="mt-2">{error?.message || "Bill data not found"}</p>
+            <p className="mt-2">{error?.message || "Tab data not found"}</p>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  return <Summary formData={billData.form_data} billId={billId} />;
+  return <Summary formData={tabData.form_data} tabId={tabSlug} />;
 }

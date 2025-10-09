@@ -6,14 +6,15 @@ export const supabaseServer = createClient(
   serverEnv.SUPABASE_SERVICE_ROLE_KEY || clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export async function saveBillData(billData: any) {
-  const { data, error } = await supabaseServer.from("bills").insert([billData]).select("id");
+export async function saveTabData(tabData: any, slug: string) {
+  const { data, error } = await supabaseServer.from("tabs").insert([{...tabData, slug}]).select("id");
   if (error) throw error;
   return data?.[0]?.id as string | undefined;
 }
 
-export async function getBillData(id: string) {
-  const { data, error } = await supabaseServer.from("bills").select("*").eq("id", id).single();
+export async function getTabData(slug: string) {
+  const { data, error } = await supabaseServer.from("tabs").select("*").eq("slug", slug).single();
+  console.log("data", data);
   if (error) throw error;
   return data;
 }

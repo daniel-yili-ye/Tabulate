@@ -4,14 +4,14 @@ import { BillAllocation } from "@/lib/validation/allocationSchema";
 interface BillItem {
   item: string;
   price: number;
-  participantIds: string[];
+  participantIds: number[];
 }
 
 function proportionallyAllocate(
   valueToAllocate: number,
-  personIdToSubtotal: Record<string, number>,
-  participantIds: string[]
-): [number, string][] {
+  personIdToSubtotal: Record<number, number>,
+  participantIds: number[]
+): [number, number][] {
   const total = Object.values(personIdToSubtotal).reduce((a, b) => a + b, 0);
 
   if (total === 0) {
@@ -21,7 +21,7 @@ function proportionallyAllocate(
 
   return participantIds.map((id) => {
     const share = (valueToAllocate * personIdToSubtotal[id]) / total;
-    return [share, id] as [number, string];
+    return [share, id] as [number, number];
   });
 }
 
@@ -35,8 +35,8 @@ export function splitBill(formData: FormData): BillAllocation {
   }));
 
   const people = stepParticipants.map((p) => ({ id: p.id, name: p.name }));
-  const personIdToIndex: Record<string, number> = {};
-  const personIdToSubtotal: Record<string, number> = {};
+  const personIdToIndex: Record<number, number> = {};
+  const personIdToSubtotal: Record<number, number> = {};
 
   people.forEach(({ id }, index) => {
     personIdToIndex[id] = index;
@@ -45,7 +45,7 @@ export function splitBill(formData: FormData): BillAllocation {
 
   const allocation: BillAllocation = {
     people: people.map(({ id, name }) => ({
-      id,
+      id: id,
       name,
       items: [],
       subtotal: 0,

@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
-import StepReceiptUpload from "../components/steps/StepReceiptUpload";
-import StepItems from "../components/steps/StepItems";
-import StepParticipants from "../components/steps/StepParticipants";
-import StepAllocateItems from "../components/steps/StepAllocateItems";
+import StepReceiptUpload from "../components/steps/Step1ReceiptUpload";
+import StepItems from "../components/steps/Step2Items";
+import StepParticipants from "../components/steps/Step3Participants";
+import StepAllocateItems from "../components/steps/Step4AllocateItems";
 import ViewReceipt from "../components/ViewReceipt";
 
 export interface StepConfig {

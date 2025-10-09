@@ -8,7 +8,7 @@ const allocatedItemSchema = z.object({
 });
 
 export const personAllocationSchema = z.object({
-  id: z.string().uuid(),
+  id: z.number().int().positive(),
   name: z.string(),
   items: z.array(allocatedItemSchema),
   subtotal: z.number(),

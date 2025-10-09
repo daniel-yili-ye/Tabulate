@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { v4 as uuidv4 } from "uuid";
 import { formSchema, FormData } from "@/lib/validation/formSchema";
 
 const defaultValues: FormData = {
@@ -19,11 +18,11 @@ const defaultValues: FormData = {
   stepParticipants: [
     {
       name: "",
-      id: uuidv4(),
+      id: 1,
     },
     {
       name: "",
-      id: uuidv4(),
+      id: 2,
     },
   ],
   stepAllocateItems: [],
@@ -62,7 +61,7 @@ export const useMultiStepForm = () => {
         console.log(formData);
         setIsSubmitted(true);
       } else {
-        setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1));
+        setCurrentStep((prev) => prev + 1);
       }
     }
   };

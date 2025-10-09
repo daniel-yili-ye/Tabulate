@@ -25,7 +25,12 @@ export function MultiStepFormNavigation({
     }
 
     return (
-      <Button type="button" onClick={onPrevious} disabled={!canGoBack}>
+      <Button
+        type="button"
+        onClick={onPrevious}
+        variant="outline"
+        disabled={!canGoBack}
+      >
         <ChevronLeftIcon /> Previous
       </Button>
     );
@@ -42,24 +47,20 @@ export function MultiStepFormNavigation({
 
     if (isFirstStep && isReceiptProcessing) {
       return (
-        <Button type="button" onClick={onNext} disabled>
+        <Button type="button" onClick={onNext} variant="ghost" disabled>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Processing...
         </Button>
       );
     }
 
-    return (
+    return isFirstStep ? (
+      <Button type="button" variant="ghost" onClick={onNext}>
+        Skip <ChevronRightIcon />
+      </Button>
+    ) : (
       <Button type="button" onClick={onNext}>
-        {isFirstStep ? (
-          <>
-            Skip <ChevronRightIcon />
-          </>
-        ) : (
-          <>
-            Next <ChevronRightIcon />
-          </>
-        )}
+        Next <ChevronRightIcon />
       </Button>
     );
   };

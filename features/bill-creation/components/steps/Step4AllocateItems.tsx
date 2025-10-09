@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export default function StepAllocateItems() {
-  const { control, watch, setValue } = useFormContext<FormData>();
+  const { control, watch } = useFormContext<FormData>();
 
   const Items = watch("stepItems.Items");
   const participants = watch("stepParticipants");

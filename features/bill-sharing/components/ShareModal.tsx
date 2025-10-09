@@ -29,7 +29,6 @@ export default function ShareModal({
   isOpen,
   setIsOpen,
   isSaving,
-  setIsSaving,
 }: ShareModalProps) {
   const [canNativeShare, setCanNativeShare] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -77,9 +76,9 @@ export default function ShareModal({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share this bill split</DialogTitle>
+          <DialogTitle>Share this tab</DialogTitle>
           <DialogDescription>
-            Anyone with the link can view this bill split
+            Anyone with the link can view this tab
           </DialogDescription>
         </DialogHeader>
 

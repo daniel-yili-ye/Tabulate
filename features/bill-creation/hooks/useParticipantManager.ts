@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { FormData } from "@/lib/validation/formSchema";
 
@@ -16,7 +15,7 @@ export const useParticipantManager = () => {
   });
 
   const addParticipant = () => {
-    appendParticipant({ id: uuidv4(), name: "" });
+    appendParticipant({ id: participantFields.length + 1, name: "" });
   };
 
   const deleteParticipant = (index: number) => {
@@ -29,7 +28,7 @@ export const useParticipantManager = () => {
 
     const currentAllocations = getValues("stepAllocateItems");
     const updatedAllocations = currentAllocations.map((allocation) =>
-      allocation.filter((participantId: string) => participantId !== idToRemove)
+      allocation.filter((participantId: number) => participantId !== idToRemove)
     );
     
     setValue("stepAllocateItems", updatedAllocations);

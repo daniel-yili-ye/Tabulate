@@ -71,7 +71,7 @@ export const wizard2Schema = z
 const wizard3Schema = z
   .array(
     z.object({
-      id: z.string().uuid("Invalid UUID"),
+      id: z.number().int().positive(),
       name: z.string().min(1, "Participant name is required"),
     })
   )
@@ -79,7 +79,7 @@ const wizard3Schema = z
 
 const wizard4Schema = z.array(
   z
-    .array(z.string().uuid("Invalid UUID"))
+    .array(z.number().int().positive())
     .min(1, "At least 1 participant must be selected")
 );
 

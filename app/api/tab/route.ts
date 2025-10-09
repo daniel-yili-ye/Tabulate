@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveBillData, getBillData } from "@/lib/supabase/server";
+import { saveTabData, getTabData } from "@/lib/supabase/server";
 import { formSchema } from "@/lib/validation/formSchema";
 import { z } from "zod";
 import { billAllocationSchema } from "@/lib/validation/allocationSchema";
+import { nanoid } from 'nanoid';  
 
 const billApiRequestBodySchema = z.object({
   form_data: formSchema,
@@ -24,13 +25,14 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const billId = await saveBillData(validationResult.data);
+    
+    const slug = nanoid(8);
+    const tabId = await saveTabData(validationResult.data, slug);
 
     return NextResponse.json({
       success: true,
-      billId,
-      shareUrl: `${request.nextUrl.origin}/tab/${billId}`,
+      tabId,
+      shareUrl: `${request.nextUrl.origin}/tab/${slug}`,
     });
   } catch (error) {
     console.error("Error creating bill:", error);
@@ -43,29 +45,29 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const id = request.nextUrl.searchParams.get("id");
+    const slug = request.nextUrl.searchParams.get("slug");
 
-    if (!id) {
+    if (!slug) {
       return NextResponse.json(
-        { success: false, error: "Bill ID is required" },
+        { success: false, error: "Tab ID is required" },
         { status: 400 }
       );
     }
 
-    const billData = await getBillData(id);
+    const tabData = await getTabData(slug);
 
-    if (!billData) {
+    if (!tabData) {
       return NextResponse.json(
-        { success: false, error: "Bill not found" },
+        { success: false, error: "Tab not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: billData });
+    return NextResponse.json({ success: true, data: tabData });
   } catch (error) {
-    console.error("Error fetching bill:", error);
+    console.error("Error fetching tab:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch bill" },
+      { success: false, error: "Failed to fetch tab" },
       { status: 500 }
     );
   }
