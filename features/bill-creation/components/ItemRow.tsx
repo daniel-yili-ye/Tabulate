@@ -76,7 +76,7 @@ export default function ItemRow({
           </FormItem>
         )}
       />
-      <DropdownMenu modal={false}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" type="button">
             <MoreHorizontal className="h-4 w-4" />
