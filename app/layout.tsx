@@ -4,6 +4,8 @@ import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/components/lib/utils";
 import QueryProvider from "@/components/providers/QueryProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -69,18 +71,30 @@ export default function RootLayout({
         )}
         suppressHydrationWarning={true}
       >
-        <QueryProvider>
-          <main className="container">
-            <header className="py-4 sticky top-0 z-50 w-full bg-background m-auto md:max-w-xl">
-              <a href="/" className="hover:opacity-80 transition-opacity">
-                <h1 className="text-2xl font-bold">Tabulate</h1>
-              </a>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            <header className="py-4 sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <div className="container">
+                <div className="flex items-center justify-between m-auto md:max-w-xl">
+                  <a href="/" className="hover:opacity-80 transition-opacity">
+                    <h1 className="text-2xl font-bold">Tabulate</h1>
+                  </a>
+                  <ThemeToggle />
+                </div>
+              </div>
             </header>
-            <div className="py-4 m-auto md:max-w-xl">{children}</div>
-          </main>
-        </QueryProvider>
-        <Toaster richColors />
-        <Analytics />
+            <main className="container">
+              <div className="pt-4 pb-12 m-auto md:max-w-xl">{children}</div>
+            </main>
+          </QueryProvider>
+          <Toaster richColors />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );
