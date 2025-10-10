@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { FormData } from "@/lib/validation/formSchema";
-import { PlusIcon } from "@radix-ui/react-icons";
 import { CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/components/lib/utils";
@@ -263,32 +262,40 @@ export default function StepItems() {
       </div>
 
       {/* Summary */}
-      <div className="space-y-3 bg-gray-50 rounded-lg p-4">
-        <h3 className="font-semibold text-gray-900">Summary</h3>
+      <div className="space-y-3 bg-muted/50 rounded-lg p-4 border">
+        <h3 className="font-semibold text-foreground">Summary</h3>
         <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
+          <div className="flex justify-between text-muted-foreground">
             <span>Subtotal:</span>
-            <span>${formatCurrency(calculations.subtotal)}</span>
+            <span className="text-foreground font-medium">
+              ${formatCurrency(calculations.subtotal)}
+            </span>
           </div>
 
           {calculations.discount > 0 && (
-            <div className="flex justify-between text-green-600">
+            <div className="flex justify-between text-green-600 dark:text-green-500">
               <span>Discount:</span>
-              <span>-${formatCurrency(calculations.discount)}</span>
+              <span className="font-medium">
+                -${formatCurrency(calculations.discount)}
+              </span>
             </div>
           )}
 
           {calculations.tax > 0 && (
-            <div className="flex justify-between">
+            <div className="flex justify-between text-muted-foreground">
               <span>Tax:</span>
-              <span>${formatCurrency(calculations.tax)}</span>
+              <span className="text-foreground font-medium">
+                ${formatCurrency(calculations.tax)}
+              </span>
             </div>
           )}
 
           {calculations.tip > 0 && (
-            <div className="flex justify-between">
+            <div className="flex justify-between text-muted-foreground">
               <span>Tip:</span>
-              <span>${formatCurrency(calculations.tip)}</span>
+              <span className="text-foreground font-medium">
+                ${formatCurrency(calculations.tip)}
+              </span>
             </div>
           )}
 
