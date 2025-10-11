@@ -4,6 +4,8 @@ import { wizard2Schema } from "@/lib/validation/formSchema";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+export const runtime = 'edge';
+
 // Define the response schema for structured output
 const receiptSchema = {
   type: SchemaType.OBJECT as const,
