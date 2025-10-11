@@ -1,52 +1,86 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 import { wizard2Schema } from "@/lib/validation/formSchema";
 
-// Use Edge Runtime for better performance (still 10s limit on free plan)
-export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
-
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+// Define the response schema for structured output
+const receiptSchema = {
+  type: SchemaType.OBJECT as const,
+  properties: {
+    businessName: {
+      type: SchemaType.STRING as const,
+      description: "The name of the business on the receipt",
+      nullable: false,
+    },
+    date: {
+      type: SchemaType.STRING as const,
+      description: "Transaction date in ISO format (YYYY-MM-DD)",
+      nullable: false,
+    },
+    Items: {
+      type: SchemaType.ARRAY as const,
+      description: "List of all items purchased",
+      items: {
+        type: SchemaType.OBJECT as const,
+        properties: {
+          item: {
+            type: SchemaType.STRING as const,
+            description: "Item name or description",
+            nullable: false,
+          },
+          price: {
+            type: SchemaType.NUMBER as const,
+            description: "Item price",
+            nullable: true,
+          },
+        },
+        required: ["item"],
+      },
+    },
+    discount: {
+      type: SchemaType.NUMBER as const,
+      description: "Discount amount if present",
+      nullable: true,
+    },
+    tax: {
+      type: SchemaType.NUMBER as const,
+      description: "Tax amount if present",
+      nullable: true,
+    },
+    tip: {
+      type: SchemaType.NUMBER as const,
+      description: "Tip amount if present",
+      nullable: true,
+    },
+  },
+  required: ["businessName", "date", "Items"],
+};
+
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash-exp",
+  model: "gemini-2.5-flash",
+  generationConfig: {
+    responseMimeType: "application/json",
+    responseSchema: receiptSchema,
+  },
 });
 
-const prompt = `Parse the following receipt into a structured JSON format. 
+const prompt = `Parse this receipt image and extract the following information:
 
-I need you to extract:
-- Business name
-- Date of transaction
-- Discount amount (if present)
-- Tax amount (if present)
-- Tip amount (if present)
-- All individual items purchased with their prices
-- Total amount
+1. Business name - the name of the store or restaurant
+2. Date - the transaction date in YYYY-MM-DD format
+3. Items - all line items with their names and prices
+4. Discount - any discount amount applied (if present)
+5. Tax - tax amount (if present)
+6. Tip - tip amount (if present)
 
-Format the extracted information in this exact JSON schema:
-{
-  "businessName": string,
-  "date": string,
-  "Items": [
-    {
-      "item": string,
-      "price": number (or null if not available)
-    }
-  ],
-  "discount": number (or null if not present),
-  "tax": number (or null if not present),
-  "tip": number (or null if not present),
-  "total": number
-}
-
-A few important notes:
-1. Make sure each field matches the exact format specified
-2. For the "Items" array, include all line items listed on the receipt
-3. Return only the valid JSON object, no additional explanation
-4. Ensure all number values are parsed as actual numbers, not strings
-5. Format the date in a standard ISO format (YYYY-MM-DD)
-6. If you cannot read the receipt clearly or extract the required information, respond with a JSON object containing an "error" field with a descriptive message.
-7. If the image doesn't appear to be a receipt, respond with a JSON object containing an "error" field with the message "The uploaded image does not appear to be a receipt."`;
+Important guidelines:
+- Extract all visible line items from the receipt
+- Ensure prices are accurate numbers (not strings)
+- If an item price is unclear, use null
+- For the date, convert any format to YYYY-MM-DD
+- Only include discount, tax, and tip if they are explicitly shown on the receipt
+- If the image is not a receipt or is unreadable, include an "error" field with a descriptive message`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,24 +118,18 @@ export async function POST(request: NextRequest) {
 
     const response = result.response;
     const text = response.text();
-    console.log(text);
+    console.log("Structured output response:", text);
 
     try {
-      let jsonText = text;
+      // Structured output guarantees valid JSON, no need to strip markdown
+      const parsedData = JSON.parse(text);
 
-      const jsonRegex = /```(?:json)?\s*([\s\S]*?)```/;
-      const match = text.match(jsonRegex);
-
-      if (match && match[1]) {
-        jsonText = match[1].trim();
-      }
-
-      const parsedData = JSON.parse(jsonText);
-
+      // Check if the model returned an error field
       if (parsedData.error) {
         return NextResponse.json({ error: parsedData.error }, { status: 400 });
       }
 
+      // Validate against our Zod schema
       const validationResult = wizard2Schema.safeParse(parsedData);
 
       if (!validationResult.success) {

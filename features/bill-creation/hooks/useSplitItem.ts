@@ -4,7 +4,7 @@ import { FormData } from "@/lib/validation/formSchema";
 
 export function useSplitItem() {
   const { getValues, setValue } = useFormContext<FormData>();
-  const [splitDialogOpen, setSplitDialogOpen] = useState(false);
+  const [splitDrawerOpen, setSplitDrawerOpen] = useState(false);
   const [currentSplitItem, setCurrentSplitItem] = useState<{ index: number; item: string; price: number } | null>(null);
   const [splitCount, setSplitCount] = useState<number>(2);
 
@@ -12,7 +12,7 @@ export function useSplitItem() {
     const currentItems = getValues("stepItems.Items");
     const itemToSplit = currentItems[index];
     setCurrentSplitItem({ index, item: itemToSplit?.item || "", price: Number(itemToSplit?.price) || 0 });
-    setSplitDialogOpen(true);
+    setSplitDrawerOpen(true);
   };
 
   const confirmSplit = () => {
@@ -47,17 +47,17 @@ export function useSplitItem() {
 
     setValue("stepAllocateItems", newAllocations);
 
-    setSplitDialogOpen(false);
+    setSplitDrawerOpen(false);
     setCurrentSplitItem(null);
     setSplitCount(2);
   };
 
   return {
-    splitDialogOpen,
+    splitDrawerOpen,
     currentSplitItem,
     splitCount,
     setSplitCount,
-    setSplitDialogOpen,
+    setSplitDrawerOpen,
     openSplitForIndex,
     confirmSplit,
   };

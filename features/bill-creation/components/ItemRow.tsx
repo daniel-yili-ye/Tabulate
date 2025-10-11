@@ -6,6 +6,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,13 +15,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Split, Trash2 } from "lucide-react";
+import { Copy, MoreHorizontal, Split, Trash2 } from "lucide-react";
 import { FormData } from "@/lib/validation/formSchema";
 
 interface ItemRowProps {
   index: number;
   canDelete: boolean;
   onSplit: () => void;
+  onDuplicate: () => void;
   onRemove: () => void;
 }
 
@@ -28,6 +30,7 @@ export default function ItemRow({
   index,
   canDelete,
   onSplit,
+  onDuplicate,
   onRemove,
 }: ItemRowProps) {
   const { control } = useFormContext<FormData>();
@@ -50,27 +53,14 @@ export default function ItemRow({
         control={control}
         name={`stepItems.Items.${index}.price`}
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="w-40">
             <FormControl>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  $
-                </span>
-                <Input
-                  className="pl-8"
-                  placeholder="0.00"
-                  type="number"
-                  inputMode="decimal"
-                  pattern="[0-9]*"
-                  {...field}
-                  value={field.value === 0 ? "" : field.value}
-                  onChange={(e) => {
-                    const value =
-                      e.target.value === "" ? 0 : Number(e.target.value);
-                    field.onChange(value);
-                  }}
-                />
-              </div>
+              <CurrencyInput
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                name={field.name}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -86,6 +76,10 @@ export default function ItemRow({
           <DropdownMenuItem onClick={onSplit}>
             <Split className="h-4 w-4 mr-2" />
             Split Item
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onDuplicate}>
+            <Copy className="h-4 w-4 mr-2" />
+            Duplicate Item
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
