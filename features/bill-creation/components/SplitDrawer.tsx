@@ -16,7 +16,7 @@ interface CurrentSplitItem {
   price: number;
 }
 
-interface SplitDialogProps {
+interface SplitDrawerProps {
   open: boolean;
   splitCount: number;
   currentSplitItem: CurrentSplitItem | null;
@@ -25,14 +25,14 @@ interface SplitDialogProps {
   onConfirm: () => void;
 }
 
-export default function SplitDialog({
+export default function SplitDrawer({
   open,
   splitCount,
   currentSplitItem,
   onSplitCountChange,
   onClose,
   onConfirm,
-}: SplitDialogProps) {
+}: SplitDrawerProps) {
   return (
     <Drawer open={open} onOpenChange={(state) => !state && onClose()}>
       <DrawerContent>

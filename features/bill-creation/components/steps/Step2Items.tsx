@@ -8,6 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -21,8 +22,10 @@ import { CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/components/lib/utils";
 import ItemRow from "../ItemRow";
-import SplitDialog from "../SplitDialog";
+import SplitDrawer from "../SplitDrawer";
+import DuplicateDrawer from "../DuplicateDrawer";
 import { useSplitItem } from "../../hooks/useSplitItem";
+import { useDuplicateItem } from "../../hooks/useDuplicateItem";
 
 export default function StepItems() {
   const { control, watch } = useFormContext<FormData>();
@@ -49,14 +52,24 @@ export default function StepItems() {
   };
 
   const {
-    splitDialogOpen,
+    splitDrawerOpen,
     currentSplitItem,
     splitCount,
     setSplitCount,
-    setSplitDialogOpen,
+    setSplitDrawerOpen,
     openSplitForIndex,
     confirmSplit,
   } = useSplitItem();
+
+  const {
+    duplicateDrawerOpen,
+    currentDuplicateItem,
+    duplicateCount,
+    setDuplicateCount,
+    setDuplicateDrawerOpen,
+    openDuplicateForIndex,
+    confirmDuplicate,
+  } = useDuplicateItem();
 
   // Watch ALL form values for real-time calculation
   const watchedValues = watch();
@@ -156,6 +169,7 @@ export default function StepItems() {
               index={index}
               canDelete={fieldsItems.length > 1}
               onSplit={() => openSplitForIndex(index)}
+              onDuplicate={() => openDuplicateForIndex(index)}
               onRemove={() => handleRemove(index)}
             />
           ))}
@@ -171,13 +185,22 @@ export default function StepItems() {
         </Button>
       </div>
 
-      <SplitDialog
-        open={splitDialogOpen}
+      <SplitDrawer
+        open={splitDrawerOpen}
         splitCount={splitCount}
         currentSplitItem={currentSplitItem}
         onSplitCountChange={setSplitCount}
-        onClose={() => setSplitDialogOpen(false)}
+        onClose={() => setSplitDrawerOpen(false)}
         onConfirm={confirmSplit}
+      />
+
+      <DuplicateDrawer
+        open={duplicateDrawerOpen}
+        duplicateCount={duplicateCount}
+        currentDuplicateItem={currentDuplicateItem}
+        onDuplicateCountChange={setDuplicateCount}
+        onClose={() => setDuplicateDrawerOpen(false)}
+        onConfirm={confirmDuplicate}
       />
 
       <div className="space-y-4">
@@ -186,23 +209,19 @@ export default function StepItems() {
           name="stepItems.discount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Discount</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    $
-                  </span>
-                  <Input
-                    className="pl-8"
-                    placeholder="0.00"
-                    type="number"
-                    inputMode="decimal"
-                    pattern="[0-9]*"
-                    {...field}
-                    value={field.value === 0 ? "" : field.value}
-                  />
-                </div>
-              </FormControl>
+              <div className="flex items-center justify-between gap-4">
+                <FormLabel className="min-w-20">Discount</FormLabel>
+                <FormControl>
+                  <div className="w-36">
+                    <CurrencyInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                    />
+                  </div>
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -212,23 +231,19 @@ export default function StepItems() {
           name="stepItems.tax"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tax</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    $
-                  </span>
-                  <Input
-                    className="pl-8"
-                    placeholder="0.00"
-                    type="number"
-                    inputMode="decimal"
-                    pattern="[0-9]*"
-                    {...field}
-                    value={field.value === 0 ? "" : field.value}
-                  />
-                </div>
-              </FormControl>
+              <div className="flex items-center justify-between gap-4">
+                <FormLabel className="min-w-20">Tax</FormLabel>
+                <FormControl>
+                  <div className="w-36">
+                    <CurrencyInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                    />
+                  </div>
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -238,23 +253,19 @@ export default function StepItems() {
           name="stepItems.tip"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tip</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    $
-                  </span>
-                  <Input
-                    className="pl-8"
-                    placeholder="0.00"
-                    type="number"
-                    inputMode="decimal"
-                    pattern="[0-9]*"
-                    {...field}
-                    value={field.value === 0 ? "" : field.value}
-                  />
-                </div>
-              </FormControl>
+              <div className="flex items-center justify-between gap-4">
+                <FormLabel className="min-w-20">Tip</FormLabel>
+                <FormControl>
+                  <div className="w-36">
+                    <CurrencyInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                    />
+                  </div>
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}

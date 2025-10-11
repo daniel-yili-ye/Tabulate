@@ -39,7 +39,7 @@ export function MultiStepFormNavigation({
   const renderNextButton = () => {
     if (isLastStep) {
       return (
-        <Button type="button" onClick={onNext}>
+        <Button key="submit" type="button" onClick={onNext}>
           Submit
         </Button>
       );
@@ -47,19 +47,29 @@ export function MultiStepFormNavigation({
 
     if (isFirstStep && isReceiptProcessing) {
       return (
-        <Button type="button" onClick={onNext} variant="ghost" disabled>
+        <Button
+          key="processing"
+          type="button"
+          onClick={onNext}
+          variant="ghost"
+          disabled
+        >
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Processing...
         </Button>
       );
     }
 
-    return isFirstStep ? (
-      <Button type="button" variant="ghost" onClick={onNext}>
-        Skip <ChevronRightIcon />
-      </Button>
-    ) : (
-      <Button type="button" onClick={onNext}>
+    if (isFirstStep) {
+      return (
+        <Button key="skip" type="button" variant="ghost" onClick={onNext}>
+          Skip <ChevronRightIcon />
+        </Button>
+      );
+    }
+
+    return (
+      <Button key="next" type="button" onClick={onNext}>
         Next <ChevronRightIcon />
       </Button>
     );
