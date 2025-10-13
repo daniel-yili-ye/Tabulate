@@ -43,7 +43,7 @@ export default function StepAllocateItems() {
                   >
                     <FormControl>
                       <Checkbox
-                        checked={field.value?.includes(participant.id)}
+                        checked={field.value?.includes(participant.id) ?? false}
                         onCheckedChange={(checked) => {
                           const updatedIds = checked
                             ? [...(field.value || []), participant.id]
