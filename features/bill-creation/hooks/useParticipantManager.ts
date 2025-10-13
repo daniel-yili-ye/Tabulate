@@ -34,11 +34,13 @@ export const useParticipantManager = () => {
     removeParticipant(index);
 
     const currentAllocations = getValues("stepAllocateItems");
-    const updatedAllocations = currentAllocations.map((allocation) =>
-      allocation.filter((participantId: number) => participantId !== idToRemove)
-    );
-    
-    setValue("stepAllocateItems", updatedAllocations);
+    if (currentAllocations && Array.isArray(currentAllocations)) {
+      const updatedAllocations = currentAllocations.map((allocation) =>
+        allocation ? allocation.filter((participantId: number) => participantId !== idToRemove) : []
+      );
+      
+      setValue("stepAllocateItems", updatedAllocations);
+    }
   };
 
   const setPartySize = (size: number) => {
@@ -68,13 +70,15 @@ export const useParticipantManager = () => {
       }
       
       // Update allocations to remove references to deleted participants
-      const updatedAllocations = currentAllocations.map((allocation) =>
-        allocation.filter(
-          (participantId: number) => !idsToRemove.includes(participantId)
-        )
-      );
-      
-      setValue("stepAllocateItems", updatedAllocations);
+      if (currentAllocations && Array.isArray(currentAllocations)) {
+        const updatedAllocations = currentAllocations.map((allocation) =>
+          allocation ? allocation.filter(
+            (participantId: number) => !idsToRemove.includes(participantId)
+          ) : []
+        );
+        
+        setValue("stepAllocateItems", updatedAllocations);
+      }
     }
   };
 

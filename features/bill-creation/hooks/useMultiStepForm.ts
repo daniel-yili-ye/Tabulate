@@ -25,7 +25,7 @@ const defaultValues: FormData = {
       id: 2,
     },
   ],
-  stepAllocateItems: [],
+  stepAllocateItems: [[]], // Initialize with one empty array to match the one default item
 };
 
 export const useMultiStepForm = () => {

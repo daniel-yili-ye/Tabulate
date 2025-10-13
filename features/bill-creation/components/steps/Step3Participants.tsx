@@ -32,14 +32,15 @@ export default function StepParticipants() {
     canRemoveParticipant,
   } = useParticipantManager();
 
-  const [selectedPartySize, setSelectedPartySize] = useState<string>("");
+  const [selectedPartySize, setSelectedPartySize] = useState<string>(
+    participantFields.length.toString()
+  );
 
-  // Initialize with current party size
   useEffect(() => {
-    if (participantFields.length > 0 && !selectedPartySize) {
+    if (participantFields.length > 0) {
       setSelectedPartySize(participantFields.length.toString());
     }
-  }, [participantFields.length, selectedPartySize]);
+  }, [participantFields.length]);
 
   const handlePartySizeChange = (value: string) => {
     setSelectedPartySize(value);

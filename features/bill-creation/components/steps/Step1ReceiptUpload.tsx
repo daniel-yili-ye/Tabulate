@@ -74,7 +74,8 @@ export default function StepReceiptUpload({
     mutationFn: parseReceiptImage,
     onMutate: () => {
       const toastId = toast.loading("Processing receipt...", {
-        description: "Please wait while we analyze your receipt.",
+        description:
+          "Please do not refresh the page while we analyze your receipt.",
       });
       if (onProcessingStateChange) onProcessingStateChange(true);
       return { toastId };
@@ -87,7 +88,14 @@ export default function StepReceiptUpload({
 
       setValue("stepItems.businessName", data.businessName || "");
       if (data.date) setValue("stepItems.date", new Date(data.date));
-      if (data.Items?.length) setValue("stepItems.Items", data.Items);
+      if (data.Items?.length) {
+        setValue("stepItems.Items", data.Items);
+        // Initialize empty allocations for each item
+        setValue(
+          "stepAllocateItems",
+          data.Items.map(() => [])
+        );
+      }
       if (data.tax) setValue("stepItems.tax", data.tax);
       if (data.tip) setValue("stepItems.tip", data.tip);
       if (data.discount) setValue("stepItems.discount", data.discount);
