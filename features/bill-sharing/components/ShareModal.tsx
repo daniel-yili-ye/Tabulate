@@ -88,7 +88,7 @@ export default function ShareModal({
           </div>
         ) : (
           <div>
-            <div className="flex items-center space-x-2 mt-4">
+            <div className="flex items-center space-x-2">
               <div className="grid flex-1 gap-2">
                 <Input ref={inputRef} readOnly value={url} className="w-full" />
               </div>

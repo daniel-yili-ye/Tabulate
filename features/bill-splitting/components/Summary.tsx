@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { FormData } from "@/lib/validation/formSchema";
 import { Loader2 } from "lucide-react";
 import { useBillAllocation } from "../hooks/useBillAllocation";
@@ -35,7 +34,7 @@ export default function Summary({ formData, tabId }: SummaryProps) {
   } = useBillSharing(formData, allocation, tabId);
 
   return (
-    <Card>
+    <div className="space-y-6">
       <SummaryHeader
         businessName={formData.stepItems.businessName}
         date={formData.stepItems.date}
@@ -47,7 +46,7 @@ export default function Summary({ formData, tabId }: SummaryProps) {
         setIsOpen={setIsOpen}
         isSaving={isSaving}
       />
-      <CardContent className="space-y-4">
+      <div className="space-y-4">
         {isLoading ? (
           <div className="flex justify-center items-center h-40">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -61,7 +60,7 @@ export default function Summary({ formData, tabId }: SummaryProps) {
             total={total}
           />
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

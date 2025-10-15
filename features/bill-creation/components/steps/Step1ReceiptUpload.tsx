@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { useRef } from "react";
 import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -7,11 +8,13 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { FormData } from "@/lib/validation/formSchema";
 import { ACCEPTED_IMAGE_TYPES } from "@/lib/validation/formSchema";
-import { CheckCircle2 } from "lucide-react";
+import { Upload, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 // Define the expected API response structure for successful parse
 interface ParseSuccessResponse {
@@ -63,6 +66,8 @@ export default function StepReceiptUpload({
 }: StepReceiptUploadProps) {
   const { control, watch, setValue } = useFormContext<FormData>();
   const receiptImageURL = watch("stepReceiptUpload.receiptImageURL");
+  const uploadedFile = watch("stepReceiptUpload.image");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Setup the mutation
   const mutation = useMutation<
@@ -128,6 +133,37 @@ export default function StepReceiptUpload({
     mutation.mutate(file);
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files[0];
+    if (file && ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+      handleFileChange(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleRemoveFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setValue("stepReceiptUpload.receiptImageURL", undefined);
+    setValue("stepReceiptUpload.image", undefined);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleUploadAreaClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (fileInputRef.current && !mutation.isPending) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <FormField
@@ -136,29 +172,96 @@ export default function StepReceiptUpload({
         render={({ field: { value, onChange, ...field } }) => (
           <FormItem>
             <FormControl>
-              <Input
-                type="file"
-                onChange={(e) => handleFileChange(e.target.files?.[0])}
-                accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                disabled={mutation.isPending}
-                {...field}
-              />
-            </FormControl>
-            {receiptImageURL && (
-              <div className="mt-4 rounded-md border p-4 bg-muted/50">
-                <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <span>Receipt uploaded successfully</span>
-                </div>
-                <Image
-                  src={receiptImageURL}
-                  alt="Receipt"
-                  width={300}
-                  height={300}
-                  className="rounded-md"
-                />
+              <div>
+                {!uploadedFile ? (
+                  <div>
+                    <Input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                      onChange={(e) => handleFileChange(e.target.files?.[0])}
+                      className="hidden"
+                      disabled={mutation.isPending}
+                      name={field.name}
+                      onBlur={field.onBlur}
+                    />
+                    <div
+                      className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-12 text-center hover:border-gray-400 dark:hover:border-gray-600 transition-colors cursor-pointer"
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onClick={handleUploadAreaClick}
+                    >
+                      <div className="space-y-4">
+                        <div className="flex justify-center">
+                          <Upload className="w-12 h-12 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-lg font-medium">
+                            Upload a photo of your receipt
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            or click to browse files
+                          </p>
+                        </div>
+                        <div className="flex justify-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            JPG
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            JPEG
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            PNG
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg space-y-4">
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-medium text-green-900 dark:text-green-100 truncate">
+                              {uploadedFile.name}
+                            </p>
+                            <p className="text-sm text-green-700 dark:text-green-400">
+                              {mutation.isPending
+                                ? "Processing..."
+                                : "Ready to continue"}
+                            </p>
+                          </div>
+                        </div>
+                        {!mutation.isPending && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveFile}
+                            className="shrink-0"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                      {receiptImageURL && (
+                        <div className="rounded-md border overflow-hidden">
+                          <Image
+                            src={receiptImageURL}
+                            alt="Receipt"
+                            width={400}
+                            height={400}
+                            className="w-full h-auto"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}

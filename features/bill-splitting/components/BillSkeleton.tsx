@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -13,8 +12,8 @@ import {
 
 export default function BillSkeleton() {
   return (
-    <Card>
-      <CardHeader className="space-y-4">
+    <div className="space-y-6">
+      <div className="space-y-4">
         <div className="space-y-4 md:flex md:justify-between md:items-center md:space-y-0">
           <div>
             <Skeleton className="h-6 w-48 mb-2" />
@@ -26,9 +25,9 @@ export default function BillSkeleton() {
           </div>
         </div>
         <Separator />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Card>
+      </div>
+      <div className="space-y-4">
+        <div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -70,8 +69,8 @@ export default function BillSkeleton() {
               </TableRow>
             </TableFooter>
           </Table>
-        </Card>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 }

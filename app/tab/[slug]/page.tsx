@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import Summary from "@/features/bill-splitting/components/Summary";
 import BillSkeleton from "@/features/bill-splitting/components/BillSkeleton";
-import { Card, CardContent } from "@/components/ui/card";
 import { FormData } from "@/lib/validation/formSchema";
 
 interface BillApiResponse {
@@ -46,14 +45,10 @@ export default function BillPage() {
 
   if (error || !tabData?.form_data) {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-destructive">Error</h2>
-            <p className="mt-2">{error?.message || "Tab data not found"}</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center py-12">
+        <h2 className="text-xl font-semibold text-destructive">Error</h2>
+        <p className="mt-2">{error?.message || "Tab data not found"}</p>
+      </div>
     );
   }
 
