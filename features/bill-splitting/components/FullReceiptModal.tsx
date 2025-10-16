@@ -55,7 +55,7 @@ export default function FullReceiptModal({
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
                 <TableCell className="text-right">
-                  {roundCents(item.price)}
+                  ${roundCents(item.price)}
                 </TableCell>
               </TableRow>
             ))}
@@ -64,14 +64,14 @@ export default function FullReceiptModal({
             <TableRow>
               <TableCell>Subtotal</TableCell>
               <TableCell className="text-right">
-                {roundCents(subtotal)}
+                ${roundCents(subtotal)}
               </TableCell>
             </TableRow>
             {formData.stepItems.tax !== 0 && (
               <TableRow>
                 <TableCell>Tax</TableCell>
                 <TableCell className="text-right">
-                  {roundCents(formData.stepItems.tax)}
+                  ${roundCents(formData.stepItems.tax)}
                 </TableCell>
               </TableRow>
             )}
@@ -79,21 +79,21 @@ export default function FullReceiptModal({
               <TableRow>
                 <TableCell>Tip</TableCell>
                 <TableCell className="text-right">
-                  {roundCents(formData.stepItems.tip)}
+                  ${roundCents(formData.stepItems.tip)}
                 </TableCell>
               </TableRow>
             )}
             {formData.stepItems.discount !== 0 && (
-              <TableRow>
+              <TableRow className="text-green-600 dark:text-green-500">
                 <TableCell>Discount</TableCell>
                 <TableCell className="text-right">
-                  -{roundCents(formData.stepItems.discount)}
+                  -${roundCents(formData.stepItems.discount)}
                 </TableCell>
               </TableRow>
             )}
             <TableRow>
               <TableCell>TOTAL</TableCell>
-              <TableCell className="text-right">{roundCents(total)}</TableCell>
+              <TableCell className="text-right">${roundCents(total)}</TableCell>
             </TableRow>
           </TableFooter>
         </Table>

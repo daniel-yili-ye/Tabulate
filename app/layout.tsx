@@ -15,7 +15,7 @@ const inter = Inter({
 
 export const metadata = {
   title: "Tabulate",
-  description: "Split bills with friends easily",
+  description: "Split the tab with friends",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },
@@ -78,7 +78,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <header className="py-4 sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <header className="py-4 sticky top-0 z-50 w-full bg-background">
               <div className="container">
                 <div className="flex items-center justify-between m-auto md:max-w-xl">
                   <a href="/" className="hover:opacity-80 transition-opacity">

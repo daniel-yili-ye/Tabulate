@@ -52,10 +52,10 @@ export default function ItemizedBreakdownModal({
               <TableRow key={index}>
                 <TableCell>{item.item}</TableCell>
                 <TableCell className="text-right">
-                  {roundCents(item.fullPrice)} / {item.participants}
+                  ${roundCents(item.fullPrice)} / {item.participants}
                 </TableCell>
                 <TableCell className="text-right">
-                  {roundCents(item.price)}
+                  ${roundCents(item.price)}
                 </TableCell>
               </TableRow>
             ))}
@@ -65,7 +65,7 @@ export default function ItemizedBreakdownModal({
               <TableCell>Subtotal</TableCell>
               <TableCell></TableCell>
               <TableCell className="text-right">
-                {roundCents(person.subtotal)}
+                ${roundCents(person.subtotal)}
               </TableCell>
             </TableRow>
             {person.tax !== 0 && (
@@ -73,7 +73,7 @@ export default function ItemizedBreakdownModal({
                 <TableCell>Tax</TableCell>
                 <TableCell></TableCell>
                 <TableCell className="text-right">
-                  {roundCents(person.tax)}
+                  ${roundCents(person.tax)}
                 </TableCell>
               </TableRow>
             )}
@@ -82,16 +82,16 @@ export default function ItemizedBreakdownModal({
                 <TableCell>Tip</TableCell>
                 <TableCell></TableCell>
                 <TableCell className="text-right">
-                  {roundCents(person.tip)}
+                  ${roundCents(person.tip)}
                 </TableCell>
               </TableRow>
             )}
             {person.discount !== 0 && (
-              <TableRow>
+              <TableRow className="text-green-600 dark:text-green-500">
                 <TableCell>Discount</TableCell>
                 <TableCell></TableCell>
                 <TableCell className="text-right">
-                  -{roundCents(person.discount)}
+                  -${roundCents(person.discount)}
                 </TableCell>
               </TableRow>
             )}
@@ -99,7 +99,7 @@ export default function ItemizedBreakdownModal({
               <TableCell>TOTAL</TableCell>
               <TableCell></TableCell>
               <TableCell className="text-right">
-                {roundCents(person.total)}
+                ${roundCents(person.total)}
               </TableCell>
             </TableRow>
           </TableFooter>

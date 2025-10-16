@@ -45,7 +45,7 @@ export default function AllocationTable({
             <TableRow key={index}>
               <TableCell>{person.name}</TableCell>
               <TableCell className="text-right">
-                {roundCents(person.total)}
+                ${roundCents(person.total)}
               </TableCell>
               <TableCell>
                 <ItemizedBreakdownModal person={person} />
@@ -56,7 +56,7 @@ export default function AllocationTable({
         <TableFooter>
           <TableRow>
             <TableCell>TOTAL</TableCell>
-            <TableCell className="text-right">{roundCents(total)}</TableCell>
+            <TableCell className="text-right">${roundCents(total)}</TableCell>
             <TableCell>
               <FullReceiptModal
                 formData={formData}

@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { useMultiStepForm } from "../hooks/useMultiStepForm";
 import { createStepConfig } from "../config/stepConfig";
@@ -40,16 +39,16 @@ export default function MultiStepForm() {
   return (
     <Form {...form}>
       <form onSubmit={(e) => e.preventDefault()}>
-        <Card>
+        <div className="space-y-6">
           <MultiStepFormHeader
             title={currentStepConfig.title}
             description={currentStepConfig.description}
             sideContent={currentStepConfig.sideContent?.(receiptImageURL)}
           />
 
-          <CardContent>{currentStepConfig.component}</CardContent>
+          <div>{currentStepConfig.component}</div>
 
-          <CardFooter>
+          <div>
             <MultiStepFormNavigation
               isFirstStep={isFirstStep}
               isLastStep={isLastStep}
@@ -58,8 +57,8 @@ export default function MultiStepForm() {
               onPrevious={handlePrevious}
               onNext={handleNext}
             />
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </form>
     </Form>
   );

@@ -33,7 +33,7 @@ export default function StepAllocateItems() {
                 <div className="space-x-2">
                   <FormLabel className="text-base">{Item.item}</FormLabel>
                   <FormLabel className="text-sm text-muted-foreground">
-                    {Number(Item.price).toFixed(2)}
+                    ${Number(Item.price).toFixed(2)}
                   </FormLabel>
                 </div>
                 {participants.map((participant) => (
