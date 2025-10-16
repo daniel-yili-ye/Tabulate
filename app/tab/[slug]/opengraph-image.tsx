@@ -18,7 +18,7 @@ function formatDate(date: Date | string): string {
   });
 }
 
-function calculateFontSize(text: string, maxWidth: number = 480): number {
+function calculateFontSize(text: string, maxWidth: number = 320): number {
   // Base font size
   const baseFontSize = 64;
   const minFontSize = 32;
@@ -26,6 +26,28 @@ function calculateFontSize(text: string, maxWidth: number = 480): number {
   // Approximate character width at base font size (rough estimate)
   // For bold fonts, chars are ~0.6 * fontSize wide on average
   const charWidthRatio = 0.6;
+  const estimatedWidth = text.length * baseFontSize * charWidthRatio;
+
+  if (estimatedWidth <= maxWidth) {
+    return baseFontSize;
+  }
+
+  // Calculate adjusted font size
+  const adjustedFontSize = Math.floor(
+    maxWidth / (text.length * charWidthRatio)
+  );
+
+  // Return the larger of adjusted size or minimum size
+  return Math.max(minFontSize, adjustedFontSize);
+}
+
+function calculateDateFontSize(text: string, maxWidth: number = 320): number {
+  // Base font size for date (smaller than business name)
+  const baseFontSize = 16;
+  const minFontSize = 12;
+
+  // For regular weight fonts, chars are ~0.5 * fontSize wide on average
+  const charWidthRatio = 0.5;
   const estimatedWidth = text.length * baseFontSize * charWidthRatio;
 
   if (estimatedWidth <= maxWidth) {
@@ -53,6 +75,11 @@ export default async function Image({
 
     if (!tabData) {
       // Return a default image if tab not found
+      const fallbackTitle = "Tabulate";
+      const fallbackSubtitle = "Split the tab with friends";
+      const fallbackTitleFontSize = calculateFontSize(fallbackTitle);
+      const fallbackSubtitleFontSize = calculateDateFontSize(fallbackSubtitle);
+
       return new ImageResponse(
         (
           <div
@@ -63,15 +90,34 @@ export default async function Image({
               height: "100%",
               display: "flex",
               flexDirection: "column",
-              alignItems: "flex-start",
-              justifyContent: "flex-start",
+              justifyContent: "center",
               padding: "20px 20px",
-              color: "black",
+              color: "white",
             }}
           >
-            <div style={{ fontSize: 36, fontWeight: 900 }}>Tabulate</div>
-            <div style={{ fontSize: 32, marginTop: 20, color: "grey" }}>
-              Split bills with friends easily
+            <div
+              style={{
+                fontSize: fallbackTitleFontSize,
+                textAlign: "left",
+                color: "black",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                lineHeight: 1,
+              }}
+            >
+              {fallbackTitle}
+            </div>
+            <div
+              style={{
+                fontSize: fallbackSubtitleFontSize,
+                color: "grey",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {fallbackSubtitle}
             </div>
           </div>
         ),
@@ -86,8 +132,9 @@ export default async function Image({
     const date = tabData.form_data.stepItems.date;
     const formattedDate = date ? formatDate(date) : "No date";
 
-    // Calculate dynamic font size based on business name length
+    // Calculate dynamic font sizes
     const dynamicFontSize = calculateFontSize(businessName);
+    const dynamicDateFontSize = calculateDateFontSize(formattedDate);
 
     return new ImageResponse(
       (
@@ -106,21 +153,25 @@ export default async function Image({
         >
           <div
             style={{
-              fontSize: 36,
+              fontSize: dynamicFontSize,
               fontWeight: 900,
               textAlign: "left",
               color: "black",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
+              lineHeight: 1,
             }}
           >
             {businessName}
           </div>
           <div
             style={{
-              fontSize: 24,
+              fontSize: dynamicDateFontSize,
               color: "grey",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {formattedDate}
@@ -134,6 +185,11 @@ export default async function Image({
   } catch (error) {
     console.error("Error generating OG image:", error);
     // Return default image on error
+    const errorTitle = "Tabulate";
+    const errorSubtitle = "Split the tab with friends";
+    const errorTitleFontSize = calculateFontSize(errorTitle);
+    const errorSubtitleFontSize = calculateDateFontSize(errorSubtitle);
+
     return new ImageResponse(
       (
         <div
@@ -144,17 +200,35 @@ export default async function Image({
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-start",
-            justifyContent: "flex-start",
+            justifyContent: "center",
             padding: "20px 20px",
-            color: "black",
+            color: "white",
           }}
         >
-          <div style={{ fontSize: 36, fontWeight: 900, fontFamily: "Inter" }}>
-            Tabulate
+          <div
+            style={{
+              fontSize: errorTitleFontSize,
+              fontWeight: 900,
+              textAlign: "left",
+              color: "black",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              lineHeight: 1,
+            }}
+          >
+            {errorTitle}
           </div>
-          <div style={{ fontSize: 24, marginTop: 20, color: "grey" }}>
-            Split bills with friends easily
+          <div
+            style={{
+              fontSize: errorSubtitleFontSize,
+              color: "grey",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {errorSubtitle}
           </div>
         </div>
       ),

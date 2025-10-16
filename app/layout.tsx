@@ -15,7 +15,7 @@ const inter = Inter({
 
 export const metadata = {
   title: "Tabulate",
-  description: "Split bills with friends easily",
+  description: "Split the tab with friends",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },

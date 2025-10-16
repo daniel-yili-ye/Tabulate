@@ -1,7 +1,7 @@
 {
   "name": "Tabulate",
   "short_name": "Tabulate",
-  "description": "Split bills with friends easily",
+  "description": "Split the tab with friends",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

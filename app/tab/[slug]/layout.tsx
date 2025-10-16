@@ -23,7 +23,7 @@ export async function generateMetadata({
     if (!tabData) {
       return {
         title: "Tab Not Found | Tabulate",
-        description: "Split bills with friends easily",
+        description: "Split the tab with friends",
       };
     }
 
@@ -51,7 +51,7 @@ export async function generateMetadata({
     console.error("Error generating metadata:", error);
     return {
       title: "Tabulate",
-      description: "Split bills with friends easily",
+      description: "Split the tab with friends",
     };
   }
 }

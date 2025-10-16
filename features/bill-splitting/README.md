@@ -86,7 +86,7 @@ Business logic for bill calculations.
 
 ### Reusability
 
-- Components can be easily reused in different contexts
+- Components can be reused in different contexts
 - Hooks can be used independently in other features
 - Utilities are pure functions that can be tested and reused
 
