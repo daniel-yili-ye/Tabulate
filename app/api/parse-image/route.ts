@@ -1,4 +1,4 @@
-import { generateText, Output } from "ai";
+import { generateText, Output, NoObjectGeneratedError } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { NextRequest, NextResponse } from "next/server";
 import { receiptBaseSchema, wizard2Schema } from "@/lib/validation/formSchema";
@@ -69,13 +69,79 @@ Important guidelines:
     const endTime = Date.now();
     console.log(`Gemini API call completed in ${endTime - startTime}ms`);
 
-    // result.output is already validated against receiptSchema by AI SDK
-    // Apply wizard2Schema transforms (date conversion, subtotal/total calculation, etc.)
-    const transformedData = wizard2Schema.parse(result.output);
+    // Check if the AI SDK successfully generated structured output
+    if (result.output === undefined || result.output === null) {
+      console.error("AI SDK returned undefined/null output");
+      return NextResponse.json(
+        {
+          error:
+            "Failed to parse the receipt. Please try again with a clearer image.",
+        },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json(transformedData);
+    // Check if the AI returned null/empty values indicating an unreadable receipt
+    // This happens when the AI follows the prompt instruction to "return null values"
+    // for unreadable images. We must detect this BEFORE wizard2Schema transforms
+    // null date to today's date and empty Items to [{ item: "", price: 0 }]
+    const rawOutput = result.output;
+    const hasNoBusinessName = !rawOutput.businessName;
+    const hasNoDate = !rawOutput.date;
+    const hasNoItems =
+      !rawOutput.Items ||
+      rawOutput.Items.length === 0 ||
+      rawOutput.Items.every((item) => !item.item || item.item.trim() === "");
+
+    if (hasNoBusinessName && hasNoDate && hasNoItems) {
+      console.error("AI returned empty/null values - receipt likely unreadable", rawOutput);
+      return NextResponse.json(
+        {
+          error:
+            "Could not extract receipt data. Please ensure the image is a clear photo of a receipt.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Apply wizard2Schema transforms (date conversion, subtotal/total calculation, etc.)
+    // Use safeParse to provide informative error messages
+    const validationResult = wizard2Schema.safeParse(result.output);
+
+    if (!validationResult.success) {
+      console.error(
+        "AI response failed schema validation:",
+        validationResult.error.flatten()
+      );
+      return NextResponse.json(
+        {
+          error:
+            "AI failed to return data in the expected format. Please try again.",
+          details: validationResult.error.flatten(),
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(validationResult.data);
   } catch (error) {
     console.error("Error processing image:", error);
+
+    // Handle NoObjectGeneratedError specifically for user-friendly messages
+    if (NoObjectGeneratedError.isInstance(error)) {
+      console.error("NoObjectGeneratedError details:", {
+        cause: error.cause,
+        text: error.text,
+      });
+      return NextResponse.json(
+        {
+          error:
+            "Failed to parse the receipt. Please try again with a clearer image.",
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       {
         error: "Failed to process the receipt image",
