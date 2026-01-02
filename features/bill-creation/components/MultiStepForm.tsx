@@ -1,6 +1,6 @@
 "use client";
 
-import { Form } from "@/components/ui/form";
+import { FormProvider } from "react-hook-form";
 import { useMultiStepForm } from "../hooks/useMultiStepForm";
 import { createStepConfig } from "../config/stepConfig";
 import { MultiStepFormHeader } from "./MultiStepFormHeader";
@@ -37,7 +37,7 @@ export default function MultiStepForm() {
   const receiptImageURL = form.watch("stepReceiptUpload.receiptImageURL");
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="space-y-6">
           <MultiStepFormHeader
@@ -60,6 +60,6 @@ export default function MultiStepForm() {
           </div>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 }

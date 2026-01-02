@@ -1,12 +1,6 @@
-import { useState, useMemo } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+import { useMemo } from "react";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Button } from "@/components/ui/button";
@@ -20,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { FormData } from "@/lib/validation/formSchema";
 import { CalendarIcon, Plus } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/components/lib/utils";
+import { cn } from "@/lib/utils/cn";
 import ItemRow from "../ItemRow";
 import SplitDrawer from "../SplitDrawer";
 import DuplicateDrawer from "../DuplicateDrawer";
@@ -103,44 +97,45 @@ export default function StepItems() {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-4">
-        <FormField
+      <FieldGroup>
+        <Controller
           control={control}
           name="stepItems.businessName"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Business Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Business name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <Field>
+              <FieldLabel htmlFor="business-name">Business Name</FieldLabel>
+              <Input
+                {...field}
+                id="business-name"
+                placeholder="Business name"
+              />
+            </Field>
           )}
         />
-        <FormField
+
+        <Controller
           control={control}
           name="stepItems.date"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Receipt Date</FormLabel>
+            <Field>
+              <FieldLabel htmlFor="receipt-date">Receipt Date</FieldLabel>
               <Popover>
                 <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
+                  <Button
+                    id="receipt-date"
+                    variant="outline"
+                    className={cn(
+                      "w-full pl-3 text-left font-normal",
+                      !field.value && "text-muted-foreground"
+                    )}
+                  >
+                    {field.value ? (
+                      format(field.value, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
@@ -154,11 +149,10 @@ export default function StepItems() {
                   />
                 </PopoverContent>
               </Popover>
-              <FormMessage />
-            </FormItem>
+            </Field>
           )}
         />
-      </div>
+      </FieldGroup>
 
       <div className="space-y-4">
         <div className="space-y-2">
@@ -203,74 +197,70 @@ export default function StepItems() {
         onConfirm={confirmDuplicate}
       />
 
-      <div className="space-y-4">
-        <FormField
+      <FieldGroup>
+        <Controller
           control={control}
           name="stepItems.discount"
           render={({ field }) => (
-            <FormItem>
-              <div className="flex items-center justify-between gap-4">
-                <FormLabel className="min-w-20">Discount</FormLabel>
-                <FormControl>
-                  <div className="w-36">
-                    <CurrencyInput
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                    />
-                  </div>
-                </FormControl>
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="discount" className="min-w-20">
+                Discount
+              </FieldLabel>
+              <div className="w-36">
+                <CurrencyInput
+                  id="discount"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                />
               </div>
-              <FormMessage />
-            </FormItem>
+            </Field>
           )}
         />
-        <FormField
+
+        <Controller
           control={control}
           name="stepItems.tax"
           render={({ field }) => (
-            <FormItem>
-              <div className="flex items-center justify-between gap-4">
-                <FormLabel className="min-w-20">Tax</FormLabel>
-                <FormControl>
-                  <div className="w-36">
-                    <CurrencyInput
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                    />
-                  </div>
-                </FormControl>
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="tax" className="min-w-20">
+                Tax
+              </FieldLabel>
+              <div className="w-36">
+                <CurrencyInput
+                  id="tax"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                />
               </div>
-              <FormMessage />
-            </FormItem>
+            </Field>
           )}
         />
-        <FormField
+
+        <Controller
           control={control}
           name="stepItems.tip"
           render={({ field }) => (
-            <FormItem>
-              <div className="flex items-center justify-between gap-4">
-                <FormLabel className="min-w-20">Tip</FormLabel>
-                <FormControl>
-                  <div className="w-36">
-                    <CurrencyInput
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                    />
-                  </div>
-                </FormControl>
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor="tip" className="min-w-20">
+                Tip
+              </FieldLabel>
+              <div className="w-36">
+                <CurrencyInput
+                  id="tip"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                />
               </div>
-              <FormMessage />
-            </FormItem>
+            </Field>
           )}
         />
-      </div>
+      </FieldGroup>
 
       {/* Summary */}
       <div className="space-y-3 bg-muted/50 rounded-lg p-4 border">

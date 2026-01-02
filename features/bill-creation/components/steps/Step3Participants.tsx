@@ -1,14 +1,17 @@
-// components/StepParticipants.tsx
 import { useState, useEffect } from "react";
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import {
-  FormField,
-  FormItem,
-  FormControl,
-  FormMessage,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+  Field,
+  FieldContent,
+  FieldError,
+  FieldGroup,
+} from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+  InputGroupButton,
+} from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,7 +26,10 @@ import { useParticipantManager } from "../../hooks/useParticipantManager";
 import { Plus, Trash2 } from "lucide-react";
 
 export default function StepParticipants() {
-  const { control } = useFormContext<FormData>();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<FormData>();
   const {
     participantFields,
     addParticipant,
@@ -75,37 +81,48 @@ export default function StepParticipants() {
             </Label>
           </div>
 
-          <div className="space-y-3">
-            {participantFields.map((field, index) => (
-              <div key={field.id} className="flex space-x-2">
-                <FormField
+          <FieldGroup className="gap-4">
+            {participantFields.map((field, index) => {
+              const fieldError = errors.stepParticipants?.[index]?.name;
+              const isInvalid = !!fieldError;
+
+              return (
+                <Controller
+                  key={field.id}
                   control={control}
                   name={`stepParticipants.${index}.name`}
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormControl>
-                        <Input
-                          placeholder={`Person ${index + 1} name`}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                  render={({ field: controllerField }) => (
+                    <Field orientation="horizontal" data-invalid={isInvalid}>
+                      <FieldContent>
+                        <InputGroup>
+                          <InputGroupInput
+                            {...controllerField}
+                            id={`participant-${index}`}
+                            placeholder={`Person ${index + 1} name`}
+                            aria-invalid={isInvalid}
+                          />
+                          {canRemoveParticipant && (
+                            <InputGroupAddon align="inline-end">
+                              <InputGroupButton
+                                type="button"
+                                variant="ghost"
+                                onClick={() => deleteParticipant(index)}
+                                aria-label={`Remove person ${index + 1}`}
+                                className="h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </InputGroupButton>
+                            </InputGroupAddon>
+                          )}
+                        </InputGroup>
+                        {isInvalid && <FieldError errors={[fieldError]} />}
+                      </FieldContent>
+                    </Field>
                   )}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => deleteParticipant(index)}
-                  className="shrink-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                  disabled={!canRemoveParticipant}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
+              );
+            })}
+          </FieldGroup>
 
           {/* Add More Button */}
           <Button

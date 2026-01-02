@@ -1,10 +1,5 @@
-import { useFormContext } from "react-hook-form";
-import {
-  FormField,
-  FormItem,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+import { Controller, useFormContext } from "react-hook-form";
+import { Field, FieldContent } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Button } from "@/components/ui/button";
@@ -37,33 +32,36 @@ export default function ItemRow({
 
   return (
     <div className="flex space-x-2">
-      <FormField
+      <Controller
         control={control}
         name={`stepItems.Items.${index}.item`}
         render={({ field }) => (
-          <FormItem className="w-full">
-            <FormControl>
-              <Input placeholder={`Item name ${index + 1}`} {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
+          <Field className="flex-1">
+            <FieldContent>
+              <Input
+                {...field}
+                id={`item-name-${index}`}
+                placeholder={`Item name ${index + 1}`}
+              />
+            </FieldContent>
+          </Field>
         )}
       />
-      <FormField
+      <Controller
         control={control}
         name={`stepItems.Items.${index}.price`}
         render={({ field }) => (
-          <FormItem className="w-40">
-            <FormControl>
+          <Field className="w-40">
+            <FieldContent>
               <CurrencyInput
+                id={`item-price-${index}`}
                 value={field.value}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 name={field.name}
               />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
+            </FieldContent>
+          </Field>
         )}
       />
       <DropdownMenu>

@@ -1,13 +1,8 @@
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import { useRef } from "react";
 import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
-import {
-  FormField,
-  FormItem,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
+import { Field, FieldError } from "@/components/ui/field";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { FormData } from "@/lib/validation/formSchema";
@@ -30,7 +25,7 @@ interface ParseSuccessResponse {
 // Define the structure for API errors
 interface ParseErrorResponse {
   error: string;
-  details?: any; // Optional: include if your API returns details
+  details?: unknown;
 }
 
 // Define the mutation function
@@ -48,11 +43,10 @@ async function parseReceiptImage(file: File): Promise<ParseSuccessResponse> {
   if (!response.ok || "error" in data) {
     const errorMessage =
       "error" in data ? data.error : "Failed to process receipt";
-    // You could potentially use data.details here if needed
     throw new Error(errorMessage);
   }
 
-  return data; // Return only the success data
+  return data;
 }
 
 interface StepReceiptUploadProps {
@@ -71,10 +65,10 @@ export default function StepReceiptUpload({
 
   // Setup the mutation
   const mutation = useMutation<
-    ParseSuccessResponse, // Success type
-    Error, // Error type
-    File, // Input type
-    { toastId?: string | number } // Context type
+    ParseSuccessResponse,
+    Error,
+    File,
+    { toastId?: string | number }
   >({
     mutationFn: parseReceiptImage,
     onMutate: () => {
@@ -95,7 +89,6 @@ export default function StepReceiptUpload({
       if (data.date) setValue("stepItems.date", new Date(data.date));
       if (data.Items?.length) {
         setValue("stepItems.Items", data.Items);
-        // Initialize empty allocations for each item
         setValue(
           "stepAllocateItems",
           data.Items.map(() => [])
@@ -115,11 +108,8 @@ export default function StepReceiptUpload({
         description: error.message,
       });
     },
-    onSettled: (_data, _error, _variables, context) => {
-      // Called after mutation is successful or errors out
-      // Ensures loading state is turned off
+    onSettled: () => {
       if (onProcessingStateChange) onProcessingStateChange(false);
-      // Toast dismissal/update is handled by onSuccess/onError via id
     },
   });
 
@@ -166,104 +156,102 @@ export default function StepReceiptUpload({
 
   return (
     <div className="space-y-6">
-      <FormField
+      <Controller
         control={control}
         name="stepReceiptUpload.receiptImageURL"
-        render={({ field: { value, onChange, ...field } }) => (
-          <FormItem>
-            <FormControl>
-              <div>
-                {!uploadedFile ? (
-                  <div>
-                    <Input
-                      ref={fileInputRef}
-                      type="file"
-                      accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                      onChange={(e) => handleFileChange(e.target.files?.[0])}
-                      className="hidden"
-                      disabled={mutation.isPending}
-                      name={field.name}
-                      onBlur={field.onBlur}
-                    />
-                    <div
-                      className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-12 text-center hover:border-gray-400 dark:hover:border-gray-600 transition-colors cursor-pointer"
-                      onDrop={handleDrop}
-                      onDragOver={handleDragOver}
-                      onClick={handleUploadAreaClick}
-                    >
-                      <div className="space-y-4">
-                        <div className="flex justify-center">
-                          <Upload className="w-12 h-12 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <p className="text-lg font-medium">
-                            Upload a photo of your receipt
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            or click to browse files
-                          </p>
-                        </div>
-                        <div className="flex justify-center gap-2">
-                          <Badge variant="secondary" className="text-xs">
-                            JPG
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            JPEG
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            PNG
-                          </Badge>
-                        </div>
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <div>
+              {!uploadedFile ? (
+                <div>
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                    onChange={(e) => handleFileChange(e.target.files?.[0])}
+                    className="hidden"
+                    disabled={mutation.isPending}
+                    name={field.name}
+                    onBlur={field.onBlur}
+                  />
+                  <div
+                    className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-12 text-center hover:border-gray-400 dark:hover:border-gray-600 transition-colors cursor-pointer"
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onClick={handleUploadAreaClick}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex justify-center">
+                        <Upload className="w-12 h-12 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-medium">
+                          Upload a photo of your receipt
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          or click to browse files
+                        </p>
+                      </div>
+                      <div className="flex justify-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          JPG
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          JPEG
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          PNG
+                        </Badge>
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg space-y-4">
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500 shrink-0" />
-                          <div className="min-w-0">
-                            <p className="font-medium text-green-900 dark:text-green-100 truncate">
-                              {uploadedFile.name}
-                            </p>
-                            <p className="text-sm text-green-700 dark:text-green-400">
-                              {mutation.isPending
-                                ? "Processing..."
-                                : "Ready to continue"}
-                            </p>
-                          </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 rounded-lg space-y-4">
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500 shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-medium text-green-900 dark:text-green-100 truncate">
+                            {uploadedFile.name}
+                          </p>
+                          <p className="text-sm text-green-700 dark:text-green-400">
+                            {mutation.isPending
+                              ? "Processing..."
+                              : "Ready to continue"}
+                          </p>
                         </div>
-                        {!mutation.isPending && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleRemoveFile}
-                            className="shrink-0"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        )}
                       </div>
-                      {receiptImageURL && (
-                        <div className="rounded-md border overflow-hidden">
-                          <Image
-                            src={receiptImageURL}
-                            alt="Receipt"
-                            width={400}
-                            height={400}
-                            className="w-full h-auto"
-                          />
-                        </div>
+                      {!mutation.isPending && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleRemoveFile}
+                          className="shrink-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
                       )}
                     </div>
+                    {receiptImageURL && (
+                      <div className="rounded-md border overflow-hidden">
+                        <Image
+                          src={receiptImageURL}
+                          alt="Receipt"
+                          width={400}
+                          height={400}
+                          className="w-full h-auto"
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
+                </div>
+              )}
+            </div>
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
         )}
       />
     </div>
