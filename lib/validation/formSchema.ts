@@ -18,8 +18,49 @@ const wizard1Schema = z.object({
     .optional(),
 });
 
-export const wizard2Schema = z
-  .object({
+// Base schema for receipt data (used by AI SDK structured output)
+// This is a simple schema without transforms, compatible with AI SDK constraints
+export const receiptBaseSchema = z.object({
+  businessName: z
+    .string()
+    .nullable()
+    .describe("The name of the business on the receipt"),
+  date: z
+    .string()
+    .nullable()
+    .describe("Transaction date in ISO format (YYYY-MM-DD), or null if not found"),
+  Items: z
+    .array(
+      z.object({
+        item: z.string().describe("Item name or description"),
+        price: z
+          .number()
+          .nullable()
+          .optional()
+          .describe("Item price (null if unclear)"),
+      })
+    )
+    .describe("List of all items purchased"),
+  discount: z
+    .number()
+    .nullable()
+    .optional()
+    .describe("Discount amount if present"),
+  tax: z
+    .number()
+    .nullable()
+    .optional()
+    .describe("Tax amount if present"),
+  tip: z
+    .number()
+    .nullable()
+    .optional()
+    .describe("Tip amount if present"),
+});
+
+// Extended schema with transforms for form validation
+export const wizard2Schema = receiptBaseSchema
+  .extend({
     businessName: z.preprocess(
       (arg) => (arg === null || arg === undefined ? "" : arg),
       z.string()
