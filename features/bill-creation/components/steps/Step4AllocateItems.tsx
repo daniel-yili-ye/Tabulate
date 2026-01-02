@@ -12,7 +12,11 @@ import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export default function StepAllocateItems() {
-  const { control, watch, formState: { errors } } = useFormContext<FormData>();
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = useFormContext<FormData>();
 
   const Items = watch("stepItems.Items");
   const participants = watch("stepParticipants");
@@ -34,7 +38,7 @@ export default function StepAllocateItems() {
               name={`stepAllocateItems.${ItemIndex}`}
               render={({ field }) => (
                 <FieldSet data-invalid={isInvalid}>
-                  <div className="space-x-2">
+                  <div>
                     <FieldLabel className="text-base">{Item.item}</FieldLabel>
                     <span className="text-sm text-muted-foreground">
                       ${Number(Item.price).toFixed(2)}
@@ -49,7 +53,9 @@ export default function StepAllocateItems() {
                       >
                         <Checkbox
                           id={`item-${ItemIndex}-participant-${participant.id}`}
-                          checked={field.value?.includes(participant.id) ?? false}
+                          checked={
+                            field.value?.includes(participant.id) ?? false
+                          }
                           onCheckedChange={(checked) => {
                             const updatedIds = checked
                               ? [...(field.value || []), participant.id]
@@ -69,9 +75,7 @@ export default function StepAllocateItems() {
                       </Field>
                     ))}
                   </FieldGroup>
-                  {isInvalid && (
-                    <FieldError errors={[fieldError]} />
-                  )}
+                  {isInvalid && <FieldError errors={[fieldError]} />}
                 </FieldSet>
               )}
             />
