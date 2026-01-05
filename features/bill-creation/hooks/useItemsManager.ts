@@ -27,7 +27,7 @@ export const useItemsManager = () => {
 
   const addItem = () => {
     appendItem({ item: "", price: 0 });
-    appendAllocation([]);
+    appendAllocation({ splitType: "equal", participantIds: [] });
   };
 
   const deleteItem = (index: number) => {
@@ -49,8 +49,9 @@ export const useItemsManager = () => {
     const splitAmounts = calculateSplitAmounts(numericPrice, splitCount);
 
     const currentAllocations = getValues("stepAllocateItems");
+    const defaultAllocation = { splitType: "equal" as const, participantIds: [] };
     const normalizedAllocations = currentItems.map(
-      (_, i) => currentAllocations[i] || []
+      (_, i) => currentAllocations[i] || defaultAllocation
     );
 
     updateItem(index, { item, price: splitAmounts[0] });
@@ -61,7 +62,7 @@ export const useItemsManager = () => {
 
     const newAllocations = [
       ...normalizedAllocations.slice(0, index),
-      ...Array(splitCount).fill([]),
+      ...Array(splitCount).fill(defaultAllocation),
       ...normalizedAllocations.slice(index + 1),
     ];
 

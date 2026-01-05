@@ -18,7 +18,7 @@ export const personAllocationSchema = z.object({
   total: z.number(),
 });
 
-export const billAllocationSchema = z.object({
+export const tabAllocationSchema = z.object({
   people: z.array(personAllocationSchema),
   overallTotal: z.number().optional(),
   overallSubtotal: z.number().optional(),
@@ -28,4 +28,7 @@ export const billAllocationSchema = z.object({
 });
 
 export type PersonAllocation = z.infer<typeof personAllocationSchema>;
-export type BillAllocation = z.infer<typeof billAllocationSchema>;
+export type TabAllocation = z.infer<typeof tabAllocationSchema>;
+
+// Alias for backward compatibility
+export type BillAllocation = TabAllocation;

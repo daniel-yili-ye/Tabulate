@@ -35,9 +35,37 @@ export const useParticipantManager = () => {
 
     const currentAllocations = getValues("stepAllocateItems");
     if (currentAllocations && Array.isArray(currentAllocations)) {
-      const updatedAllocations = currentAllocations.map((allocation) =>
-        allocation ? allocation.filter((participantId: number) => participantId !== idToRemove) : []
-      );
+      const updatedAllocations = currentAllocations.map((allocation) => {
+        if (!allocation) {
+          return { splitType: "equal" as const, participantIds: [] };
+        }
+        
+        // Remove the participant from participantIds
+        const updatedParticipantIds = allocation.participantIds.filter(
+          (participantId: number) => participantId !== idToRemove
+        );
+        
+        // Also clean up from shares/percentages/customAmounts if present
+        const updatedAllocation = {
+          ...allocation,
+          participantIds: updatedParticipantIds,
+        };
+        
+        if (allocation.shares && allocation.shares[idToRemove]) {
+          const { [idToRemove]: _, ...restShares } = allocation.shares;
+          updatedAllocation.shares = restShares;
+        }
+        if (allocation.percentages && allocation.percentages[idToRemove]) {
+          const { [idToRemove]: _, ...restPercentages } = allocation.percentages;
+          updatedAllocation.percentages = restPercentages;
+        }
+        if (allocation.customAmounts && allocation.customAmounts[idToRemove]) {
+          const { [idToRemove]: _, ...restCustom } = allocation.customAmounts;
+          updatedAllocation.customAmounts = restCustom;
+        }
+        
+        return updatedAllocation;
+      });
       
       setValue("stepAllocateItems", updatedAllocations);
     }
@@ -71,11 +99,40 @@ export const useParticipantManager = () => {
       
       // Update allocations to remove references to deleted participants
       if (currentAllocations && Array.isArray(currentAllocations)) {
-        const updatedAllocations = currentAllocations.map((allocation) =>
-          allocation ? allocation.filter(
+        const updatedAllocations = currentAllocations.map((allocation) => {
+          if (!allocation) {
+            return { splitType: "equal" as const, participantIds: [] };
+          }
+          
+          // Remove the participants from participantIds
+          const updatedParticipantIds = allocation.participantIds.filter(
             (participantId: number) => !idsToRemove.includes(participantId)
-          ) : []
-        );
+          );
+          
+          // Also clean up from shares/percentages/customAmounts if present
+          const updatedAllocation = {
+            ...allocation,
+            participantIds: updatedParticipantIds,
+          };
+          
+          if (allocation.shares) {
+            const cleanedShares = { ...allocation.shares };
+            idsToRemove.forEach((id) => delete cleanedShares[id]);
+            updatedAllocation.shares = cleanedShares;
+          }
+          if (allocation.percentages) {
+            const cleanedPercentages = { ...allocation.percentages };
+            idsToRemove.forEach((id) => delete cleanedPercentages[id]);
+            updatedAllocation.percentages = cleanedPercentages;
+          }
+          if (allocation.customAmounts) {
+            const cleanedCustom = { ...allocation.customAmounts };
+            idsToRemove.forEach((id) => delete cleanedCustom[id]);
+            updatedAllocation.customAmounts = cleanedCustom;
+          }
+          
+          return updatedAllocation;
+        });
         
         setValue("stepAllocateItems", updatedAllocations);
       }
