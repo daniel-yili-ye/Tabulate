@@ -2,26 +2,45 @@ import { generateText, Output, NoObjectGeneratedError } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { NextRequest, NextResponse } from "next/server";
 import { receiptBaseSchema, wizard2Schema } from "@/lib/validation/formSchema";
+import { supabaseServer } from "@/lib/supabase/server";
+import { z } from "zod";
 
 // Create a custom Google provider instance using GEMINI_API_KEY
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+const requestSchema = z.object({
+  imagePath: z.string().min(1, "Image path is required"),
+});
+
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const imageFile = formData.get("image") as File | null;
+    const body = await request.json();
+    const validationResult = requestSchema.safeParse(body);
 
-    if (!imageFile) {
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: "No image file provided" },
+        { error: "Invalid request body", details: validationResult.error.flatten() },
         { status: 400 }
       );
     }
 
-    const imageBytes = await imageFile.arrayBuffer();
-    const imageBuffer = Buffer.from(imageBytes);
+    const { imagePath } = validationResult.data;
+
+    // Create a signed download URL for Gemini to access the image
+    // URL is valid for 60 seconds - enough time for the API call
+    const { data: signedUrlData, error: signedUrlError } = await supabaseServer.storage
+      .from("receipt-images")
+      .createSignedUrl(imagePath, 60);
+
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      console.error("Error creating signed URL for image:", signedUrlError);
+      return NextResponse.json(
+        { error: "Failed to access the uploaded image" },
+        { status: 500 }
+      );
+    }
 
     const prompt = `Extract the following receipt data:
 
@@ -40,7 +59,7 @@ Important guidelines:
 - Only include discount, tax, and tip if they are explicitly shown on the receipt
 - If the image is not a receipt or is unreadable, return null values`;
 
-    console.log("Starting Gemini API call with Vercel AI SDK...");
+    console.log("Starting Gemini API call with signed URL...");
     const startTime = Date.now();
 
     const result = await generateText({
@@ -58,8 +77,7 @@ Important guidelines:
             },
             {
               type: "image",
-              image: imageBuffer,
-              mediaType: imageFile.type,
+              image: new URL(signedUrlData.signedUrl),
             },
           ],
         },
@@ -68,6 +86,8 @@ Important guidelines:
 
     const endTime = Date.now();
     console.log(`Gemini API call completed in ${endTime - startTime}ms`);
+
+    console.log("Result:", result.output);
 
     // Check if the AI SDK successfully generated structured output
     if (result.output === undefined || result.output === null) {
@@ -106,24 +126,24 @@ Important guidelines:
 
     // Apply wizard2Schema transforms (date conversion, subtotal/total calculation, etc.)
     // Use safeParse to provide informative error messages
-    const validationResult = wizard2Schema.safeParse(result.output);
+    const schemaValidationResult = wizard2Schema.safeParse(result.output);
 
-    if (!validationResult.success) {
+    if (!schemaValidationResult.success) {
       console.error(
         "AI response failed schema validation:",
-        validationResult.error.flatten()
+        schemaValidationResult.error.flatten()
       );
       return NextResponse.json(
         {
           error:
             "AI failed to return data in the expected format. Please try again.",
-          details: validationResult.error.flatten(),
+          details: schemaValidationResult.error.flatten(),
         },
         { status: 500 }
       );
     }
 
-    return NextResponse.json(validationResult.data);
+    return NextResponse.json(schemaValidationResult.data);
   } catch (error) {
     console.error("Error processing image:", error);
 
