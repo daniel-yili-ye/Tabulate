@@ -8,6 +8,8 @@ export const ACCEPTED_IMAGE_TYPES = [
 
 const wizard1Schema = z.object({
   receiptImageURL: z.any().optional(),
+  // Path to the image in Supabase storage (e.g., "temp/1234567890-abc123.jpg")
+  imagePath: z.string().optional(),
   image: z
     .any()
     .refine(

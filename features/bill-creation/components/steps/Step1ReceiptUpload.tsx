@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from "react-hook-form";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
 import { Field, FieldError } from "@/components/ui/field";
@@ -28,25 +28,71 @@ interface ParseErrorResponse {
   details?: unknown;
 }
 
-// Define the mutation function
-async function parseReceiptImage(file: File): Promise<ParseSuccessResponse> {
-  const formData = new FormData();
-  formData.append("image", file);
+// Response from signed URL endpoint
+interface SignedUrlResponse {
+  signedUrl: string;
+  token: string;
+  path: string;
+}
 
-  const response = await fetch("/api/parse-image", {
+// Upload result including the storage path
+interface UploadResult extends ParseSuccessResponse {
+  imagePath: string;
+}
+
+/**
+ * Upload file directly to Supabase using signed URL, then parse with Gemini
+ */
+async function uploadAndParseReceipt(file: File): Promise<UploadResult> {
+  // Step 1: Get signed upload URL from our server
+  const signedUrlResponse = await fetch("/api/upload/signed-url", {
     method: "POST",
-    body: formData,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      fileName: file.name,
+      contentType: file.type,
+    }),
   });
 
-  const data: ParseSuccessResponse | ParseErrorResponse = await response.json();
+  if (!signedUrlResponse.ok) {
+    throw new Error("Failed to get upload URL");
+  }
 
-  if (!response.ok || "error" in data) {
+  const { signedUrl, token, path }: SignedUrlResponse = await signedUrlResponse.json();
+
+  // Step 2: Upload file directly to Supabase with metadata
+  const uploadResponse = await fetch(signedUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type,
+      "x-upsert": "false",
+    },
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error("Failed to upload image to storage");
+  }
+
+  // Step 3: Call parse-image API with the storage path
+  const parseResponse = await fetch("/api/parse-image", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imagePath: path }),
+  });
+
+  const parseData: ParseSuccessResponse | ParseErrorResponse = await parseResponse.json();
+
+  if (!parseResponse.ok || "error" in parseData) {
     const errorMessage =
-      "error" in data ? data.error : "Failed to process receipt";
+      "error" in parseData ? parseData.error : "Failed to process receipt";
     throw new Error(errorMessage);
   }
 
-  return data;
+  return {
+    ...parseData,
+    imagePath: path,
+  };
 }
 
 interface StepReceiptUploadProps {
@@ -61,18 +107,24 @@ export default function StepReceiptUpload({
   const { control, watch, setValue } = useFormContext<FormData>();
   const receiptImageURL = watch("stepReceiptUpload.receiptImageURL");
   const uploadedFile = watch("stepReceiptUpload.image");
+  const imagePath = watch("stepReceiptUpload.imagePath");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Keep track of the file name for display purposes
+  const [fileName, setFileName] = useState<string>("");
+  
+  // Show uploaded state if we have an image (either File during upload or imagePath after)
+  const hasUploadedImage = !!uploadedFile || !!imagePath;
 
-  // Setup the mutation
+  // Setup the mutation for upload + parse
   const mutation = useMutation<
-    ParseSuccessResponse,
+    UploadResult,
     Error,
     File,
     { toastId?: string | number }
   >({
-    mutationFn: parseReceiptImage,
+    mutationFn: uploadAndParseReceipt,
     onMutate: () => {
-      const toastId = toast.loading("Processing receipt...", {
+      const toastId = toast.loading("Uploading and processing receipt...", {
         description:
           "Please do not refresh the page while we analyze your receipt.",
       });
@@ -84,6 +136,12 @@ export default function StepReceiptUpload({
         id: context?.toastId,
         description: "The receipt details have been filled out for you.",
       });
+
+      // Store the image path from Supabase storage
+      setValue("stepReceiptUpload.imagePath", data.imagePath);
+      // Clear the File object - it's now in Supabase, and keeping it can cause
+      // Zod validation issues since File objects don't serialize well
+      setValue("stepReceiptUpload.image", undefined);
 
       setValue("stepItems.businessName", data.businessName || "");
       if (data.date) setValue("stepItems.date", new Date(data.date));
@@ -107,6 +165,10 @@ export default function StepReceiptUpload({
         id: context?.toastId,
         description: error.message,
       });
+      // Clear the preview on error
+      setValue("stepReceiptUpload.receiptImageURL", undefined);
+      setValue("stepReceiptUpload.image", undefined);
+      setFileName("");
     },
     onSettled: () => {
       if (onProcessingStateChange) onProcessingStateChange(false);
@@ -116,10 +178,13 @@ export default function StepReceiptUpload({
   const handleFileChange = async (file: File | undefined) => {
     if (!file) return;
 
+    // Create local preview URL for immediate feedback
     const imageUrl = URL.createObjectURL(file);
     setValue("stepReceiptUpload.receiptImageURL", imageUrl);
     setValue("stepReceiptUpload.image", file);
+    setFileName(file.name);
 
+    // Upload to Supabase and parse
     mutation.mutate(file);
   };
 
@@ -141,6 +206,8 @@ export default function StepReceiptUpload({
     e.stopPropagation();
     setValue("stepReceiptUpload.receiptImageURL", undefined);
     setValue("stepReceiptUpload.image", undefined);
+    setValue("stepReceiptUpload.imagePath", undefined);
+    setFileName("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -162,7 +229,7 @@ export default function StepReceiptUpload({
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
             <div>
-              {!uploadedFile ? (
+              {!hasUploadedImage ? (
                 <div>
                   <Input
                     ref={fileInputRef}
@@ -214,11 +281,11 @@ export default function StepReceiptUpload({
                         <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500 shrink-0" />
                         <div className="min-w-0">
                           <p className="font-medium text-green-900 dark:text-green-100 truncate">
-                            {uploadedFile.name}
+                            {fileName || "Receipt image"}
                           </p>
                           <p className="text-sm text-green-700 dark:text-green-400">
                             {mutation.isPending
-                              ? "Processing..."
+                              ? "Uploading and processing..."
                               : "Ready to continue"}
                           </p>
                         </div>

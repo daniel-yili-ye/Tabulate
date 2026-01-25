@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FormData } from "@/lib/validation/formSchema";
 import { BillAllocation } from "@/lib/validation/allocationSchema";
-import { uploadReceiptImage } from "@/lib/supabase/client";
 
 // Define expected success response from /api/tab POST
 interface SaveBillSuccessResponse {
@@ -25,6 +24,30 @@ interface SaveBillInput {
   allocation: BillAllocation | null;
 }
 
+// Response from finalize endpoint
+interface FinalizeResponse {
+  success: boolean;
+  newPath: string;
+}
+
+/**
+ * Finalize the upload by moving from temp/ to permanent/ folder
+ */
+async function finalizeUpload(imagePath: string): Promise<string> {
+  const response = await fetch("/api/upload/finalize", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imagePath }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to finalize upload");
+  }
+
+  const data: FinalizeResponse = await response.json();
+  return data.newPath;
+}
+
 /**
  * Save bill to the database
  */
@@ -34,30 +57,33 @@ async function saveBill(input: SaveBillInput): Promise<SaveBillSuccessResponse> 
   // Create a deep copy of formData for modification
   let modifiedFormData = JSON.parse(JSON.stringify(formData));
 
-  // Check if we need to upload the image to Supabase
-  const receiptImageURL = formData.stepReceiptUpload?.receiptImageURL;
-  const receiptImage = formData.stepReceiptUpload?.image;
+  // Check if we have an imagePath from direct upload
+  const imagePath = formData.stepReceiptUpload?.imagePath;
 
-  // Check specifically for blob URLs and ensure image is a File
-  if (
-    typeof receiptImageURL === "string" &&
-    receiptImageURL.startsWith("blob:") &&
-    receiptImage instanceof File
-  ) {
-    console.log("Uploading blob image to Supabase...");
+  if (imagePath && typeof imagePath === "string" && imagePath.startsWith("temp/")) {
+    console.log("Finalizing upload - moving to permanent storage...");
     try {
-      const permanentUrl = await uploadReceiptImage(receiptImage);
-      modifiedFormData.stepReceiptUpload.receiptImageURL = permanentUrl;
+      const permanentPath = await finalizeUpload(imagePath);
+      modifiedFormData.stepReceiptUpload.imagePath = permanentPath;
+      // Clear the blob URL and File object
+      delete modifiedFormData.stepReceiptUpload.receiptImageURL;
       delete modifiedFormData.stepReceiptUpload.image;
-    } catch (uploadError) {
-      console.error("Error uploading image to Supabase:", uploadError);
-      toast.error("Failed to upload receipt image. Bill not saved.");
-      throw new Error("Image upload failed");
+    } catch (finalizeError) {
+      console.error("Error finalizing upload:", finalizeError);
+      toast.error("Failed to save receipt image. Bill not saved.");
+      throw new Error("Image finalization failed");
     }
   } else {
-    // If not uploading a blob, still remove potential File object before sending to API
+    // Remove the File object before sending to API (not JSON serializable)
     if (modifiedFormData.stepReceiptUpload?.image) {
       delete modifiedFormData.stepReceiptUpload.image;
+    }
+    // Remove blob URLs (not useful for persistence)
+    if (
+      modifiedFormData.stepReceiptUpload?.receiptImageURL &&
+      modifiedFormData.stepReceiptUpload.receiptImageURL.startsWith("blob:")
+    ) {
+      delete modifiedFormData.stepReceiptUpload.receiptImageURL;
     }
   }
 
@@ -158,4 +184,3 @@ export const useBillSharing = (
     mutation,
   };
 };
-

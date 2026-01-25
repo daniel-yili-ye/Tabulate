@@ -13,6 +13,19 @@ interface SummaryProps {
 }
 
 export default function Summary({ formData, tabId }: SummaryProps) {
+  // Get receipt image URL - either from blob URL (during creation) or construct from imagePath (saved tab)
+  const receiptImageURL = useMemo(() => {
+    // If we have a blob URL from the current session, use it
+    if (formData.stepReceiptUpload.receiptImageURL) {
+      return formData.stepReceiptUpload.receiptImageURL;
+    }
+    // If we have an imagePath (from saved tab), construct the public URL
+    if (formData.stepReceiptUpload.imagePath) {
+      return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/receipt-images/${formData.stepReceiptUpload.imagePath}`;
+    }
+    return undefined;
+  }, [formData.stepReceiptUpload.receiptImageURL, formData.stepReceiptUpload.imagePath]);
+
   // Calculate allocation using custom hook
   const { allocation, isLoading, error } = useBillAllocation(formData);
 
@@ -38,7 +51,7 @@ export default function Summary({ formData, tabId }: SummaryProps) {
       <SummaryHeader
         businessName={formData.stepItems.businessName}
         date={formData.stepItems.date}
-        receiptImageURL={formData.stepReceiptUpload.receiptImageURL}
+        receiptImageURL={receiptImageURL}
         shareUrl={shareUrl || mutation.data?.shareUrl || fullUrl}
         fullUrl={fullUrl}
         onShare={handleShare}
