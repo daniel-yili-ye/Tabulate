@@ -122,11 +122,52 @@ const wizard3Schema = z
   )
   .min(2, "At least 2 participants are required");
 
-const wizard4Schema = z.array(
-  z
-    .array(z.number().int().positive())
-    .min(1, "At least 1 participant must be selected")
-);
+// Split type options
+export const splitTypeSchema = z.enum(["equal", "shares", "percentage", "custom"]);
+export type SplitType = z.infer<typeof splitTypeSchema>;
+
+// Item allocation schema with split type support
+const itemAllocationSchema = z
+  .object({
+    splitType: splitTypeSchema.default("equal"),
+    participantIds: z
+      .array(z.number().int().positive())
+      .min(1, "At least 1 participant must be selected"),
+    // For "shares" split type - participantId -> number of shares
+    shares: z.record(z.coerce.string(), z.number().int().positive()).optional(),
+    // For "percentage" split type - participantId -> percentage (integers only, should sum to 100)
+    percentages: z
+      .record(z.coerce.string(), z.number().int().min(0).max(100))
+      .optional(),
+    // For "custom" split type - participantId -> dollar amount
+    customAmounts: z
+      .record(z.coerce.string(), z.number().nonnegative())
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      // Validate percentages sum to 100 when using percentage split
+      if (data.splitType === "percentage" && data.percentages) {
+        const sum = data.participantIds.reduce(
+          (acc, id) => acc + (data.percentages?.[id] || 0),
+          0
+        );
+        return sum === 100;
+      }
+      return true;
+    },
+    {
+      message: "Percentages must sum to 100%",
+      path: ["percentages"],
+    }
+  );
+
+// Note: Custom amount validation is done at the form level since we need
+// access to item prices which aren't stored in the allocation schema
+
+export type ItemAllocation = z.infer<typeof itemAllocationSchema>;
+
+const wizard4Schema = z.array(itemAllocationSchema);
 
 export const formSchema = z.object({
   stepReceiptUpload: wizard1Schema,

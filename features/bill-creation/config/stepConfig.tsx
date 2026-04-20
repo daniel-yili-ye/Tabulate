@@ -34,22 +34,27 @@ export const createStepConfig = (
     title: "Receipt Details",
     description: "Review and edit the receipt details.",
     component: <StepItems />,
-    sideContent: (receiptImageURL?: string) =>
-      receiptImageURL ? (
-        <ViewReceipt receiptImageURL={receiptImageURL} />
-      ) : null,
+    sideContent: (receiptImageURL?: string) => (
+      <ViewReceipt receiptImageURL={receiptImageURL} />
+    ),
   },
   {
     id: "participants",
     title: "Participants",
     description: "Enter the participant names.",
     component: <StepParticipants />,
+    sideContent: (receiptImageURL?: string) => (
+      <ViewReceipt receiptImageURL={receiptImageURL} />
+    ),
   },
   {
     id: "allocate",
     title: "Allocate Receipt Items",
     description:
-      "Allocate items to participants. Items can be allocated to multiple people.",
+      "Select who's responsible for each item and how to split the cost.",
     component: <StepAllocateItems />,
+    sideContent: (receiptImageURL?: string) => (
+      <ViewReceipt receiptImageURL={receiptImageURL} />
+    ),
   },
 ];

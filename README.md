@@ -65,7 +65,8 @@ To run this project locally:
       ```plaintext
       # .env.local example
       NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
-      NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
+      SUPABASE_SECRET_KEY=YOUR_SUPABASE_SECRET_KEY
       GOOGLE_AI_API_KEY=YOUR_GOOGLE_AI_API_KEY
       # Add any other required variables
       ```

@@ -1,0 +1,394 @@
+{
+    "receipt": {
+      "tax": 43.95,
+      "tip": 74.8,
+      "date": "2025-10-13T00:00:00.000Z",
+      "Items": [
+        {
+          "item": "Right Bee Cider",
+          "price": 8
+        },
+        {
+          "item": "Faux-Spritz",
+          "price": 13
+        },
+        {
+          "item": "5oz Somm Choice (3 @15.00)",
+          "price": 45
+        },
+        {
+          "item": "Bone Marrow (2 @28.00)",
+          "price": 56
+        },
+        {
+          "item": "Pork Chop",
+          "price": 48
+        },
+        {
+          "item": "Pork Shank",
+          "price": 44
+        },
+        {
+          "item": "Lamb Shank",
+          "price": 38
+        },
+        {
+          "item": "Tagliatelle",
+          "price": 28
+        },
+        {
+          "item": "Duck Gnocchi",
+          "price": 32
+        },
+        {
+          "item": "Roasted SP",
+          "price": 26
+        },
+        {
+          "item": "Pork Shoulder",
+          "price": 36
+        },
+        {
+          "item": "SURCHARGE",
+          "price": 14.96
+        }
+      ],
+      "total": 507.71,
+      "discount": 0,
+      "subtotal": 388.96,
+      "businessName": "The Purple Pig"
+    }, 
+    "participants": [
+      {
+        "id": 1,
+        "name": "Arthur"
+      },
+      {
+        "id": 2,
+        "name": "Laura"
+      },
+      {
+        "id": 3,
+        "name": "Rico"
+      },
+      {
+        "id": 4,
+        "name": "Prima"
+      },
+      {
+        "id": 5,
+        "name": "Emily"
+      },
+      {
+        "id": 6,
+        "name": "Nicole"
+      },
+      {
+        "id": 7,
+        "name": "Rachel"
+      }
+    ],
+    "allocations": [
+      [
+        3
+      ],
+      [
+        5
+      ],
+      [
+        1,
+        4,
+        6
+      ],
+      [
+        1,
+        3,
+        2,
+        5,
+        4,
+        6,
+        7
+      ],
+      [
+        4
+      ],
+      [
+        1
+      ],
+      [
+        7,
+        6
+      ],
+      [
+        7,
+        6
+      ],
+      [
+        5
+      ],
+      [
+        3
+      ],
+      [
+        2
+      ],
+      [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    ],
+    "computed": {
+      "people": [
+        {
+          "id": 1,
+          "tax": 7.812056326026915,
+          "tip": 13.295604395604395,
+          "name": "Arthur",
+          "items": [
+            {
+              "item": "5oz Somm Choice (3 @15.00)",
+              "price": 15,
+              "fullPrice": 45,
+              "participants": 3
+            },
+            {
+              "item": "Bone Marrow (2 @28.00)",
+              "price": 8,
+              "fullPrice": 56,
+              "participants": 7
+            },
+            {
+              "item": "Pork Shank",
+              "price": 44,
+              "fullPrice": 44,
+              "participants": 1
+            },
+            {
+              "item": "SURCHARGE",
+              "price": 2.1371428571428575,
+              "fullPrice": 14.96,
+              "participants": 7
+            }
+          ],
+          "total": 90.24480357877418,
+          "discount": 0,
+          "subtotal": 69.13714285714286
+        },
+        {
+          "id": 2,
+          "tax": 5.213202973497091,
+          "tip": 8.872527472527471,
+          "name": "Laura",
+          "items": [
+            {
+              "item": "Bone Marrow (2 @28.00)",
+              "price": 8,
+              "fullPrice": 56,
+              "participants": 7
+            },
+            {
+              "item": "Pork Shoulder",
+              "price": 36,
+              "fullPrice": 36,
+              "participants": 1
+            },
+            {
+              "item": "SURCHARGE",
+              "price": 2.1371428571428575,
+              "fullPrice": 14.96,
+              "participants": 7
+            }
+          ],
+          "total": 60.22287330316742,
+          "discount": 0,
+          "subtotal": 46.137142857142855
+        },
+        {
+          "id": 3,
+          "tax": 4.987215725451019,
+          "tip": 8.487912087912086,
+          "name": "Rico",
+          "items": [
+            {
+              "item": "Right Bee Cider",
+              "price": 8,
+              "fullPrice": 8,
+              "participants": 1
+            },
+            {
+              "item": "Bone Marrow (2 @28.00)",
+              "price": 8,
+              "fullPrice": 56,
+              "participants": 7
+            },
+            {
+              "item": "Roasted SP",
+              "price": 26,
+              "fullPrice": 26,
+              "participants": 1
+            },
+            {
+              "item": "SURCHARGE",
+              "price": 2.1371428571428575,
+              "fullPrice": 14.96,
+              "participants": 7
+            }
+          ],
+          "total": 57.61227067050596,
+          "discount": 0,
+          "subtotal": 44.137142857142855
+        },
+        {
+          "id": 4,
+          "tax": 8.264030822119057,
+          "tip": 14.064835164835163,
+          "name": "Prima",
+          "items": [
+            {
+              "item": "5oz Somm Choice (3 @15.00)",
+              "price": 15,
+              "fullPrice": 45,
+              "participants": 3
+            },
+            {
+              "item": "Bone Marrow (2 @28.00)",
+              "price": 8,
+              "fullPrice": 56,
+              "participants": 7
+            },
+            {
+              "item": "Pork Chop",
+              "price": 48,
+              "fullPrice": 48,
+              "participants": 1
+            },
+            {
+              "item": "SURCHARGE",
+              "price": 2.1371428571428575,
+              "fullPrice": 14.96,
+              "participants": 7
+            }
+          ],
+          "total": 95.46600884409708,
+          "discount": 0,
+          "subtotal": 73.13714285714286
+        },
+        {
+          "id": 5,
+          "tax": 6.230145589704413,
+          "tip": 10.603296703296701,
+          "name": "Emily",
+          "items": [
+            {
+              "item": "Faux-Spritz",
+              "price": 13,
+              "fullPrice": 13,
+              "participants": 1
+            },
+            {
+              "item": "Bone Marrow (2 @28.00)",
+              "price": 8,
+              "fullPrice": 56,
+              "participants": 7
+            },
+            {
+              "item": "Duck Gnocchi",
+              "price": 32,
+              "fullPrice": 32,
+              "participants": 1
+            },
+            {
+              "item": "SURCHARGE",
+              "price": 2.1371428571428575,
+              "fullPrice": 14.96,
+              "participants": 7
+            }
+          ],
+          "total": 71.97058515014398,
+          "discount": 0,
+          "subtotal": 55.137142857142855
+        },
+        {
+          "id": 6,
+          "tax": 6.56912646177352,
+          "tip": 11.18021978021978,
+          "name": "Nicole",
+          "items": [
+            {
+              "item": "5oz Somm Choice (3 @15.00)",
+              "price": 15,
+              "fullPrice": 45,
+              "participants": 3
+            },
+            {
+              "item": "Bone Marrow (2 @28.00)",
+              "price": 8,
+              "fullPrice": 56,
+              "participants": 7
+            },
+            {
+              "item": "Lamb Shank",
+              "price": 19,
+              "fullPrice": 38,
+              "participants": 2
+            },
+            {
+              "item": "Tagliatelle",
+              "price": 14,
+              "fullPrice": 28,
+              "participants": 2
+            },
+            {
+              "item": "SURCHARGE",
+              "price": 2.1371428571428575,
+              "fullPrice": 14.96,
+              "participants": 7
+            }
+          ],
+          "total": 75.88648909913616,
+          "discount": 0,
+          "subtotal": 58.137142857142855
+        },
+        {
+          "id": 7,
+          "tax": 4.874222101427984,
+          "tip": 8.295604395604395,
+          "name": "Rachel",
+          "items": [
+            {
+              "item": "Bone Marrow (2 @28.00)",
+              "price": 8,
+              "fullPrice": 56,
+              "participants": 7
+            },
+            {
+              "item": "Lamb Shank",
+              "price": 19,
+              "fullPrice": 38,
+              "participants": 2
+            },
+            {
+              "item": "Tagliatelle",
+              "price": 14,
+              "fullPrice": 28,
+              "participants": 2
+            },
+            {
+              "item": "SURCHARGE",
+              "price": 2.1371428571428575,
+              "fullPrice": 14.96,
+              "participants": 7
+            }
+          ],
+          "total": 56.30696935417523,
+          "discount": 0,
+          "subtotal": 43.137142857142855
+        }
+      ]
+    }
+  }

@@ -5,6 +5,7 @@ const supabaseDomain =
   ".supabase.co";
 
 const nextConfig = {
+  reactCompiler: true,
   images: {
     remotePatterns: [
       {

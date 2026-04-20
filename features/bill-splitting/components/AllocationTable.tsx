@@ -1,18 +1,7 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
 import { BillAllocation } from "@/lib/validation/allocationSchema";
-import { roundCents } from "../utils/formatters";
-import ItemizedBreakdownModal from "./ItemizedBreakdownModal";
-import FullReceiptModal from "./FullReceiptModal";
 import { FormData } from "@/lib/validation/formSchema";
+import PersonCard from "./PersonCard";
+import ReceiptCard from "./ReceiptCard";
 
 interface AllocationTableProps {
   allocation: BillAllocation;
@@ -31,42 +20,27 @@ export default function AllocationTable({
   );
 
   return (
-    <Card>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-            <TableHead className="w-[50px]"></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {allocation.people.map((person, index) => (
-            <TableRow key={index}>
-              <TableCell>{person.name}</TableCell>
-              <TableCell className="text-right">
-                ${roundCents(person.total)}
-              </TableCell>
-              <TableCell>
-                <ItemizedBreakdownModal person={person} />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TableCell>TOTAL</TableCell>
-            <TableCell className="text-right">${roundCents(total)}</TableCell>
-            <TableCell>
-              <FullReceiptModal
-                formData={formData}
-                subtotal={subtotal}
-                total={total}
-              />
-            </TableCell>
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </Card>
+    <div className="space-y-4">
+      {/* Person Cards */}
+      {allocation.people.map((person, index) => (
+        <PersonCard
+          key={person.id || index}
+          person={person}
+          defaultOpen={index === 0}
+        />
+      ))}
+
+      {/* Receipt Card */}
+      <ReceiptCard
+        businessName={formData.stepItems.businessName}
+        date={formData.stepItems.date}
+        items={formData.stepItems.Items}
+        subtotal={subtotal}
+        tax={formData.stepItems.tax}
+        tip={formData.stepItems.tip}
+        discount={formData.stepItems.discount}
+        total={total}
+      />
+    </div>
   );
 }

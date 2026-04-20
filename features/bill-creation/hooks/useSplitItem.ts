@@ -30,7 +30,8 @@ export function useSplitItem() {
 
     const currentItems = getValues("stepItems.Items");
     const currentAllocations = getValues("stepAllocateItems");
-    const normalizedAllocations = currentItems.map((_, i) => (currentAllocations?.[i] || []));
+    const defaultAllocation = { splitType: "equal" as const, participantIds: [] };
+    const normalizedAllocations = currentItems.map((_, i) => (currentAllocations?.[i] || defaultAllocation));
 
     const newItems = [...currentItems];
     newItems[index] = { item, price: splitPrices[0] } as any;
@@ -41,7 +42,7 @@ export function useSplitItem() {
 
     const newAllocations = [
       ...normalizedAllocations.slice(0, index),
-      ...Array(splitCount).fill([]),
+      ...Array(splitCount).fill(defaultAllocation),
       ...normalizedAllocations.slice(index + 1),
     ];
 

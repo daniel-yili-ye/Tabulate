@@ -30,8 +30,9 @@ export function useDuplicateItem() {
 
     const currentItems = getValues("stepItems.Items");
     const currentAllocations = getValues("stepAllocateItems");
+    const defaultAllocation = { splitType: "equal" as const, participantIds: [] };
     const normalizedAllocations = currentItems.map(
-      (_, i) => currentAllocations?.[i] || []
+      (_, i) => currentAllocations?.[i] || defaultAllocation
     );
 
     // Create duplicate items with the same price
@@ -47,7 +48,7 @@ export function useDuplicateItem() {
     // Create empty allocations for the duplicated items
     const newAllocations = [
       ...normalizedAllocations.slice(0, index + 1),
-      ...Array(duplicateCount).fill([]),
+      ...Array(duplicateCount).fill(defaultAllocation),
       ...normalizedAllocations.slice(index + 1),
     ];
 
