@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import {
   Field,
@@ -303,7 +303,7 @@ function ItemAllocationRow({
                 <div
                   key={participant.id}
                   className={cn(
-                    "flex items-center gap-3 p-2 rounded-md h-12",
+                    "flex items-center gap-2 p-1.5 rounded-md h-10",
                     isSelected ? "bg-accent/50" : "bg-transparent"
                   )}
                 >
@@ -314,7 +314,7 @@ function ItemAllocationRow({
                     onCheckedChange={(checked) =>
                       handleParticipantToggle(participant.id, !!checked)
                     }
-                    className="h-5 w-5"
+                    className="h-4 w-4"
                   />
 
                   {/* Name */}
@@ -351,13 +351,26 @@ function ItemAllocationRow({
                             min={0}
                             max={100}
                             step={1}
-                            value={percentages[participant.id] || 0}
-                            onChange={(e) =>
-                              handlePercentageChange(
-                                participant.id,
-                                Math.round(parseInt(e.target.value) || 0)
-                              )
+                            value={
+                              percentages[participant.id] !== undefined &&
+                              percentages[participant.id] !== null
+                                ? percentages[participant.id]
+                                : ""
                             }
+                            onChange={(e) => {
+                              const inputValue = e.target.value;
+                              if (inputValue === "") {
+                                handlePercentageChange(participant.id, 0);
+                                return;
+                              }
+                              const numValue = parseInt(inputValue, 10);
+                              if (!isNaN(numValue)) {
+                                handlePercentageChange(
+                                  participant.id,
+                                  Math.max(0, Math.min(100, numValue))
+                                );
+                              }
+                            }}
                             className="w-16 h-8 text-sm text-center"
                             placeholder="0"
                           />
@@ -435,20 +448,14 @@ interface AllocationSummaryProps {
   items: { item?: string; price?: number }[];
   participants: { id: number; name: string }[];
   allocations: ItemAllocation[];
-  tax: number;
-  tip: number;
-  discount: number;
 }
 
 function AllocationSummary({
   items,
   participants,
   allocations,
-  tax,
-  tip,
-  discount,
 }: AllocationSummaryProps) {
-  // Calculate per-person subtotals
+  // Calculate per-person subtotals dynamically
   const personSubtotals = useMemo(() => {
     const subtotals: Record<number, number> = {};
     participants.forEach((p) => {
@@ -473,32 +480,6 @@ function AllocationSummary({
     return Object.values(personSubtotals).reduce((sum, v) => sum + v, 0);
   }, [personSubtotals]);
 
-  // Proportionally allocate tax, tip, discount
-  const personTotals = useMemo(() => {
-    return participants.map((p) => {
-      const subtotal = personSubtotals[p.id] || 0;
-      const proportion = totalSubtotal > 0 ? subtotal / totalSubtotal : 0;
-      const personTax = tax * proportion;
-      const personTip = tip * proportion;
-      const personDiscount = discount * proportion;
-      const total = subtotal + personTax + personTip - personDiscount;
-
-      return {
-        id: p.id,
-        name: p.name,
-        subtotal,
-        tax: personTax,
-        tip: personTip,
-        discount: personDiscount,
-        total: Math.max(0, total),
-      };
-    });
-  }, [participants, personSubtotals, totalSubtotal, tax, tip, discount]);
-
-  const grandTotal = personTotals.reduce((sum, p) => sum + p.total, 0);
-  const expectedTotal = totalSubtotal + tax + tip - discount;
-  const isBalanced = Math.abs(grandTotal - expectedTotal) < 0.01;
-
   const formatCurrency = (amount: number) => amount.toFixed(2);
 
   return (
@@ -507,80 +488,69 @@ function AllocationSummary({
 
       {/* Per-person breakdown */}
       <div className="space-y-2 text-sm">
-        {personTotals.map((person) => (
-          <div key={person.id} className="flex justify-between">
-            <span className="text-muted-foreground">{person.name}:</span>
-            <span className="text-foreground font-medium">
-              ${formatCurrency(person.total)}
-            </span>
-          </div>
-        ))}
+        {participants.map((participant) => {
+          const subtotal = personSubtotals[participant.id] || 0;
+          return (
+            <div key={participant.id} className="flex justify-between">
+              <span className="text-muted-foreground">{participant.name}:</span>
+              <span className="text-foreground font-medium">
+                ${formatCurrency(subtotal)}
+              </span>
+            </div>
+          );
+        })}
 
         <Separator />
 
-        {/* Receipt totals */}
+        {/* Items subtotal */}
         <div className="flex justify-between text-muted-foreground">
           <span>Items Subtotal:</span>
           <span className="text-foreground font-medium">
             ${formatCurrency(totalSubtotal)}
           </span>
         </div>
-
-        {discount > 0 && (
-          <div className="flex justify-between text-green-600 dark:text-green-500">
-            <span>Discount:</span>
-            <span className="font-medium">-${formatCurrency(discount)}</span>
-          </div>
-        )}
-
-        {tax > 0 && (
-          <div className="flex justify-between text-muted-foreground">
-            <span>Tax:</span>
-            <span className="text-foreground font-medium">
-              ${formatCurrency(tax)}
-            </span>
-          </div>
-        )}
-
-        {tip > 0 && (
-          <div className="flex justify-between text-muted-foreground">
-            <span>Tip:</span>
-            <span className="text-foreground font-medium">
-              ${formatCurrency(tip)}
-            </span>
-          </div>
-        )}
-
-        <Separator />
-
-        <div className="flex justify-between font-semibold text-lg">
-          <span>Total:</span>
-          <span className={cn(!isBalanced && "text-amber-600")}>
-            ${formatCurrency(grandTotal)}
-          </span>
-        </div>
-
-        {!isBalanced && (
-          <p className="text-xs text-amber-600">
-            Note: Allocations may not perfectly match item totals
-          </p>
-        )}
       </div>
     </div>
   );
 }
 
 export default function StepAllocateItems() {
-  const { control, watch } = useFormContext<FormData>();
+  const { control, setValue } = useFormContext<FormData>();
 
-  const Items = watch("stepItems.Items");
-  const participants = watch("stepParticipants");
-  const allocations = watch("stepAllocateItems");
-  const tax = watch("stepItems.tax") || 0;
-  const tip = watch("stepItems.tip") || 0;
-  const discount = watch("stepItems.discount") || 0;
+  // Use useWatch for reactive updates when form values change
+  const Items = useWatch({ control, name: "stepItems.Items" }) || [];
+  const participants = useWatch({ control, name: "stepParticipants" }) || [];
+  const allocations = useWatch({ control, name: "stepAllocateItems" }) || [];
 
-  if (!Items || !participants) {
+  // Ensure allocations array matches items array length
+  useEffect(() => {
+    if (Items.length > 0 && allocations.length !== Items.length) {
+      const defaultAllocation = {
+        splitType: "equal" as const,
+        participantIds: [],
+      };
+      const newAllocations = [...allocations];
+
+      // Add missing allocations
+      while (newAllocations.length < Items.length) {
+        newAllocations.push(defaultAllocation);
+      }
+
+      // Remove extra allocations
+      if (newAllocations.length > Items.length) {
+        newAllocations.splice(Items.length);
+      }
+
+      setValue("stepAllocateItems", newAllocations, { shouldValidate: false });
+    }
+  }, [Items.length, allocations.length, setValue]);
+
+  if (
+    !Items ||
+    !participants ||
+    Items.length === 0 ||
+    participants.length === 0
+  ) {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -606,10 +576,7 @@ export default function StepAllocateItems() {
       <AllocationSummary
         items={Items}
         participants={participants}
-        allocations={allocations || []}
-        tax={tax}
-        tip={tip}
-        discount={discount}
+        allocations={allocations}
       />
     </div>
   );

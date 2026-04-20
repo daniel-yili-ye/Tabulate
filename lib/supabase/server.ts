@@ -4,7 +4,7 @@ import type { TabData, Tab } from "@/types/database";
 
 export const supabaseServer = createClient(
   clientEnv.NEXT_PUBLIC_SUPABASE_URL,
-  serverEnv.SUPABASE_SERVICE_ROLE_KEY || clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  serverEnv.SUPABASE_SECRET_KEY || clientEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 );
 
 /**

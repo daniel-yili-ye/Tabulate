@@ -58,7 +58,8 @@ async function uploadAndParseReceipt(file: File): Promise<UploadResult> {
     throw new Error("Failed to get upload URL");
   }
 
-  const { signedUrl, token, path }: SignedUrlResponse = await signedUrlResponse.json();
+  const { signedUrl, token, path }: SignedUrlResponse =
+    await signedUrlResponse.json();
 
   // Step 2: Upload file directly to Supabase with metadata
   const uploadResponse = await fetch(signedUrl, {
@@ -81,7 +82,8 @@ async function uploadAndParseReceipt(file: File): Promise<UploadResult> {
     body: JSON.stringify({ imagePath: path }),
   });
 
-  const parseData: ParseSuccessResponse | ParseErrorResponse = await parseResponse.json();
+  const parseData: ParseSuccessResponse | ParseErrorResponse =
+    await parseResponse.json();
 
   if (!parseResponse.ok || "error" in parseData) {
     const errorMessage =
@@ -111,7 +113,7 @@ export default function StepReceiptUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Keep track of the file name for display purposes
   const [fileName, setFileName] = useState<string>("");
-  
+
   // Show uploaded state if we have an image (either File during upload or imagePath after)
   const hasUploadedImage = !!uploadedFile || !!imagePath;
 
@@ -149,7 +151,10 @@ export default function StepReceiptUpload({
         setValue("stepItems.Items", data.Items);
         setValue(
           "stepAllocateItems",
-          data.Items.map(() => [])
+          data.Items.map(() => ({
+            splitType: "equal",
+            participantIds: [],
+          })),
         );
       }
       if (data.tax) setValue("stepItems.tax", data.tax);
