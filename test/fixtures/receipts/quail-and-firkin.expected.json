@@ -1,0 +1,18 @@
+{
+  "businessName": "QUAIL & FIRKIN",
+  "date": "2026-08-27",
+  "items": [
+    { "name": "Btl Corona", "priceCents": 775 },
+    { "name": "2 x Lg Heineken", "priceCents": 2150 },
+    { "name": "3 x Lg Guinness", "priceCents": 3225 },
+    { "name": "Calamari", "priceCents": 2500 },
+    { "name": "Truffle Fries", "priceCents": 1200 },
+    { "name": "Fried Pickles", "priceCents": 1200 },
+    { "name": "Heineken 0.0", "priceCents": 700 },
+    { "name": "Blueberry Mojito", "priceCents": 1400 }
+  ],
+  "taxCents": 1710,
+  "tipCents": 2229,
+  "discountCents": 0,
+  "warning": null
+}
