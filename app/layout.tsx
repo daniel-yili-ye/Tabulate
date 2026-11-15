@@ -1,102 +1,50 @@
-import "@/app/globals.css";
-import { Inter } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
+import type { Metadata, Viewport } from "next";
+import { Geist } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/components/lib/utils";
-import QueryProvider from "@/components/providers/QueryProvider";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
-export const metadata = {
-  title: "Tabulate",
-  description: "Split the tab with friends",
-  icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-  },
-  manifest: "/manifest.json",
+const description =
+  "Scan a receipt, tap who had what, and share one link. Tabulate works out everyone's share of tax, tip and discounts to the cent.";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://localhost:3000",
+  ),
+  title: { default: "Tabulate — split any receipt", template: "%s · Tabulate" },
+  description,
+  applicationName: "Tabulate",
+  openGraph: { siteName: "Tabulate", type: "website", description },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-
-        {/* iPhone/iPad (iOS 7+) */}
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/icons/icon-180x180.png"
-        />
-
-        {/* iPad Pro */}
-        <link
-          rel="apple-touch-icon"
-          sizes="167x167"
-          href="/icons/icon-167x167.png"
-        />
-
-        {/* iPad & iPad mini */}
-        <link
-          rel="apple-touch-icon"
-          sizes="152x152"
-          href="/icons/icon-152x152.png"
-        />
-
-        {/* iPhone */}
-        <link
-          rel="apple-touch-icon"
-          sizes="120x120"
-          href="/icons/icon-120x120.png"
-        />
-
-        {/* Fallback */}
-        <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
-        <link rel="manifest" href="/manifest.json" />
-      </head>
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          inter.variable
-        )}
-        suppressHydrationWarning={true}
-      >
+    <html lang="en" className={geist.variable} suppressHydrationWarning>
+      <body className="flex min-h-dvh flex-col antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>
-            <header className="py-4 sticky top-0 z-50 w-full bg-background">
-              <div className="container">
-                <div className="flex items-center justify-between m-auto md:max-w-xl">
-                  <a href="/" className="hover:opacity-80 transition-opacity">
-                    <h1 className="text-2xl font-bold">Tabulate</h1>
-                  </a>
-                  <ThemeToggle />
-                </div>
-              </div>
-            </header>
-            <main className="container">
-              <div className="pt-4 pb-12 m-auto md:max-w-xl">{children}</div>
-            </main>
-          </QueryProvider>
-          <Toaster richColors />
-          <Analytics />
-          <SpeedInsights />
+          {children}
+          <Toaster richColors closeButton position="bottom-right" />
         </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
