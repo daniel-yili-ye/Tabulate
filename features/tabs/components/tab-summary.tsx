@@ -1,13 +1,14 @@
-import { CheckIcon, ReceiptTextIcon, Undo2Icon } from "lucide-react";
-import { Totals } from "@/components/amount-rows";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ReceiptTextIcon,
+} from "lucide-react";
+import { Accordion as AccordionPrimitive } from "radix-ui";
+import { Totals } from "@/components/amount-rows";
+import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { formatCents } from "../format";
 import type { PersonSplit, SplitInput, SplitResult } from "../split";
@@ -20,7 +21,7 @@ function SummaryCard({
   totalCents,
   currency,
   paid = false,
-  action,
+  onPaidChange,
   children,
 }: {
   value: string;
@@ -30,8 +31,8 @@ function SummaryCard({
   totalCents: number;
   currency: string;
   paid?: boolean;
-  /** Shown under the header whether or not the card is open. */
-  action?: React.ReactNode;
+  /** Shows a paid switch in the header. Absent when the viewer may not change it. */
+  onPaidChange?: (paid: boolean) => void;
   children: React.ReactNode;
 }) {
   return (
@@ -43,29 +44,53 @@ function SummaryCard({
           "border-emerald-600/30 bg-emerald-500/10 dark:border-emerald-500/30",
       )}
     >
-      <AccordionTrigger className="items-center gap-3 py-3 hover:no-underline">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium uppercase">
-          {avatar}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-2">
-            <span className="truncate font-medium">{title}</span>
-            {paid && (
-              <Badge className="bg-emerald-600 text-white dark:bg-emerald-600">
-                <CheckIcon />
-                Paid
-              </Badge>
-            )}
-          </span>
-          <span className="block text-sm font-normal text-muted-foreground">
-            {subtitle}
-          </span>
-        </span>
-        <span className="text-lg font-semibold tabular-nums">
-          {formatCents(totalCents, currency)}
-        </span>
-      </AccordionTrigger>
-      {action && <div className="pb-3">{action}</div>}
+      {/*
+        Three columns: who, the paid switch, the amount. The trigger spans all
+        three so the whole row opens the card, and the switch sits on top of
+        its middle column as a sibling, because a button cannot hold a switch.
+      */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3">
+        <AccordionPrimitive.Header className="col-span-full row-start-1 grid grid-cols-subgrid">
+          <AccordionPrimitive.Trigger className="group/trigger col-span-full grid grid-cols-subgrid items-center rounded-lg py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+            <span className="flex min-w-0 items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium uppercase">
+                {avatar}
+              </span>
+              <span className="min-w-0">
+                <span className="flex items-center gap-2">
+                  <span className="truncate font-medium">{title}</span>
+                  {/* With a switch in the row, the switch says it already. */}
+                  {paid && !onPaidChange && (
+                    <Badge className="bg-emerald-600 text-white dark:bg-emerald-600">
+                      <CheckIcon />
+                      Paid
+                    </Badge>
+                  )}
+                </span>
+                <span className="block text-sm text-muted-foreground">{subtitle}</span>
+              </span>
+            </span>
+            <span className="col-start-3 flex items-center gap-3">
+              <span className="text-lg font-semibold tabular-nums">
+                {formatCents(totalCents, currency)}
+              </span>
+              <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground group-aria-expanded/trigger:hidden" />
+              <ChevronUpIcon className="hidden size-4 shrink-0 text-muted-foreground group-aria-expanded/trigger:inline" />
+            </span>
+          </AccordionPrimitive.Trigger>
+        </AccordionPrimitive.Header>
+        {onPaidChange && (
+          <label className="relative z-10 col-start-2 row-start-1 flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="max-sm:sr-only">Paid</span>
+            <Switch
+              aria-label={`${title} has paid`}
+              className="data-checked:bg-emerald-600"
+              checked={paid}
+              onCheckedChange={onPaidChange}
+            />
+          </label>
+        )}
+      </div>
       <AccordionContent className="space-y-3 pb-4">{children}</AccordionContent>
     </AccordionItem>
   );
@@ -115,25 +140,7 @@ function PersonCard({ person, currency, paid, onPaidChange }: PersonCardProps) {
       totalCents={person.totalCents}
       currency={currency}
       paid={paid}
-      action={
-        onPaidChange &&
-        (paid ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full text-muted-foreground"
-            onClick={() => onPaidChange(false)}
-          >
-            <Undo2Icon data-icon="inline-start" />
-            Mark as not paid
-          </Button>
-        ) : (
-          <Button className="w-full" onClick={() => onPaidChange(true)}>
-            <CheckIcon data-icon="inline-start" />
-            Mark as paid
-          </Button>
-        ))
-      }
+      onPaidChange={onPaidChange}
     >
       <LineItems
         currency={currency}
