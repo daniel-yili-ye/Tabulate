@@ -1,7 +1,6 @@
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  CircleCheckIcon,
   ReceiptTextIcon,
 } from "lucide-react";
 import { Accordion as AccordionPrimitive } from "radix-ui";
@@ -80,12 +79,11 @@ function SummaryCard({
             />
           </label>
         ) : (
-          // Read-only: the same place and colour as the switch, without
-          // looking like something to press.
+          // Read-only: the same place and label as the switch, without
+          // anything that looks like it can be pressed.
           paid && (
-            <span className="pointer-events-none col-start-2 row-start-1 flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-500">
+            <span className="pointer-events-none col-start-2 row-start-1 text-sm text-muted-foreground">
               Paid
-              <CircleCheckIcon className="size-4" />
             </span>
           )
         )}
