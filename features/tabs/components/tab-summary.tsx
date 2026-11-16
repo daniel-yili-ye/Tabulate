@@ -1,13 +1,12 @@
 import {
-  CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  CircleCheckIcon,
   ReceiptTextIcon,
 } from "lucide-react";
 import { Accordion as AccordionPrimitive } from "radix-ui";
 import { Totals } from "@/components/amount-rows";
 import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { formatCents } from "../format";
@@ -57,16 +56,7 @@ function SummaryCard({
                 {avatar}
               </span>
               <span className="min-w-0">
-                <span className="flex items-center gap-2">
-                  <span className="truncate font-medium">{title}</span>
-                  {/* With a switch in the row, the switch says it already. */}
-                  {paid && !onPaidChange && (
-                    <Badge className="bg-emerald-600 text-white dark:bg-emerald-600">
-                      <CheckIcon />
-                      Paid
-                    </Badge>
-                  )}
-                </span>
+                <span className="block truncate font-medium">{title}</span>
                 <span className="block text-sm text-muted-foreground">{subtitle}</span>
               </span>
             </span>
@@ -79,7 +69,7 @@ function SummaryCard({
             </span>
           </AccordionPrimitive.Trigger>
         </AccordionPrimitive.Header>
-        {onPaidChange && (
+        {onPaidChange ? (
           <label className="relative z-10 col-start-2 row-start-1 flex items-center gap-2 text-sm text-muted-foreground">
             <span>Paid</span>
             <Switch
@@ -89,6 +79,15 @@ function SummaryCard({
               onCheckedChange={onPaidChange}
             />
           </label>
+        ) : (
+          // Read-only: the same place and colour as the switch, without
+          // looking like something to press.
+          paid && (
+            <span className="pointer-events-none col-start-2 row-start-1 flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-500">
+              Paid
+              <CircleCheckIcon className="size-4" />
+            </span>
+          )
         )}
       </div>
       <AccordionContent className="space-y-3 pb-4">{children}</AccordionContent>
