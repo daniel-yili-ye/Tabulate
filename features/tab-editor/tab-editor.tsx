@@ -26,7 +26,6 @@ import { receiptImageUrl } from "@/lib/env";
 import { newItem } from "./draft";
 import { AssignStep } from "./steps/assign-step";
 import { ItemsStep } from "./steps/items-step";
-import { PaymentStep } from "./steps/payment-step";
 import { PeopleStep } from "./steps/people-step";
 import { ReceiptStep, type ScanStatus } from "./steps/receipt-step";
 
@@ -47,16 +46,12 @@ const STEPS = [
     title: "Who had what?",
     description: "Pick who shares each item and how it's divided.",
   },
-  {
-    title: "How should people pay?",
-    description: "Add a note telling everyone how to pay you back.",
-  },
 ] as const;
 
 const ITEMS_STEP = 1;
 const PEOPLE_STEP = 2;
 const ASSIGN_STEP = 3;
-const LAST_STEP = STEPS.length - 1;
+const LAST_STEP = ASSIGN_STEP;
 
 /** The fields each step is responsible for, validated before moving on. */
 function fieldsForStep(step: number, draft: TabDraft): FieldPath<TabDraft>[] {
@@ -96,8 +91,7 @@ function firstStepWithError(errors: FieldErrors<TabDraft>): number {
     return ITEMS_STEP;
   }
   if (errors.participants) return PEOPLE_STEP;
-  if (errors.items) return ASSIGN_STEP;
-  return LAST_STEP;
+  return ASSIGN_STEP;
 }
 
 interface TabEditorProps {
@@ -311,8 +305,7 @@ export function TabEditor({ userId, slug, initialDraft }: TabEditorProps) {
         )}
         {step === ITEMS_STEP && <ItemsStep />}
         {step === PEOPLE_STEP && <PeopleStep />}
-        {step === ASSIGN_STEP && <AssignStep />}
-        {step === LAST_STEP && <PaymentStep />}
+        {step === LAST_STEP && <AssignStep />}
 
         <div className="flex justify-between gap-2 border-t pt-4">
           <Button

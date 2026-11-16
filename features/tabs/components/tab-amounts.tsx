@@ -20,7 +20,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { setParticipantPaid, setTabConversion } from "../actions";
+import { Switch } from "@/components/ui/switch";
+import {
+  setParticipantPaid,
+  setTabAllowGuestPaid,
+  setTabConversion,
+} from "../actions";
 import { convertTab, impliedRate } from "../convert";
 import type { CurrencyCode } from "../currency";
 import { formatCents } from "../format";
@@ -185,6 +190,15 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
       if (result?.error) toast.error(result.error);
     });
 
+  const [allowGuestPaid, setAllowOptimistically] = useOptimistic(tab.allowGuestPaid);
+
+  const changeAllowGuestPaid = (allow: boolean) =>
+    startPaidChange(async () => {
+      setAllowOptimistically(allow);
+      const result = await setTabAllowGuestPaid(tab.slug, allow);
+      if (result?.error) toast.error(result.error);
+    });
+
   const people = tab.participants.length;
   const paidCount = tab.participants.filter((person) => paidIds.includes(person.id)).length;
 
@@ -259,17 +273,26 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
         dialog && <div className="flex justify-end">{dialog}</div>
       )}
 
-      {paidCount > 0 &&
-        (paidCount === people ? (
-          <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-500">
-            <CircleCheckIcon className="size-4" />
-            Everyone has paid
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground tabular-nums">
-            {paidCount} of {people} paid
-          </p>
-        ))}
+      {(paidCount > 0 || tab.isOwner) && (
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          {paidCount === people ? (
+            <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-500">
+              <CircleCheckIcon className="size-4" />
+              Everyone has paid
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground tabular-nums">
+              {paidCount} of {people} paid
+            </p>
+          )}
+          {tab.isOwner && (
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              Let others mark as paid
+              <Switch checked={allowGuestPaid} onCheckedChange={changeAllowGuestPaid} />
+            </label>
+          )}
+        </div>
+      )}
 
       <TabSummary
         tab={shownTab}

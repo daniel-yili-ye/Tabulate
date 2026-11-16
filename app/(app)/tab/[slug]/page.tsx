@@ -74,7 +74,11 @@ export default async function TabPage({
         </div>
       </div>
 
-      <PaymentNote message={tab.paymentMessage} />
+      <PaymentNote
+        slug={tab.slug}
+        message={tab.paymentMessage}
+        isOwner={tab.isOwner}
+      />
       <TabAmounts tab={tab} ownerCurrency={ownerCurrency} />
 
       {!tab.isOwner && (

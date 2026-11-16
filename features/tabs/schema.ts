@@ -79,9 +79,12 @@ export const tabDraftSchema = z
     tipCents: cents,
     discountCents: cents,
     receiptImagePath: z.string().max(200).nullable(),
-    /** This tab's own note. Starts as the default from the user's settings. */
+    /**
+     * This tab's own note and whether people other than the owner may mark
+     * someone as paid. Both are changed on the tab page, not in the editor,
+     * which only carries them through a save.
+     */
     paymentMessage,
-    /** Whether people other than the owner may mark someone as paid. */
     allowGuestPaid: z.boolean(),
     participants: z
       .array(participantSchema)
@@ -162,6 +165,9 @@ export type SharedTab = z.infer<typeof sharedTabSchema>;
  * currency is what a new tab is in until a receipt scan says otherwise.
  */
 export const profileSchema = z.object({ paymentMessage, currency });
+
+/** A tab's payment note on its own, as edited from the tab page. */
+export const paymentMessageSchema = paymentMessage;
 
 /** The total the owner was charged for a tab in another currency. */
 export const conversionSchema = z.object({

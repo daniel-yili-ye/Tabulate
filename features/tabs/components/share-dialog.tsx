@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import Link from "next/link";
 import { CopyIcon, LinkIcon, SendIcon, Share2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { copyText } from "@/lib/clipboard";
 import { buildShareMessage } from "../share";
+import { PaymentNoteDialog } from "./payment-note-dialog";
 
 interface ShareDialogProps {
   slug: string;
@@ -89,12 +89,14 @@ export function ShareDialog({
         {isOwner && !paymentMessage && (
           <p className="text-sm text-muted-foreground">
             Want to tell people how to pay you?{" "}
-            <Link
-              href={`/tab/${slug}/edit`}
-              className="font-medium text-foreground underline underline-offset-4"
-            >
-              Add a payment note
-            </Link>
+            <PaymentNoteDialog slug={slug} message={paymentMessage}>
+              <button
+                type="button"
+                className="font-medium text-foreground underline underline-offset-4"
+              >
+                Add a payment note
+              </button>
+            </PaymentNoteDialog>
           </p>
         )}
 
