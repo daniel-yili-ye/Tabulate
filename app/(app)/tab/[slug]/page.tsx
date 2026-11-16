@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { PencilIcon } from "lucide-react";
 import { ReceiptDialog } from "@/components/receipt-dialog";
 import { Button } from "@/components/ui/button";
-import { PaymentNote } from "@/features/tabs/components/payment-note";
 import { ShareDialog } from "@/features/tabs/components/share-dialog";
 import { TabAmounts } from "@/features/tabs/components/tab-amounts";
 import { formatDate } from "@/features/tabs/format";
@@ -74,11 +73,6 @@ export default async function TabPage({
         </div>
       </div>
 
-      <PaymentNote
-        slug={tab.slug}
-        message={tab.paymentMessage}
-        isOwner={tab.isOwner}
-      />
       <TabAmounts tab={tab} ownerCurrency={ownerCurrency} />
 
       {!tab.isOwner && (

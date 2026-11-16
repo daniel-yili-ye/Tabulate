@@ -6,10 +6,13 @@ import {
   CircleCheckIcon,
   Loader2Icon,
   PencilIcon,
+  PlusIcon,
+  UserCheckIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CurrencySelect } from "@/components/currency-select";
 import { MoneyInput } from "@/components/money-input";
+import { SettingCard } from "@/components/setting-card";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,6 +34,7 @@ import type { CurrencyCode } from "../currency";
 import { formatCents } from "../format";
 import type { SharedTab } from "../schema";
 import { computeSplit } from "../split";
+import { PaymentNote } from "./payment-note";
 import { TabSummary } from "./tab-summary";
 
 interface ConversionDialogProps {
@@ -87,8 +91,8 @@ function ConversionDialog({
           </Button>
         ) : (
           <Button variant="outline" size="sm">
-            <ArrowLeftRightIcon data-icon="inline-start" />
-            Charged in another currency?
+            <PlusIcon data-icon="inline-start" />
+            Add
           </Button>
         )}
       </DialogTrigger>
@@ -224,16 +228,16 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
 
   return (
     <div className="space-y-3">
+      <PaymentNote slug={tab.slug} message={tab.paymentMessage} isOwner={tab.isOwner} />
+
       {conversion ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4">
-          <div className="min-w-0 text-sm">
-            <p className="font-medium">
-              {formatCents(receiptSplit.totalCents, tab.currency)} {tab.currency} was
-              charged as {formatCents(conversion.totalCents, conversion.currency)}{" "}
-              {conversion.currency}
-            </p>
-            <p className="text-muted-foreground tabular-nums">
-              1 {tab.currency} ={" "}
+        <SettingCard
+          icon={<ArrowLeftRightIcon />}
+          title={`Charged as ${formatCents(conversion.totalCents, conversion.currency)} ${conversion.currency}`}
+          description={
+            <span className="tabular-nums">
+              {formatCents(receiptSplit.totalCents, tab.currency)} {tab.currency} · 1{" "}
+              {tab.currency} ={" "}
               {rateFormat.format(
                 impliedRate(
                   { currency: tab.currency, totalCents: receiptSplit.totalCents },
@@ -241,58 +245,71 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
                 ),
               )}{" "}
               {conversion.currency}
-            </p>
+            </span>
+          }
+        >
+          <div
+            role="group"
+            aria-label="Show amounts in"
+            className="flex gap-0.5 rounded-lg border bg-background p-0.5"
+          >
+            {(
+              [
+                ["receipt", tab.currency],
+                ["charged", conversion.currency],
+              ] as const
+            ).map(([option, code]) => (
+              <Button
+                key={option}
+                size="sm"
+                variant={view === option ? "secondary" : "ghost"}
+                aria-pressed={view === option}
+                onClick={() => setView(option)}
+              >
+                {code}
+              </Button>
+            ))}
           </div>
-          <div className="flex items-center gap-1">
-            <div
-              role="group"
-              aria-label="Show amounts in"
-              className="flex gap-0.5 rounded-lg border p-0.5"
-            >
-              {(
-                [
-                  ["receipt", tab.currency],
-                  ["charged", conversion.currency],
-                ] as const
-              ).map(([option, code]) => (
-                <Button
-                  key={option}
-                  size="sm"
-                  variant={view === option ? "secondary" : "ghost"}
-                  aria-pressed={view === option}
-                  onClick={() => setView(option)}
-                >
-                  {code}
-                </Button>
-              ))}
-            </div>
-            {dialog}
-          </div>
-        </div>
+          {dialog}
+        </SettingCard>
       ) : (
-        dialog && <div className="flex justify-end">{dialog}</div>
+        dialog && (
+          <SettingCard
+            empty
+            icon={<ArrowLeftRightIcon />}
+            title="Charged in another currency?"
+            description="Show what everyone owes in the currency you paid in."
+          >
+            {dialog}
+          </SettingCard>
+        )
       )}
 
-      {(paidCount > 0 || tab.isOwner) && (
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          {paidCount === people ? (
-            <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-500">
-              <CircleCheckIcon className="size-4" />
-              Everyone has paid
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground tabular-nums">
-              {paidCount} of {people} paid
-            </p>
-          )}
-          {tab.isOwner && (
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              Let others mark as paid
-              <Switch checked={allowGuestPaid} onCheckedChange={changeAllowGuestPaid} />
-            </label>
-          )}
-        </div>
+      {tab.isOwner && (
+        <SettingCard
+          icon={<UserCheckIcon />}
+          title="Let others mark as paid"
+          description="Anyone with the link can mark a share as paid."
+        >
+          <Switch
+            aria-label="Let others mark as paid"
+            checked={allowGuestPaid}
+            onCheckedChange={changeAllowGuestPaid}
+          />
+        </SettingCard>
       )}
+
+      {paidCount > 0 &&
+        (paidCount === people ? (
+          <p className="flex items-center gap-1.5 pt-3 text-sm font-medium text-emerald-600 dark:text-emerald-500">
+            <CircleCheckIcon className="size-4" />
+            Everyone has paid
+          </p>
+        ) : (
+          <p className="pt-3 text-sm text-muted-foreground tabular-nums">
+            {paidCount} of {people} paid
+          </p>
+        ))}
 
       <TabSummary
         tab={shownTab}

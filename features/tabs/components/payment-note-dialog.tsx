@@ -37,9 +37,9 @@ export function PaymentNoteDialog({ slug, message, children }: PaymentNoteDialog
     setOpen(next);
   };
 
-  const save = () =>
+  const save = (note: string) =>
     startTransition(async () => {
-      const result = await setTabPaymentMessage(slug, draft);
+      const result = await setTabPaymentMessage(slug, note);
       if (result?.error) {
         toast.error(result.error);
         return;
@@ -65,7 +65,7 @@ export function PaymentNoteDialog({ slug, message, children }: PaymentNoteDialog
             // This dialog can sit inside another form-less dialog; keep the
             // submit to itself.
             event.stopPropagation();
-            save();
+            save(draft);
           }}
         >
           <FieldGroup>
@@ -98,10 +98,22 @@ export function PaymentNoteDialog({ slug, message, children }: PaymentNoteDialog
                 </span>
               </FieldDescription>
             </Field>
-            <Button type="submit" disabled={pending} className="self-start">
-              {pending && <Loader2Icon className="animate-spin" data-icon="inline-start" />}
-              Save
-            </Button>
+            <div className="flex flex-wrap justify-between gap-2">
+              <Button type="submit" disabled={pending}>
+                {pending && <Loader2Icon className="animate-spin" data-icon="inline-start" />}
+                Save
+              </Button>
+              {message && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={pending}
+                  onClick={() => save("")}
+                >
+                  Remove note
+                </Button>
+              )}
+            </div>
           </FieldGroup>
         </form>
       </DialogContent>

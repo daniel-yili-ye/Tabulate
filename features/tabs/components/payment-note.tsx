@@ -1,4 +1,5 @@
 import { PencilIcon, PlusIcon, WalletIcon } from "lucide-react";
+import { SettingCard } from "@/components/setting-card";
 import { Button } from "@/components/ui/button";
 import { PaymentNoteDialog } from "./payment-note-dialog";
 
@@ -17,33 +18,24 @@ export function PaymentNote({ slug, message, isOwner }: PaymentNoteProps) {
     if (!isOwner) return null;
 
     return (
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-dashed p-4">
-        <WalletIcon className="size-5 shrink-0 text-muted-foreground" />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">No payment note yet</p>
-          <p className="text-sm text-muted-foreground">
-            Tell everyone how to pay you back.
-          </p>
-        </div>
+      <SettingCard
+        empty
+        icon={<WalletIcon />}
+        title="No payment note yet"
+        description="Tell everyone how to pay you back."
+      >
         <PaymentNoteDialog slug={slug} message={message}>
           <Button variant="outline" size="sm">
             <PlusIcon data-icon="inline-start" />
             Add a note
           </Button>
         </PaymentNoteDialog>
-      </div>
+      </SettingCard>
     );
   }
 
   return (
-    <div className="flex items-start gap-3 rounded-xl border bg-muted/40 p-4">
-      <WalletIcon className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium">Payment Note</p>
-        <p className="text-sm break-words whitespace-pre-wrap text-muted-foreground">
-          {message}
-        </p>
-      </div>
+    <SettingCard icon={<WalletIcon />} title="Payment note" description={message}>
       {isOwner && (
         <PaymentNoteDialog slug={slug} message={message}>
           <Button variant="ghost" size="icon" aria-label="Edit payment note">
@@ -51,6 +43,6 @@ export function PaymentNote({ slug, message, isOwner }: PaymentNoteProps) {
           </Button>
         </PaymentNoteDialog>
       )}
-    </div>
+    </SettingCard>
   );
 }
