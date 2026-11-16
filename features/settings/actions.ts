@@ -18,6 +18,7 @@ export async function updateProfile(
 
   const parsed = profileSchema.safeParse({
     paymentMessage: formData.get("paymentMessage"),
+    currency: formData.get("currency"),
   });
   if (!parsed.success) {
     return { status: "error", message: parsed.error.issues[0]?.message };
@@ -26,7 +27,7 @@ export async function updateProfile(
   const supabase = await createClient();
   const { error } = await supabase
     .from("profiles")
-    .update({ payment_message: parsed.data.paymentMessage })
+    .update({ payment_message: parsed.data.paymentMessage, currency: parsed.data.currency })
     .eq("id", user.id);
   if (error) {
     console.error("update profile failed", error);

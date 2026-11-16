@@ -4,13 +4,20 @@ import { formatCents } from "@/features/tabs/format";
 interface AmountRowProps {
   label: string;
   cents: number;
+  currency: string;
   /** "discount" shows a negative green amount, "total" is emphasised. */
   tone?: "default" | "discount" | "total";
   /** Hide the row when the amount is zero (optional lines like tip). */
   hideZero?: boolean;
 }
 
-export function AmountRow({ label, cents, tone = "default", hideZero }: AmountRowProps) {
+export function AmountRow({
+  label,
+  cents,
+  currency,
+  tone = "default",
+  hideZero,
+}: AmountRowProps) {
   if (hideZero && cents === 0) return null;
 
   return (
@@ -30,7 +37,7 @@ export function AmountRow({ label, cents, tone = "default", hideZero }: AmountRo
         )}
       >
         {tone === "discount" && "-"}
-        {formatCents(cents)}
+        {formatCents(cents, currency)}
       </span>
     </div>
   );
@@ -44,6 +51,7 @@ interface TotalsProps {
   taxCents: number;
   tipCents: number;
   totalCents: number;
+  currency: string;
   className?: string;
 }
 
@@ -56,16 +64,23 @@ export function Totals({
   taxCents,
   tipCents,
   totalCents,
+  currency,
   className,
 }: TotalsProps) {
   return (
     <div className={cn("space-y-2 rounded-lg bg-muted/60 p-4", className)}>
       {title && <h3 className="text-sm font-semibold">{title}</h3>}
-      <AmountRow label={subtotalLabel} cents={subtotalCents} />
-      <AmountRow label="Discount" cents={discountCents} tone="discount" hideZero />
-      <AmountRow label="Tax" cents={taxCents} hideZero />
-      <AmountRow label="Tip" cents={tipCents} hideZero />
-      <AmountRow label="Total" cents={totalCents} tone="total" />
+      <AmountRow label={subtotalLabel} cents={subtotalCents} currency={currency} />
+      <AmountRow
+        label="Discount"
+        cents={discountCents}
+        currency={currency}
+        tone="discount"
+        hideZero
+      />
+      <AmountRow label="Tax" cents={taxCents} currency={currency} hideZero />
+      <AmountRow label="Tip" cents={tipCents} currency={currency} hideZero />
+      <AmountRow label="Total" cents={totalCents} currency={currency} tone="total" />
     </div>
   );
 }

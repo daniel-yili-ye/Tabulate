@@ -53,6 +53,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          currency: string
           display_name: string
           id: string
           payment_message: string
@@ -60,6 +61,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          currency?: string
           display_name?: string
           id: string
           payment_message?: string
@@ -67,6 +69,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          currency?: string
           display_name?: string
           id?: string
           payment_message?: string
@@ -139,18 +142,21 @@ export type Database = {
         Row: {
           id: string
           name: string
+          paid: boolean
           position: number
           tab_id: string
         }
         Insert: {
           id?: string
           name: string
+          paid?: boolean
           position: number
           tab_id: string
         }
         Update: {
           id?: string
           name?: string
+          paid?: boolean
           position?: number
           tab_id?: string
         }
@@ -166,42 +172,54 @@ export type Database = {
       }
       tabs: {
         Row: {
+          allow_guest_paid: boolean
           business_name: string
           created_at: string
+          currency: string
           discount_cents: number
           id: string
           owner_id: string
           payment_message: string
           receipt_date: string
           receipt_image_path: string | null
+          settle_currency: string | null
+          settle_total_cents: number | null
           slug: string
           tax_cents: number
           tip_cents: number
           updated_at: string
         }
         Insert: {
+          allow_guest_paid?: boolean
           business_name: string
           created_at?: string
+          currency?: string
           discount_cents?: number
           id?: string
           owner_id?: string
           payment_message?: string
           receipt_date: string
           receipt_image_path?: string | null
+          settle_currency?: string | null
+          settle_total_cents?: number | null
           slug: string
           tax_cents?: number
           tip_cents?: number
           updated_at?: string
         }
         Update: {
+          allow_guest_paid?: boolean
           business_name?: string
           created_at?: string
+          currency?: string
           discount_cents?: number
           id?: string
           owner_id?: string
           payment_message?: string
           receipt_date?: string
           receipt_image_path?: string | null
+          settle_currency?: string | null
+          settle_total_cents?: number | null
           slug?: string
           tax_cents?: number
           tip_cents?: number
@@ -228,6 +246,10 @@ export type Database = {
       save_tab: {
         Args: { p_create: boolean; p_slug: string; p_tab: Json }
         Returns: string
+      }
+      set_participant_paid: {
+        Args: { p_paid: boolean; p_participant_id: string; p_slug: string }
+        Returns: boolean
       }
     }
     Enums: {

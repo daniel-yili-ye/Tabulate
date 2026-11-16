@@ -2,6 +2,7 @@ import "server-only";
 
 import { generateText, Output } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import type { CurrencyCode } from "@/features/tabs/currency";
 import {
   EXTRACTION_PROMPT,
   extractionSchema,
@@ -23,6 +24,8 @@ interface ReadReceiptInput {
   apiKey: string;
   image: Uint8Array;
   mediaType: string;
+  /** The user's own currency, for receipts that do not say which they are in. */
+  fallbackCurrency: CurrencyCode;
   signal: AbortSignal;
 }
 
@@ -34,6 +37,7 @@ export async function readReceipt({
   apiKey,
   image,
   mediaType,
+  fallbackCurrency,
   signal,
 }: ReadReceiptInput): Promise<ParsedReceipt | null> {
   const google = createGoogleGenerativeAI({ apiKey });
@@ -55,5 +59,5 @@ export async function readReceipt({
     abortSignal: signal,
   });
 
-  return normalizeExtraction(output);
+  return normalizeExtraction(output, fallbackCurrency);
 }

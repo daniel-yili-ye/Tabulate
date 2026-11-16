@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { DEFAULT_CURRENCY, isCurrency } from "./currency";
 import { profileSchema, sharedTabSchema, type Profile, type SharedTab } from "./schema";
 
 /** One tab by its share slug. Public: works with or without a session. */
@@ -17,8 +18,11 @@ export interface TabSummary {
   slug: string;
   businessName: string;
   date: string;
+  currency: string;
   totalCents: number;
   people: number;
+  /** How many of those people have been marked as paid. */
+  paid: number;
 }
 
 export const TABS_PER_PAGE = 10;
@@ -52,7 +56,7 @@ export async function listMyTabs(filters: TabFilters): Promise<TabPage> {
     let query = supabase
       .from("tabs")
       .select(
-        "slug, business_name, receipt_date, tax_cents, tip_cents, discount_cents, tab_items(price_cents), tab_participants(count)",
+        "slug, business_name, receipt_date, currency, tax_cents, tip_cents, discount_cents, tab_items(price_cents), tab_participants(paid)",
         { count: "exact" },
       );
     if (filters.search) {
@@ -89,11 +93,12 @@ type TabRow = {
   slug: string;
   business_name: string;
   receipt_date: string;
+  currency: string;
   tax_cents: number;
   tip_cents: number;
   discount_cents: number;
   tab_items: { price_cents: number }[];
-  tab_participants: { count: number }[];
+  tab_participants: { paid: boolean }[];
 };
 
 function toSummary(tab: TabRow): TabSummary {
@@ -101,7 +106,9 @@ function toSummary(tab: TabRow): TabSummary {
     slug: tab.slug,
     businessName: tab.business_name,
     date: tab.receipt_date,
-    people: tab.tab_participants[0]?.count ?? 0,
+    currency: tab.currency,
+    people: tab.tab_participants.length,
+    paid: tab.tab_participants.filter((person) => person.paid).length,
     totalCents:
       tab.tab_items.reduce((sum, item) => sum + item.price_cents, 0) +
       tab.tax_cents +
@@ -114,11 +121,12 @@ export const getMyProfile = cache(async (userId: string): Promise<Profile> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("payment_message")
+    .select("payment_message, currency")
     .eq("id", userId)
     .maybeSingle();
   if (error) throw new Error(`Could not load profile: ${error.message}`);
   return profileSchema.parse({
     paymentMessage: data?.payment_message ?? "",
+    currency: isCurrency(data?.currency) ? data.currency : DEFAULT_CURRENCY,
   });
 });

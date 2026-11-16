@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toCurrency, type CurrencyCode } from "../tabs/currency.ts";
 import { dollarsToCents, formatCents, parseIsoDate } from "../tabs/format.ts";
 import { LIMITS } from "../tabs/limits.ts";
 
@@ -12,6 +13,12 @@ export const extractionSchema = z.object({
     .string()
     .nullable()
     .describe("Transaction date as YYYY-MM-DD, or null if it is not printed."),
+  currency: z
+    .string()
+    .nullable()
+    .describe(
+      "ISO 4217 code of the currency the receipt is priced in, e.g. EUR. Null unless you are confident.",
+    ),
   items: z
     .array(
       z.object({
@@ -52,6 +59,8 @@ Rules:
 - Do not list subtotal, tax, tip, service charge, discount, total, payment or change lines as items; use the dedicated fields.
 - Discounts and promotions go in "discount" as a positive number, never as negative items.
 - Only report tax, tip and discount that are printed. Do not calculate or guess them. Ignore suggested tip amounts.
+- Report amounts exactly as printed, in the receipt's own currency. Never convert them.
+- Set currency only when you are confident: a printed currency code, a symbol that belongs to one currency (€, £), or a symbol shared by several currencies ($, kr, ¥) together with a printed address, country, phone number or tax name (GST/HST, VAT, IVA) that settles which one. Otherwise use null.
 - Never invent items or prices. If a price is unreadable, use null.
 - If the image is not a receipt or cannot be read, set isReceipt to false and return an empty items list.`;
 
@@ -59,6 +68,10 @@ export interface ParsedReceipt {
   businessName: string;
   /** YYYY-MM-DD as printed, or null. The client checks it against its own "today". */
   date: string | null;
+  /** The receipt's currency, or the user's own when the receipt does not say. */
+  currency: CurrencyCode;
+  /** False when `currency` is the fallback rather than read from the receipt. */
+  currencyDetected: boolean;
   items: { name: string; priceCents: number }[];
   taxCents: number;
   tipCents: number;
@@ -69,16 +82,26 @@ export interface ParsedReceipt {
 
 const clampCents = (cents: number) => Math.min(Math.max(cents, 0), LIMITS.maxCents);
 
-/** Turn raw model output into trusted, bounded values. Null if nothing usable. */
-export function normalizeExtraction(raw: Extraction): ParsedReceipt | null {
+/**
+ * Turn raw model output into trusted, bounded values. Null if nothing usable.
+ * `fallbackCurrency` is used when the model could not tell the currency.
+ */
+export function normalizeExtraction(
+  raw: Extraction,
+  fallbackCurrency: CurrencyCode,
+): ParsedReceipt | null {
   if (!raw.isReceipt) return null;
 
-  let discountCents = Math.abs(dollarsToCents(raw.discount));
+  const detected = toCurrency(raw.currency);
+  const currency = detected ?? fallbackCurrency;
+  const toCents = (amount: number | null) => dollarsToCents(amount, currency);
+
+  let discountCents = Math.abs(toCents(raw.discount));
   const items: ParsedReceipt["items"] = [];
 
   for (const item of raw.items) {
     const name = item.name.trim();
-    const cents = dollarsToCents(item.lineTotal);
+    const cents = toCents(item.lineTotal);
     if (cents < 0) {
       // A negative line is a discount the model left among the items.
       discountCents += -cents;
@@ -100,21 +123,23 @@ export function normalizeExtraction(raw: Extraction): ParsedReceipt | null {
 
   if (items.length === 0) return null;
 
-  const taxCents = clampCents(dollarsToCents(raw.tax));
-  const tipCents = clampCents(dollarsToCents(raw.tip));
+  const taxCents = clampCents(toCents(raw.tax));
+  const tipCents = clampCents(toCents(raw.tip));
   const subtotalCents = items.reduce((sum, item) => sum + item.priceCents, 0);
   discountCents = Math.min(clampCents(discountCents), subtotalCents);
 
   const computedTotal = subtotalCents + taxCents + tipCents - discountCents;
-  const printedTotal = raw.total == null ? null : dollarsToCents(raw.total);
+  const printedTotal = raw.total == null ? null : toCents(raw.total);
   const warning =
     printedTotal !== null && printedTotal !== computedTotal
-      ? `The items add up to ${formatCents(computedTotal)}, but the receipt total reads ${formatCents(printedTotal)}. Double-check them against the photo.`
+      ? `The items add up to ${formatCents(computedTotal, currency)}, but the receipt total reads ${formatCents(printedTotal, currency)}. Double-check them against the photo.`
       : null;
 
   return {
     businessName: (raw.businessName ?? "").trim().slice(0, LIMITS.businessNameLength),
     date: raw.date && parseIsoDate(raw.date) ? raw.date : null,
+    currency,
+    currencyDetected: detected !== null,
     items,
     taxCents,
     tipCents,

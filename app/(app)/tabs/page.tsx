@@ -122,10 +122,19 @@ export default async function TabsPage({ searchParams }: PageProps<"/tabs">) {
                 </Link>
                 <p className="text-sm text-muted-foreground">
                   {formatDate(tab.date)} · {tab.people} people
+                  {tab.paid > 0 &&
+                    (tab.paid === tab.people ? (
+                      <span className="font-medium text-emerald-600 dark:text-emerald-500">
+                        {" "}
+                        · Settled
+                      </span>
+                    ) : (
+                      ` · ${tab.paid} of ${tab.people} paid`
+                    ))}
                 </p>
               </div>
               <span className="font-semibold tabular-nums">
-                {formatCents(tab.totalCents)}
+                {formatCents(tab.totalCents, tab.currency)}
               </span>
               <TabRowMenu slug={tab.slug} businessName={tab.businessName} />
             </li>

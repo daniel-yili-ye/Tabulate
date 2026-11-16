@@ -41,6 +41,8 @@ export interface ItemCountRequest {
   id: number;
   mode: ItemCountMode;
   item: TabItem;
+  /** The tab's currency, for showing the prices. */
+  currency: string;
 }
 
 interface ItemCountDrawerProps {
@@ -76,7 +78,7 @@ export function ItemCountDrawer({ open, request, onConfirm, onClose }: ItemCount
 }
 
 function ItemCountBody({
-  request: { mode, item },
+  request: { mode, item, currency },
   onConfirm,
   onClose,
 }: Pick<ItemCountDrawerProps, "onConfirm" | "onClose"> & { request: ItemCountRequest }) {
@@ -126,16 +128,18 @@ function ItemCountBody({
         </div>
 
         <div className="space-y-1">
-          <AmountRow label="Item price" cents={item.priceCents} />
+          <AmountRow label="Item price" cents={item.priceCents} currency={currency} />
           {mode === "split" ? (
             <AmountRow
               label="Price per part"
               cents={Math.floor(item.priceCents / count)}
+              currency={currency}
             />
           ) : (
             <AmountRow
               label="Added to the tab"
               cents={item.priceCents * count}
+              currency={currency}
             />
           )}
         </div>

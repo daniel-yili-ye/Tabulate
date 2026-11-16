@@ -26,7 +26,6 @@ import { receiptImageUrl } from "@/lib/env";
 import { newItem } from "./draft";
 import { AssignStep } from "./steps/assign-step";
 import { ItemsStep } from "./steps/items-step";
-import { PaymentStep } from "./steps/payment-step";
 import { PeopleStep } from "./steps/people-step";
 import { ReceiptStep, type ScanStatus } from "./steps/receipt-step";
 
@@ -47,16 +46,12 @@ const STEPS = [
     title: "Who had what?",
     description: "Pick who shares each item and how it's divided.",
   },
-  {
-    title: "How should people pay?",
-    description: "Add a note telling everyone how to pay you back.",
-  },
 ] as const;
 
 const ITEMS_STEP = 1;
 const PEOPLE_STEP = 2;
 const ASSIGN_STEP = 3;
-const LAST_STEP = STEPS.length - 1;
+const LAST_STEP = ASSIGN_STEP;
 
 /** The fields each step is responsible for, validated before moving on. */
 function fieldsForStep(step: number, draft: TabDraft): FieldPath<TabDraft>[] {
@@ -64,6 +59,7 @@ function fieldsForStep(step: number, draft: TabDraft): FieldPath<TabDraft>[] {
     return [
       "businessName",
       "date",
+      "currency",
       "taxCents",
       "tipCents",
       "discountCents",
@@ -86,6 +82,7 @@ function firstStepWithError(errors: FieldErrors<TabDraft>): number {
   if (
     errors.businessName ||
     errors.date ||
+    errors.currency ||
     errors.taxCents ||
     errors.tipCents ||
     errors.discountCents ||
@@ -94,8 +91,7 @@ function firstStepWithError(errors: FieldErrors<TabDraft>): number {
     return ITEMS_STEP;
   }
   if (errors.participants) return PEOPLE_STEP;
-  if (errors.items) return ASSIGN_STEP;
-  return LAST_STEP;
+  return ASSIGN_STEP;
 }
 
 interface TabEditorProps {
@@ -191,13 +187,18 @@ export function TabEditor({ userId, slug, initialDraft }: TabEditorProps) {
         receipt.date && receipt.date <= today ? receipt.date : today,
         set,
       );
+      form.setValue("currency", receipt.currency, set);
       form.setValue("taxCents", receipt.taxCents, set);
       form.setValue("tipCents", receipt.tipCents, set);
       form.setValue("discountCents", receipt.discountCents, set);
       form.setValue("items", receipt.items.map((item) => newItem(item)), set);
 
       if (receipt.warning) toast.warning(receipt.warning, { duration: 10_000 });
-      else toast.success("Receipt read. Give it a quick check.");
+      else if (!receipt.currencyDetected) {
+        toast.success(
+          `Receipt read. We couldn't tell the currency, so it's set to ${receipt.currency}.`,
+        );
+      } else toast.success("Receipt read. Give it a quick check.");
       goToStep(ITEMS_STEP);
     } catch (error) {
       if (signal.aborted) {
@@ -234,7 +235,14 @@ export function TabEditor({ userId, slug, initialDraft }: TabEditorProps) {
     const valid = await form.trigger(fieldsForStep(step, form.getValues()), {
       shouldFocus: true,
     });
-    if (valid) goToStep(step + 1);
+    if (!valid) return;
+    // Adding, deleting, splitting or duplicating an item makes the form check
+    // the whole items list in the background, which flags every item that has
+    // nobody assigned yet. Before the assign step that is not a mistake, so
+    // those errors are dropped rather than greeting the user there in red.
+    // This step's own item fields have just passed, so nothing real is lost.
+    if (step < ASSIGN_STEP) form.clearErrors("items");
+    goToStep(step + 1);
   };
 
   const save = form.handleSubmit(
@@ -297,8 +305,7 @@ export function TabEditor({ userId, slug, initialDraft }: TabEditorProps) {
         )}
         {step === ITEMS_STEP && <ItemsStep />}
         {step === PEOPLE_STEP && <PeopleStep />}
-        {step === ASSIGN_STEP && <AssignStep />}
-        {step === LAST_STEP && <PaymentStep />}
+        {step === LAST_STEP && <AssignStep />}
 
         <div className="flex justify-between gap-2 border-t pt-4">
           <Button

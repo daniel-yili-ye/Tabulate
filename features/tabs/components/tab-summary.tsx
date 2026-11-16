@@ -1,11 +1,13 @@
-import { ReceiptTextIcon } from "lucide-react";
-import { Totals } from "@/components/amount-rows";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ReceiptTextIcon,
+} from "lucide-react";
+import { Accordion as AccordionPrimitive } from "radix-ui";
+import { Totals } from "@/components/amount-rows";
+import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import { formatCents } from "../format";
 import type { PersonSplit, SplitInput, SplitResult } from "../split";
 
@@ -15,6 +17,9 @@ function SummaryCard({
   title,
   subtitle,
   totalCents,
+  currency,
+  paid = false,
+  onPaidChange,
   children,
 }: {
   value: string;
@@ -22,24 +27,67 @@ function SummaryCard({
   title: string;
   subtitle: string;
   totalCents: number;
+  currency: string;
+  paid?: boolean;
+  /** Shows a paid switch in the header. Absent when the viewer may not change it. */
+  onPaidChange?: (paid: boolean) => void;
   children: React.ReactNode;
 }) {
   return (
-    <AccordionItem value={value} className="rounded-xl border px-4 last:border-b">
-      <AccordionTrigger className="items-center gap-3 py-3 hover:no-underline">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium uppercase">
-          {avatar}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium">{title}</span>
-          <span className="block text-sm font-normal text-muted-foreground">
-            {subtitle}
-          </span>
-        </span>
-        <span className="text-lg font-semibold tabular-nums">
-          {formatCents(totalCents)}
-        </span>
-      </AccordionTrigger>
+    <AccordionItem
+      value={value}
+      className={cn(
+        "rounded-xl border px-4 transition-colors last:border-b",
+        paid &&
+          "border-emerald-600/30 bg-emerald-500/10 dark:border-emerald-500/30",
+      )}
+    >
+      {/*
+        Three columns: who, the paid switch, the amount. The trigger spans all
+        three so the whole row opens the card, and the switch sits on top of
+        its middle column as a sibling, because a button cannot hold a switch.
+      */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-x-3">
+        <AccordionPrimitive.Header className="col-span-full row-start-1 grid grid-cols-subgrid">
+          <AccordionPrimitive.Trigger className="group/trigger col-span-full grid grid-cols-subgrid items-center rounded-lg py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+            <span className="flex min-w-0 items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium uppercase">
+                {avatar}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate font-medium">{title}</span>
+                <span className="block text-sm text-muted-foreground">{subtitle}</span>
+              </span>
+            </span>
+            <span className="col-start-3 flex items-center gap-3">
+              <span className="text-lg font-semibold tabular-nums">
+                {formatCents(totalCents, currency)}
+              </span>
+              <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground group-aria-expanded/trigger:hidden" />
+              <ChevronUpIcon className="hidden size-4 shrink-0 text-muted-foreground group-aria-expanded/trigger:inline" />
+            </span>
+          </AccordionPrimitive.Trigger>
+        </AccordionPrimitive.Header>
+        {onPaidChange ? (
+          <label className="relative z-10 col-start-2 row-start-1 flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Paid</span>
+            <Switch
+              aria-label={`${title} has paid`}
+              className="data-checked:bg-emerald-600"
+              checked={paid}
+              onCheckedChange={onPaidChange}
+            />
+          </label>
+        ) : (
+          // Read-only: the same place and label as the switch, without
+          // anything that looks like it can be pressed.
+          paid && (
+            <span className="pointer-events-none col-start-2 row-start-1 text-sm text-muted-foreground">
+              Paid
+            </span>
+          )
+        )}
+      </div>
       <AccordionContent className="space-y-3 pb-4">{children}</AccordionContent>
     </AccordionItem>
   );
@@ -47,8 +95,10 @@ function SummaryCard({
 
 function LineItems({
   lines,
+  currency,
 }: {
   lines: { key: string; name: string; note?: string; cents: number }[];
+  currency: string;
 }) {
   return (
     <ul className="divide-y text-sm">
@@ -60,14 +110,22 @@ function LineItems({
               <span className="block text-xs text-muted-foreground">{line.note}</span>
             )}
           </span>
-          <span className="font-medium tabular-nums">{formatCents(line.cents)}</span>
+          <span className="font-medium tabular-nums">{formatCents(line.cents, currency)}</span>
         </li>
       ))}
     </ul>
   );
 }
 
-function PersonCard({ person }: { person: PersonSplit }) {
+interface PersonCardProps {
+  person: PersonSplit;
+  currency: string;
+  paid: boolean;
+  /** Absent when the viewer may not change who has paid. */
+  onPaidChange?: (paid: boolean) => void;
+}
+
+function PersonCard({ person, currency, paid, onPaidChange }: PersonCardProps) {
   const count = person.items.length;
 
   return (
@@ -77,14 +135,18 @@ function PersonCard({ person }: { person: PersonSplit }) {
       title={person.name}
       subtitle={`${count} item${count === 1 ? "" : "s"}`}
       totalCents={person.totalCents}
+      currency={currency}
+      paid={paid}
+      onPaidChange={onPaidChange}
     >
       <LineItems
+        currency={currency}
         lines={person.items.map((item, index) => ({
           key: `${index}`,
           name: item.name,
           note:
             item.sharedBy > 1
-              ? `${formatCents(item.priceCents)} shared by ${item.sharedBy}`
+              ? `${formatCents(item.priceCents, currency)} shared by ${item.sharedBy}`
               : undefined,
           cents: item.cents,
         }))}
@@ -96,17 +158,43 @@ function PersonCard({ person }: { person: PersonSplit }) {
         taxCents={person.taxCents}
         tipCents={person.tipCents}
         totalCents={person.totalCents}
+        currency={currency}
       />
     </SummaryCard>
   );
 }
 
+interface TabSummaryProps {
+  tab: SplitInput;
+  split: SplitResult;
+  /** The currency `tab` and `split` are in. */
+  currency: string;
+  /** Ids of the people who have paid their share. */
+  paidIds: readonly string[];
+  /** Absent when the viewer may not change who has paid. */
+  onPaidChange?: (participantId: string, paid: boolean) => void;
+}
+
 /** Everyone's totals plus the full receipt, as expandable cards. */
-export function TabSummary({ tab, split }: { tab: SplitInput; split: SplitResult }) {
+export function TabSummary({
+  tab,
+  split,
+  currency,
+  paidIds,
+  onPaidChange,
+}: TabSummaryProps) {
   return (
     <Accordion type="multiple" className="space-y-3">
       {split.people.map((person) => (
-        <PersonCard key={person.id} person={person} />
+        <PersonCard
+          key={person.id}
+          person={person}
+          currency={currency}
+          paid={paidIds.includes(person.id)}
+          onPaidChange={
+            onPaidChange && ((paid: boolean) => onPaidChange(person.id, paid))
+          }
+        />
       ))}
       <SummaryCard
         value="receipt"
@@ -114,8 +202,10 @@ export function TabSummary({ tab, split }: { tab: SplitInput; split: SplitResult
         title="Full receipt"
         subtitle={`${tab.items.length} item${tab.items.length === 1 ? "" : "s"}`}
         totalCents={split.totalCents}
+        currency={currency}
       >
         <LineItems
+          currency={currency}
           lines={tab.items.map((item, index) => ({
             key: `${index}`,
             name: item.name || `Item ${index + 1}`,
@@ -128,6 +218,7 @@ export function TabSummary({ tab, split }: { tab: SplitInput; split: SplitResult
           taxCents={tab.taxCents}
           tipCents={tab.tipCents}
           totalCents={split.totalCents}
+          currency={currency}
         />
       </SummaryCard>
     </Accordion>

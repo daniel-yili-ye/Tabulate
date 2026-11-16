@@ -4,13 +4,12 @@ import { notFound } from "next/navigation";
 import { PencilIcon } from "lucide-react";
 import { ReceiptDialog } from "@/components/receipt-dialog";
 import { Button } from "@/components/ui/button";
-import { PaymentNote } from "@/features/tabs/components/payment-note";
 import { ShareDialog } from "@/features/tabs/components/share-dialog";
-import { TabSummary } from "@/features/tabs/components/tab-summary";
+import { TabAmounts } from "@/features/tabs/components/tab-amounts";
 import { formatDate } from "@/features/tabs/format";
-import { getSharedTab } from "@/features/tabs/queries";
-import { computeSplit } from "@/features/tabs/split";
+import { getMyProfile, getSharedTab } from "@/features/tabs/queries";
 import { receiptImageUrl } from "@/lib/env";
+import { getUser } from "@/lib/supabase/server";
 
 export async function generateMetadata({
   params,
@@ -38,7 +37,9 @@ export default async function TabPage({
   const tab = await getSharedTab(slug);
   if (!tab) notFound();
 
-  const split = computeSplit(tab);
+  // The owner's own currency is the likely one to convert a foreign tab into.
+  const owner = tab.isOwner ? await getUser() : null;
+  const ownerCurrency = owner ? (await getMyProfile(owner.id)).currency : null;
 
   return (
     <div className="space-y-6">
@@ -72,8 +73,7 @@ export default async function TabPage({
         </div>
       </div>
 
-      <PaymentNote message={tab.paymentMessage} />
-      <TabSummary tab={tab} split={split} />
+      <TabAmounts tab={tab} ownerCurrency={ownerCurrency} />
 
       {!tab.isOwner && (
         <p className="text-center text-sm text-muted-foreground">
