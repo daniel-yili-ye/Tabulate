@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { LogOutIcon, ReceiptTextIcon, SettingsIcon } from "lucide-react";
+import {
+  LogOutIcon,
+  PlusIcon,
+  ReceiptTextIcon,
+  SettingsIcon,
+} from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -35,6 +40,12 @@ export function UserMenu({ email }: { email: string | null }) {
             <DropdownMenuSeparator />
           </>
         )}
+        <DropdownMenuItem asChild>
+          <Link href="/tabs/new">
+            <PlusIcon />
+            New tab
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/tabs">
             <ReceiptTextIcon />

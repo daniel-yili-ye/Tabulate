@@ -129,11 +129,8 @@ export default function HomePage() {
         </section>
       </main>
       <footer className="border-t">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-6 text-sm text-muted-foreground">
+        <div className="mx-auto max-w-5xl px-4 py-6 text-sm text-muted-foreground">
           <p>Tabulate</p>
-          <Link href="/login" className="hover:text-foreground">
-            Sign in
-          </Link>
         </div>
       </footer>
     </>
