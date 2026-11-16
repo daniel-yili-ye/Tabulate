@@ -241,7 +241,14 @@ export function TabEditor({ userId, slug, initialDraft }: TabEditorProps) {
     const valid = await form.trigger(fieldsForStep(step, form.getValues()), {
       shouldFocus: true,
     });
-    if (valid) goToStep(step + 1);
+    if (!valid) return;
+    // Adding, deleting, splitting or duplicating an item makes the form check
+    // the whole items list in the background, which flags every item that has
+    // nobody assigned yet. Before the assign step that is not a mistake, so
+    // those errors are dropped rather than greeting the user there in red.
+    // This step's own item fields have just passed, so nothing real is lost.
+    if (step < ASSIGN_STEP) form.clearErrors("items");
+    goToStep(step + 1);
   };
 
   const save = form.handleSubmit(
