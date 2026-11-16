@@ -71,9 +71,14 @@ export function SettingsForm({ profile }: { profile: Profile }) {
 
         <Field>
           <FieldLabel htmlFor="currency">Your currency</FieldLabel>
+          {/*
+            Submitted through this input, not the select's own form support:
+            that resets to the value the page loaded with after every save, so
+            the next save would quietly put the old currency back.
+          */}
+          <input type="hidden" name="currency" value={currency} />
           <CurrencySelect
             id="currency"
-            name="currency"
             value={currency}
             onValueChange={setCurrency}
             className="sm:w-72"

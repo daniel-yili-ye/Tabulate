@@ -21,8 +21,6 @@ interface CurrencySelectProps {
   /** A currency to leave out, e.g. the one being converted from. */
   exclude?: string;
   id?: string;
-  /** Set to submit the value with a plain form. */
-  name?: string;
   className?: string;
   "aria-invalid"?: boolean;
   "aria-label"?: string;
@@ -33,13 +31,11 @@ export function CurrencySelect({
   onValueChange,
   exclude,
   id,
-  name,
   className,
   ...aria
 }: CurrencySelectProps) {
   return (
     <Select
-      name={name}
       value={value}
       onValueChange={(next) => onValueChange(next as CurrencyCode)}
     >
