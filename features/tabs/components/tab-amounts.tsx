@@ -233,11 +233,10 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
       {conversion ? (
         <SettingCard
           icon={<ArrowLeftRightIcon />}
-          title={`Charged as ${formatCents(conversion.totalCents, conversion.currency)} ${conversion.currency}`}
+          title={`${formatCents(receiptSplit.totalCents, tab.currency)} ${tab.currency} charged as ${formatCents(conversion.totalCents, conversion.currency)} ${conversion.currency}`}
           description={
             <span className="tabular-nums">
-              {formatCents(receiptSplit.totalCents, tab.currency)} {tab.currency} · 1{" "}
-              {tab.currency} ={" "}
+              1 {tab.currency} ={" "}
               {rateFormat.format(
                 impliedRate(
                   { currency: tab.currency, totalCents: receiptSplit.totalCents },
