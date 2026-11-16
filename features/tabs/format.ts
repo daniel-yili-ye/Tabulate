@@ -1,17 +1,20 @@
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
+import { currencyDigits, currencyFormatter } from "./currency.ts";
 
-/** 1234 -> "$12.34" */
-export function formatCents(cents: number): string {
-  return currency.format(cents / 100);
+/** 1234 in USD -> "$12.34", 1234 in JPY -> "¥1,234". */
+export function formatCents(cents: number, currency: string): string {
+  return currencyFormatter(currency).format(cents / 10 ** currencyDigits(currency));
 }
 
-/** Dollars from an untrusted source (the receipt parser) to whole cents. */
-export function dollarsToCents(dollars: number | null | undefined): number {
+/**
+ * An amount from an untrusted source (the receipt parser) to whole minor units
+ * of the given currency.
+ */
+export function dollarsToCents(
+  dollars: number | null | undefined,
+  currency: string,
+): number {
   if (dollars == null || !Number.isFinite(dollars)) return 0;
-  return Math.round(dollars * 100);
+  return Math.round(dollars * 10 ** currencyDigits(currency));
 }
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;

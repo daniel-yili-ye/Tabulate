@@ -42,7 +42,7 @@ function ExampleSplit() {
       <div className="flex items-baseline justify-between">
         <p className="font-medium">Osteria Lupo</p>
         <p className="text-sm text-muted-foreground tabular-nums">
-          {formatCents(total)}
+          {formatCents(total, "USD")}
         </p>
       </div>
       <p className="text-sm text-muted-foreground">Tax and tip included</p>
@@ -59,7 +59,7 @@ function ExampleSplit() {
               </span>
             </span>
             <span className="font-semibold tabular-nums">
-              {formatCents(person.cents)}
+              {formatCents(person.cents, "USD")}
             </span>
           </li>
         ))}

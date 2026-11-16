@@ -64,6 +64,7 @@ function fieldsForStep(step: number, draft: TabDraft): FieldPath<TabDraft>[] {
     return [
       "businessName",
       "date",
+      "currency",
       "taxCents",
       "tipCents",
       "discountCents",
@@ -86,6 +87,7 @@ function firstStepWithError(errors: FieldErrors<TabDraft>): number {
   if (
     errors.businessName ||
     errors.date ||
+    errors.currency ||
     errors.taxCents ||
     errors.tipCents ||
     errors.discountCents ||
@@ -191,13 +193,18 @@ export function TabEditor({ userId, slug, initialDraft }: TabEditorProps) {
         receipt.date && receipt.date <= today ? receipt.date : today,
         set,
       );
+      form.setValue("currency", receipt.currency, set);
       form.setValue("taxCents", receipt.taxCents, set);
       form.setValue("tipCents", receipt.tipCents, set);
       form.setValue("discountCents", receipt.discountCents, set);
       form.setValue("items", receipt.items.map((item) => newItem(item)), set);
 
       if (receipt.warning) toast.warning(receipt.warning, { duration: 10_000 });
-      else toast.success("Receipt read. Give it a quick check.");
+      else if (!receipt.currencyDetected) {
+        toast.success(
+          `Receipt read. We couldn't tell the currency, so it's set to ${receipt.currency}.`,
+        );
+      } else toast.success("Receipt read. Give it a quick check.");
       goToStep(ITEMS_STEP);
     } catch (error) {
       if (signal.aborted) {

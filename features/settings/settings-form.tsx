@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { CurrencySelect } from "@/components/currency-select";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -22,6 +23,7 @@ export function SettingsForm({ profile }: { profile: Profile }) {
   const [state, action, pending] = useActionState(updateProfile, INITIAL);
   // Controlled, because React resets uncontrolled fields after a form action.
   const [paymentMessage, setPaymentMessage] = useState(profile.paymentMessage);
+  const [currency, setCurrency] = useState(profile.currency);
 
   useEffect(() => {
     if (state.status === "saved") toast.success("Settings saved");
@@ -65,6 +67,22 @@ export function SettingsForm({ profile }: { profile: Profile }) {
           <p className="rounded-lg border bg-muted/50 p-3 text-sm break-words whitespace-pre-wrap">
             {preview}
           </p>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="currency">Your currency</FieldLabel>
+          <CurrencySelect
+            id="currency"
+            name="currency"
+            value={currency}
+            onValueChange={setCurrency}
+            className="sm:w-72"
+          />
+          <FieldDescription>
+            New tabs start in this currency, and it is used when a scan
+            can&apos;t tell which currency a receipt is in. You can change it
+            on any tab.
+          </FieldDescription>
         </Field>
 
         {state.status === "error" && <FieldError>{state.message}</FieldError>}

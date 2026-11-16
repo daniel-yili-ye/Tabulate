@@ -53,6 +53,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          currency: string
           display_name: string
           id: string
           payment_message: string
@@ -60,6 +61,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          currency?: string
           display_name?: string
           id: string
           payment_message?: string
@@ -67,6 +69,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          currency?: string
           display_name?: string
           id?: string
           payment_message?: string
@@ -168,12 +171,15 @@ export type Database = {
         Row: {
           business_name: string
           created_at: string
+          currency: string
           discount_cents: number
           id: string
           owner_id: string
           payment_message: string
           receipt_date: string
           receipt_image_path: string | null
+          settle_currency: string | null
+          settle_total_cents: number | null
           slug: string
           tax_cents: number
           tip_cents: number
@@ -182,12 +188,15 @@ export type Database = {
         Insert: {
           business_name: string
           created_at?: string
+          currency?: string
           discount_cents?: number
           id?: string
           owner_id?: string
           payment_message?: string
           receipt_date: string
           receipt_image_path?: string | null
+          settle_currency?: string | null
+          settle_total_cents?: number | null
           slug: string
           tax_cents?: number
           tip_cents?: number
@@ -196,12 +205,15 @@ export type Database = {
         Update: {
           business_name?: string
           created_at?: string
+          currency?: string
           discount_cents?: number
           id?: string
           owner_id?: string
           payment_message?: string
           receipt_date?: string
           receipt_image_path?: string | null
+          settle_currency?: string | null
+          settle_total_cents?: number | null
           slug?: string
           tax_cents?: number
           tip_cents?: number

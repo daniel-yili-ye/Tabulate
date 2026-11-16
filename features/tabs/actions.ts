@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { RECEIPTS_BUCKET } from "@/lib/env";
 import { createClient, getUser } from "@/lib/supabase/server";
-import { tabDraftSchema } from "./schema";
+import { conversionSchema, tabDraftSchema } from "./schema";
 
 export interface ActionResult {
   error: string;
@@ -68,6 +68,51 @@ export async function saveTab(
   revalidatePath("/tabs");
   revalidatePath(`/tab/${targetSlug}`);
   redirect(slug ? `/tab/${targetSlug}` : `/tab/${targetSlug}?share=1`);
+}
+
+/**
+ * Record what the owner was charged for a tab in another currency, or remove
+ * that again with `null`.
+ */
+export async function setTabConversion(
+  slug: string,
+  input: unknown,
+): Promise<ActionResult | void> {
+  const user = await getUser();
+  if (!user) return NOT_SIGNED_IN;
+  if (!SLUG.test(slug)) return { error: "Tab not found." };
+
+  const parsed = conversionSchema.nullable().safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Check the amount and try again." };
+  }
+  const conversion = parsed.data;
+
+  const supabase = await createClient();
+  // Row level security limits both queries to the caller's own tabs.
+  const { data: tab } = await supabase
+    .from("tabs")
+    .select("currency")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (!tab) return { error: "Tab not found." };
+  if (conversion?.currency === tab.currency) {
+    return { error: "Pick a currency other than the one the tab is in." };
+  }
+
+  const { error } = await supabase
+    .from("tabs")
+    .update({
+      settle_currency: conversion?.currency ?? null,
+      settle_total_cents: conversion?.totalCents ?? null,
+    })
+    .eq("slug", slug);
+  if (error) {
+    console.error("set tab conversion failed", error);
+    return { error: "Couldn't save the conversion. Try again." };
+  }
+
+  revalidatePath(`/tab/${slug}`);
 }
 
 export async function deleteTab(slug: string): Promise<ActionResult | void> {

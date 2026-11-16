@@ -15,6 +15,7 @@ function SummaryCard({
   title,
   subtitle,
   totalCents,
+  currency,
   children,
 }: {
   value: string;
@@ -22,6 +23,7 @@ function SummaryCard({
   title: string;
   subtitle: string;
   totalCents: number;
+  currency: string;
   children: React.ReactNode;
 }) {
   return (
@@ -37,7 +39,7 @@ function SummaryCard({
           </span>
         </span>
         <span className="text-lg font-semibold tabular-nums">
-          {formatCents(totalCents)}
+          {formatCents(totalCents, currency)}
         </span>
       </AccordionTrigger>
       <AccordionContent className="space-y-3 pb-4">{children}</AccordionContent>
@@ -47,8 +49,10 @@ function SummaryCard({
 
 function LineItems({
   lines,
+  currency,
 }: {
   lines: { key: string; name: string; note?: string; cents: number }[];
+  currency: string;
 }) {
   return (
     <ul className="divide-y text-sm">
@@ -60,14 +64,14 @@ function LineItems({
               <span className="block text-xs text-muted-foreground">{line.note}</span>
             )}
           </span>
-          <span className="font-medium tabular-nums">{formatCents(line.cents)}</span>
+          <span className="font-medium tabular-nums">{formatCents(line.cents, currency)}</span>
         </li>
       ))}
     </ul>
   );
 }
 
-function PersonCard({ person }: { person: PersonSplit }) {
+function PersonCard({ person, currency }: { person: PersonSplit; currency: string }) {
   const count = person.items.length;
 
   return (
@@ -77,14 +81,16 @@ function PersonCard({ person }: { person: PersonSplit }) {
       title={person.name}
       subtitle={`${count} item${count === 1 ? "" : "s"}`}
       totalCents={person.totalCents}
+      currency={currency}
     >
       <LineItems
+        currency={currency}
         lines={person.items.map((item, index) => ({
           key: `${index}`,
           name: item.name,
           note:
             item.sharedBy > 1
-              ? `${formatCents(item.priceCents)} shared by ${item.sharedBy}`
+              ? `${formatCents(item.priceCents, currency)} shared by ${item.sharedBy}`
               : undefined,
           cents: item.cents,
         }))}
@@ -96,17 +102,25 @@ function PersonCard({ person }: { person: PersonSplit }) {
         taxCents={person.taxCents}
         tipCents={person.tipCents}
         totalCents={person.totalCents}
+        currency={currency}
       />
     </SummaryCard>
   );
 }
 
+interface TabSummaryProps {
+  tab: SplitInput;
+  split: SplitResult;
+  /** The currency `tab` and `split` are in. */
+  currency: string;
+}
+
 /** Everyone's totals plus the full receipt, as expandable cards. */
-export function TabSummary({ tab, split }: { tab: SplitInput; split: SplitResult }) {
+export function TabSummary({ tab, split, currency }: TabSummaryProps) {
   return (
     <Accordion type="multiple" className="space-y-3">
       {split.people.map((person) => (
-        <PersonCard key={person.id} person={person} />
+        <PersonCard key={person.id} person={person} currency={currency} />
       ))}
       <SummaryCard
         value="receipt"
@@ -114,8 +128,10 @@ export function TabSummary({ tab, split }: { tab: SplitInput; split: SplitResult
         title="Full receipt"
         subtitle={`${tab.items.length} item${tab.items.length === 1 ? "" : "s"}`}
         totalCents={split.totalCents}
+        currency={currency}
       >
         <LineItems
+          currency={currency}
           lines={tab.items.map((item, index) => ({
             key: `${index}`,
             name: item.name || `Item ${index + 1}`,
@@ -128,6 +144,7 @@ export function TabSummary({ tab, split }: { tab: SplitInput; split: SplitResult
           taxCents={tab.taxCents}
           tipCents={tab.tipCents}
           totalCents={split.totalCents}
+          currency={currency}
         />
       </SummaryCard>
     </Accordion>

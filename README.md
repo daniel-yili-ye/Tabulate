@@ -49,8 +49,8 @@ supabase/migrations/  The whole database: tables, RLS, functions, storage
 
 | Table              | Purpose                                                       |
 | ------------------ | ------------------------------------------------------------- |
-| `profiles`         | One per user: display name and payment note                   |
-| `tabs`             | A receipt: owner, name, date, tax, tip, discount, image path   |
+| `profiles`         | One per user: display name, payment note and home currency    |
+| `tabs`             | A receipt: owner, name, date, currency, tax, tip, discount, image path, and what it was charged as in another currency |
 | `tab_participants` | People on a tab                                               |
 | `tab_items`        | Line items with a price and split type                        |
 | `item_shares`      | Who shares which item, with a weight                          |

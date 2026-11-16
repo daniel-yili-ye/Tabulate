@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Controller, useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import {
   CopyIcon,
+  InfoIcon,
   MoreHorizontalIcon,
   PlusIcon,
   SplitIcon,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Totals } from "@/components/amount-rows";
+import { CurrencySelect } from "@/components/currency-select";
 import { MoneyInput } from "@/components/money-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +24,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { LIMITS } from "@/features/tabs/limits";
 import type { TabDraft } from "@/features/tabs/schema";
 import { duplicateItem, newItem, splitItemInto } from "../draft";
@@ -39,9 +47,9 @@ const CHARGES = [
 
 function ReceiptTotals() {
   const { control } = useFormContext<TabDraft>();
-  const [items, taxCents, tipCents, discountCents] = useWatch({
+  const [items, taxCents, tipCents, discountCents, currency] = useWatch({
     control,
-    name: ["items", "taxCents", "tipCents", "discountCents"],
+    name: ["items", "taxCents", "tipCents", "discountCents", "currency"],
   });
   const subtotalCents = items.reduce((sum, item) => sum + item.priceCents, 0);
 
@@ -53,7 +61,35 @@ function ReceiptTotals() {
       taxCents={taxCents}
       tipCents={tipCents}
       totalCents={subtotalCents + taxCents + tipCents - discountCents}
+      currency={currency}
     />
+  );
+}
+
+function CurrencyHint() {
+  // Controlled so that a tap opens it too: tooltips only react to hover and
+  // keyboard focus by themselves, which leaves touch screens out.
+  const [open, setOpen] = useState(false);
+
+  return (
+    <TooltipProvider>
+      <Tooltip open={open} onOpenChange={setOpen}>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label="About the currency"
+            className="rounded-full text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+            onClick={() => setOpen(true)}
+          >
+            <InfoIcon className="size-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-60">
+          The currency the receipt is in. If you were charged in a different
+          one, you can add that once the tab is saved.
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
@@ -70,6 +106,7 @@ export function ItemsStep() {
     name: "items",
     keyName: "key",
   });
+  const currency = useWatch({ control, name: "currency" });
   // The request outlives `countOpen` so the drawer keeps its content while it
   // animates closed.
   const [countRequest, setCountRequest] = useState<ItemCountRequest | null>(null);
@@ -80,6 +117,7 @@ export function ItemsStep() {
       id: (previous?.id ?? 0) + 1,
       mode,
       item: getValues(`items.${index}`),
+      currency,
     }));
     setCountOpen(true);
   };
@@ -131,6 +169,25 @@ export function ItemsStep() {
           />
           <FieldError errors={[errors.date]} />
         </Field>
+        <Controller
+          control={control}
+          name="currency"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <div className="flex items-center gap-1.5">
+                <FieldLabel htmlFor="currency">Currency</FieldLabel>
+                <CurrencyHint />
+              </div>
+              <CurrencySelect
+                id="currency"
+                value={field.value}
+                onValueChange={field.onChange}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
       </FieldGroup>
 
       <div className="space-y-2">
@@ -151,6 +208,7 @@ export function ItemsStep() {
                 <MoneyInput
                   aria-label={`Item ${index + 1} price`}
                   className="w-28"
+                  currency={currency}
                   value={price.value}
                   onChange={price.onChange}
                   onBlur={price.onBlur}
@@ -221,6 +279,7 @@ export function ItemsStep() {
                   <MoneyInput
                     id={name}
                     className="w-28"
+                    currency={currency}
                     aria-invalid={fieldState.invalid}
                     value={field.value}
                     onChange={field.onChange}

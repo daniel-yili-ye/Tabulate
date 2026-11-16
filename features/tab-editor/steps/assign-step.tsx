@@ -42,7 +42,7 @@ const SPLIT_OPTIONS: { value: SplitType; label: string; icon: LucideIcon }[] = [
 ];
 
 /** "10% left to assign" style hint for percentage and custom splits. */
-function BalanceHint({ item }: { item: TabItem }) {
+function BalanceHint({ item, currency }: { item: TabItem; currency: string }) {
   if (item.shares.length === 0) return null;
   if (item.splitType !== "percentage" && item.splitType !== "custom") return null;
 
@@ -50,7 +50,7 @@ function BalanceHint({ item }: { item: TabItem }) {
   const target = isPercent ? 100 : item.priceCents;
   const assigned = item.shares.reduce((sum, share) => sum + share.weight, 0);
   const difference = target - assigned;
-  const show = (value: number) => (isPercent ? `${value}%` : formatCents(value));
+  const show = (value: number) => (isPercent ? `${value}%` : formatCents(value, currency));
 
   return (
     <p
@@ -79,11 +79,19 @@ interface AssignItemProps {
   index: number;
   item: TabItem;
   participants: TabParticipant[];
+  currency: string;
   onChange: (item: TabItem) => void;
   error?: string;
 }
 
-function AssignItem({ index, item, participants, onChange, error }: AssignItemProps) {
+function AssignItem({
+  index,
+  item,
+  participants,
+  currency,
+  onChange,
+  error,
+}: AssignItemProps) {
   const amounts = splitItem(item);
   const shareIndex = new Map(
     item.shares.map((share, position) => [share.participantId, position]),
@@ -109,7 +117,7 @@ function AssignItem({ index, item, participants, onChange, error }: AssignItemPr
         <div className="min-w-0">
           <h3 className="truncate font-medium">{item.name || `Item ${index + 1}`}</h3>
           <p className="text-sm text-muted-foreground tabular-nums">
-            {formatCents(item.priceCents)}
+            {formatCents(item.priceCents, currency)}
           </p>
         </div>
         <Select
@@ -192,13 +200,14 @@ function AssignItem({ index, item, participants, onChange, error }: AssignItemPr
                 <MoneyInput
                   aria-label={`${participant.name} amount`}
                   className="h-8 w-24"
+                  currency={currency}
                   value={weight}
                   onChange={setWeight}
                 />
               )}
               {selected && item.splitType !== "custom" && (
                 <span className="w-16 text-right text-sm text-muted-foreground tabular-nums">
-                  {formatCents(amounts[position])}
+                  {formatCents(amounts[position], currency)}
                 </span>
               )}
             </li>
@@ -208,7 +217,7 @@ function AssignItem({ index, item, participants, onChange, error }: AssignItemPr
 
       <div className="flex items-center justify-between gap-3">
         <div className="space-y-1">
-          <BalanceHint item={item} />
+          <BalanceHint item={item} currency={currency} />
           {error && <FieldError>{error}</FieldError>}
         </div>
         <Button
@@ -235,7 +244,7 @@ export function AssignStep() {
     formState: { errors, isSubmitted },
   } = useFormContext<TabDraft>();
   const draft = useWatch({ control }) as TabDraft;
-  const { items, participants } = draft;
+  const { items, participants, currency } = draft;
   const split = computeSplit(draft);
 
   // Once problems are showing, re-check on every change so they clear when fixed.
@@ -265,6 +274,7 @@ export function AssignStep() {
             index={index}
             item={item}
             participants={participants}
+            currency={currency}
             onChange={(next) => setValue(`items.${index}`, next, options)}
             error={error?.root?.message ?? error?.message}
           />
@@ -278,17 +288,23 @@ export function AssignStep() {
             key={person.id}
             label={person.name || "Unnamed"}
             cents={person.totalCents}
+            currency={currency}
           />
         ))}
         {split.unassignedCents > 0 && (
           <p className="flex justify-between gap-4 text-sm text-amber-600 dark:text-amber-500">
             <span>Not assigned yet</span>
             <span className="font-medium tabular-nums">
-              {formatCents(split.unassignedCents)}
+              {formatCents(split.unassignedCents, currency)}
             </span>
           </p>
         )}
-        <AmountRow label="Receipt total" cents={split.totalCents} tone="total" />
+        <AmountRow
+          label="Receipt total"
+          cents={split.totalCents}
+          currency={currency}
+          tone="total"
+        />
       </div>
     </div>
   );

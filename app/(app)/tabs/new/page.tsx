@@ -8,8 +8,14 @@ export const metadata: Metadata = { title: "New tab" };
 
 export default async function NewTabPage() {
   const user = await requireUser("/tabs/new");
-  const { paymentMessage } = await getMyProfile(user.id);
+  const { paymentMessage, currency } = await getMyProfile(user.id);
 
   // The draft is built here so its ids match between server and client render.
-  return <TabEditor userId={user.id} slug={null} initialDraft={emptyDraft(paymentMessage)} />;
+  return (
+    <TabEditor
+      userId={user.id}
+      slug={null}
+      initialDraft={emptyDraft(paymentMessage, currency)}
+    />
+  );
 }

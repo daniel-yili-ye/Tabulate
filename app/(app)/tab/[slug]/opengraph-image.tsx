@@ -17,7 +17,7 @@ export default async function OpenGraphImage({
 
   const title = tab?.businessName ?? "Tabulate";
   const subtitle = tab
-    ? `${formatDate(tab.date, "long")} · ${formatCents(computeSplit(tab).totalCents)} · ${tab.participants.length} people`
+    ? `${formatDate(tab.date, "long")} · ${formatCents(computeSplit(tab).totalCents, tab.currency)} · ${tab.participants.length} people`
     : "Split any receipt with friends";
 
   return new ImageResponse(

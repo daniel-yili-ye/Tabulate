@@ -1,3 +1,4 @@
+import type { CurrencyCode } from "../tabs/currency.ts";
 import type {
   SharedTab,
   SplitType,
@@ -23,13 +24,14 @@ export function newParticipant(): TabParticipant {
 }
 
 /**
- * A blank tab, starting with the user's default payment note. The date is
- * filled in on the client, in the user's time zone.
+ * A blank tab, starting with the user's default payment note and currency.
+ * The date is filled in on the client, in the user's time zone.
  */
-export function emptyDraft(paymentMessage = ""): TabDraft {
+export function emptyDraft(paymentMessage: string, currency: CurrencyCode): TabDraft {
   return {
     businessName: "",
     date: "",
+    currency,
     taxCents: 0,
     tipCents: 0,
     discountCents: 0,
@@ -44,6 +46,7 @@ export function draftFromTab(tab: SharedTab): TabDraft {
   return {
     businessName: tab.businessName,
     date: tab.date,
+    currency: tab.currency,
     taxCents: tab.taxCents,
     tipCents: tab.tipCents,
     discountCents: tab.discountCents,

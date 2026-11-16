@@ -6,6 +6,7 @@ import {
   receiptApiKey,
   receiptModel,
 } from "@/features/receipts/read-receipt";
+import { getMyProfile } from "@/features/tabs/queries";
 import { RECEIPTS_BUCKET } from "@/lib/env";
 import { createClient, getUser } from "@/lib/supabase/server";
 
@@ -60,8 +61,10 @@ export async function POST(request: NextRequest) {
   const startedAt = Date.now();
 
   try {
+    const { currency: fallbackCurrency } = await getMyProfile(user.id);
     const receipt = await readReceipt({
       apiKey,
+      fallbackCurrency,
       image: new Uint8Array(await image.arrayBuffer()),
       mediaType: image.type || "image/jpeg",
       // Stop when the user cancels as well as when the model takes too long.

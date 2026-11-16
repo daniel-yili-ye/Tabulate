@@ -125,7 +125,7 @@ export default async function TabsPage({ searchParams }: PageProps<"/tabs">) {
                 </p>
               </div>
               <span className="font-semibold tabular-nums">
-                {formatCents(tab.totalCents)}
+                {formatCents(tab.totalCents, tab.currency)}
               </span>
               <TabRowMenu slug={tab.slug} businessName={tab.businessName} />
             </li>

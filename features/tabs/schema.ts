@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CURRENCY_CODES, DEFAULT_CURRENCY } from "./currency.ts";
 import { parseIsoDate } from "./format.ts";
 import { LIMITS } from "./limits.ts";
 
@@ -12,6 +13,8 @@ const cents = z
   .int()
   .min(0)
   .max(LIMITS.maxCents, "Amount is too large");
+
+const currency = z.enum(CURRENCY_CODES, "Pick a currency");
 
 const shareSchema = z.object({
   participantId: z.uuid(),
@@ -70,6 +73,8 @@ export const tabDraftSchema = z
     date: z
       .string()
       .refine((value) => parseIsoDate(value) !== null, "Pick a valid date"),
+    /** The currency of the receipt. All amounts are its minor units. */
+    currency,
     taxCents: cents,
     tipCents: cents,
     discountCents: cents,
@@ -109,7 +114,10 @@ export const tabDraftSchema = z
     });
   });
 
-/** A tab as it is edited and saved. Money is integer cents throughout. */
+/**
+ * A tab as it is edited and saved. Money is whole minor units of the tab's
+ * currency throughout, called cents for short.
+ */
 export type TabDraft = z.infer<typeof tabDraftSchema>;
 export type TabItem = TabDraft["items"][number];
 export type TabParticipant = TabDraft["participants"][number];
@@ -121,6 +129,10 @@ export const sharedTabSchema = z.object({
   isOwner: z.boolean().nullable().transform((value) => value === true),
   businessName: z.string(),
   date: z.string(),
+  currency: currency.catch(DEFAULT_CURRENCY),
+  /** What the owner was charged in another currency, if they have said. */
+  settleCurrency: currency.nullable().catch(null),
+  settleTotalCents: z.number().int().positive().nullable().catch(null),
   taxCents: z.number(),
   tipCents: z.number(),
   discountCents: z.number(),
@@ -140,7 +152,22 @@ export const sharedTabSchema = z.object({
 
 export type SharedTab = z.infer<typeof sharedTabSchema>;
 
-/** Account settings. The payment note here is the default for new tabs. */
-export const profileSchema = z.object({ paymentMessage });
+/**
+ * Account settings. The payment note is the default for new tabs, and the
+ * currency is what a new tab is in until a receipt scan says otherwise.
+ */
+export const profileSchema = z.object({ paymentMessage, currency });
+
+/** The total the owner was charged for a tab in another currency. */
+export const conversionSchema = z.object({
+  currency,
+  totalCents: z
+    .number("Enter an amount")
+    .int()
+    .min(1, "Enter the amount you were charged")
+    .max(LIMITS.maxCents, "Amount is too large"),
+});
+
+export type Conversion = z.infer<typeof conversionSchema>;
 
 export type Profile = z.infer<typeof profileSchema>;
