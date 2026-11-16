@@ -1,7 +1,12 @@
 "use client";
 
 import { useOptimistic, useState, useTransition } from "react";
-import { ArrowLeftRightIcon, Loader2Icon, PencilIcon } from "lucide-react";
+import {
+  ArrowLeftRightIcon,
+  CircleCheckIcon,
+  Loader2Icon,
+  PencilIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { CurrencySelect } from "@/components/currency-select";
 import { MoneyInput } from "@/components/money-input";
@@ -180,6 +185,9 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
       if (result?.error) toast.error(result.error);
     });
 
+  const people = tab.participants.length;
+  const paidCount = tab.participants.filter((person) => paidIds.includes(person.id)).length;
+
   const receiptSplit = computeSplit(tab);
   const conversion =
     tab.settleCurrency && tab.settleTotalCents && receiptSplit.totalCents > 0
@@ -250,6 +258,18 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
       ) : (
         dialog && <div className="flex justify-end">{dialog}</div>
       )}
+
+      {paidCount > 0 &&
+        (paidCount === people ? (
+          <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-500">
+            <CircleCheckIcon className="size-4" />
+            Everyone has paid
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {paidCount} of {people} paid
+          </p>
+        ))}
 
       <TabSummary
         tab={shownTab}

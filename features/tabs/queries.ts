@@ -21,6 +21,8 @@ export interface TabSummary {
   currency: string;
   totalCents: number;
   people: number;
+  /** How many of those people have been marked as paid. */
+  paid: number;
 }
 
 export const TABS_PER_PAGE = 10;
@@ -54,7 +56,7 @@ export async function listMyTabs(filters: TabFilters): Promise<TabPage> {
     let query = supabase
       .from("tabs")
       .select(
-        "slug, business_name, receipt_date, currency, tax_cents, tip_cents, discount_cents, tab_items(price_cents), tab_participants(count)",
+        "slug, business_name, receipt_date, currency, tax_cents, tip_cents, discount_cents, tab_items(price_cents), tab_participants(paid)",
         { count: "exact" },
       );
     if (filters.search) {
@@ -96,7 +98,7 @@ type TabRow = {
   tip_cents: number;
   discount_cents: number;
   tab_items: { price_cents: number }[];
-  tab_participants: { count: number }[];
+  tab_participants: { paid: boolean }[];
 };
 
 function toSummary(tab: TabRow): TabSummary {
@@ -105,7 +107,8 @@ function toSummary(tab: TabRow): TabSummary {
     businessName: tab.business_name,
     date: tab.receipt_date,
     currency: tab.currency,
-    people: tab.tab_participants[0]?.count ?? 0,
+    people: tab.tab_participants.length,
+    paid: tab.tab_participants.filter((person) => person.paid).length,
     totalCents:
       tab.tab_items.reduce((sum, item) => sum + item.price_cents, 0) +
       tab.tax_cents +
