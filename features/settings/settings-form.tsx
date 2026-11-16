@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CurrencySelect } from "@/components/currency-select";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ const INITIAL: ProfileFormState = { status: "idle" };
 
 export function SettingsForm({ profile }: { profile: Profile }) {
   const [state, action, pending] = useActionState(updateProfile, INITIAL);
-  // Controlled, because React resets uncontrolled fields after a form action.
   const [paymentMessage, setPaymentMessage] = useState(profile.paymentMessage);
   const [currency, setCurrency] = useState(profile.currency);
 
@@ -37,7 +36,16 @@ export function SettingsForm({ profile }: { profile: Profile }) {
   });
 
   return (
-    <form action={action}>
+    // Submitted by hand rather than through `action`: React resets a form after
+    // its action runs, and the currency select answers a reset by going back
+    // to the value the page loaded with, undoing the choice just saved.
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        startTransition(() => action(formData));
+      }}
+    >
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="paymentMessage">Default payment note</FieldLabel>
@@ -71,11 +79,6 @@ export function SettingsForm({ profile }: { profile: Profile }) {
 
         <Field>
           <FieldLabel htmlFor="currency">Your currency</FieldLabel>
-          {/*
-            Submitted through this input, not the select's own form support:
-            that resets to the value the page loaded with after every save, so
-            the next save would quietly put the old currency back.
-          */}
           <input type="hidden" name="currency" value={currency} />
           <CurrencySelect
             id="currency"
