@@ -307,7 +307,7 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
           </p>
         ) : (
           <p className="text-sm text-muted-foreground tabular-nums">
-            {paidCount} of {people} people have paid
+            {paidCount} of {people} people are marked as paid
           </p>
         )}
 
