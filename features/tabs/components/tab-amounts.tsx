@@ -298,25 +298,27 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
         </SettingCard>
       )}
 
-      {paidCount > 0 &&
-        (paidCount === people ? (
-          <p className="flex items-center gap-1.5 pt-3 text-sm font-medium text-emerald-600 dark:text-emerald-500">
+      {/* Set apart from the options above by the same gap as the page's sections. */}
+      <div className="space-y-3 not-first:pt-3">
+        {paidCount === people ? (
+          <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-500">
             <CircleCheckIcon className="size-4" />
             Everyone has paid
           </p>
         ) : (
-          <p className="pt-3 text-sm text-muted-foreground tabular-nums">
-            {paidCount} of {people} paid
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {paidCount} of {people} people have paid
           </p>
-        ))}
+        )}
 
-      <TabSummary
-        tab={shownTab}
-        split={shownSplit}
-        currency={shownCurrency}
-        paidIds={paidIds}
-        onPaidChange={tab.isOwner || tab.allowGuestPaid ? changePaid : undefined}
-      />
+        <TabSummary
+          tab={shownTab}
+          split={shownSplit}
+          currency={shownCurrency}
+          paidIds={paidIds}
+          onPaidChange={tab.isOwner || tab.allowGuestPaid ? changePaid : undefined}
+        />
+      </div>
     </div>
   );
 }
