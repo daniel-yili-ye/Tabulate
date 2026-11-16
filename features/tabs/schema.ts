@@ -81,6 +81,8 @@ export const tabDraftSchema = z
     receiptImagePath: z.string().max(200).nullable(),
     /** This tab's own note. Starts as the default from the user's settings. */
     paymentMessage,
+    /** Whether people other than the owner may mark someone as paid. */
+    allowGuestPaid: z.boolean(),
     participants: z
       .array(participantSchema)
       .min(LIMITS.minParticipants, "Add at least 2 people")
@@ -138,7 +140,10 @@ export const sharedTabSchema = z.object({
   discountCents: z.number(),
   receiptImagePath: z.string().nullable(),
   paymentMessage: z.string(),
-  participants: z.array(z.object({ id: z.string(), name: z.string() })),
+  allowGuestPaid: z.boolean().catch(true),
+  participants: z.array(
+    z.object({ id: z.string(), name: z.string(), paid: z.boolean().catch(false) }),
+  ),
   items: z.array(
     z.object({
       id: z.string(),

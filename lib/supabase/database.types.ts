@@ -142,18 +142,21 @@ export type Database = {
         Row: {
           id: string
           name: string
+          paid: boolean
           position: number
           tab_id: string
         }
         Insert: {
           id?: string
           name: string
+          paid?: boolean
           position: number
           tab_id: string
         }
         Update: {
           id?: string
           name?: string
+          paid?: boolean
           position?: number
           tab_id?: string
         }
@@ -169,6 +172,7 @@ export type Database = {
       }
       tabs: {
         Row: {
+          allow_guest_paid: boolean
           business_name: string
           created_at: string
           currency: string
@@ -186,6 +190,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allow_guest_paid?: boolean
           business_name: string
           created_at?: string
           currency?: string
@@ -203,6 +208,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allow_guest_paid?: boolean
           business_name?: string
           created_at?: string
           currency?: string
@@ -240,6 +246,10 @@ export type Database = {
       save_tab: {
         Args: { p_create: boolean; p_slug: string; p_tab: Json }
         Returns: string
+      }
+      set_participant_paid: {
+        Args: { p_paid: boolean; p_participant_id: string; p_slug: string }
+        Returns: boolean
       }
     }
     Enums: {

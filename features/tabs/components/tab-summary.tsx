@@ -1,4 +1,4 @@
-import { ReceiptTextIcon } from "lucide-react";
+import { CheckIcon, ReceiptTextIcon, Undo2Icon } from "lucide-react";
 import { Totals } from "@/components/amount-rows";
 import {
   Accordion,
@@ -6,6 +6,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { formatCents } from "../format";
 import type { PersonSplit, SplitInput, SplitResult } from "../split";
 
@@ -16,6 +19,7 @@ function SummaryCard({
   subtitle,
   totalCents,
   currency,
+  paid = false,
   children,
 }: {
   value: string;
@@ -24,6 +28,7 @@ function SummaryCard({
   subtitle: string;
   totalCents: number;
   currency: string;
+  paid?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -33,12 +38,25 @@ function SummaryCard({
           {avatar}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium">{title}</span>
+          <span className="flex items-center gap-2">
+            <span className="truncate font-medium">{title}</span>
+            {paid && (
+              <Badge variant="secondary">
+                <CheckIcon />
+                Paid
+              </Badge>
+            )}
+          </span>
           <span className="block text-sm font-normal text-muted-foreground">
             {subtitle}
           </span>
         </span>
-        <span className="text-lg font-semibold tabular-nums">
+        <span
+          className={cn(
+            "text-lg font-semibold tabular-nums",
+            paid && "text-muted-foreground line-through",
+          )}
+        >
           {formatCents(totalCents, currency)}
         </span>
       </AccordionTrigger>
@@ -71,7 +89,15 @@ function LineItems({
   );
 }
 
-function PersonCard({ person, currency }: { person: PersonSplit; currency: string }) {
+interface PersonCardProps {
+  person: PersonSplit;
+  currency: string;
+  paid: boolean;
+  /** Absent when the viewer may not change who has paid. */
+  onPaidChange?: (paid: boolean) => void;
+}
+
+function PersonCard({ person, currency, paid, onPaidChange }: PersonCardProps) {
   const count = person.items.length;
 
   return (
@@ -82,6 +108,7 @@ function PersonCard({ person, currency }: { person: PersonSplit; currency: strin
       subtitle={`${count} item${count === 1 ? "" : "s"}`}
       totalCents={person.totalCents}
       currency={currency}
+      paid={paid}
     >
       <LineItems
         currency={currency}
@@ -104,6 +131,20 @@ function PersonCard({ person, currency }: { person: PersonSplit; currency: strin
         totalCents={person.totalCents}
         currency={currency}
       />
+      {onPaidChange && (
+        <Button
+          variant={paid ? "outline" : "default"}
+          className="w-full"
+          onClick={() => onPaidChange(!paid)}
+        >
+          {paid ? (
+            <Undo2Icon data-icon="inline-start" />
+          ) : (
+            <CheckIcon data-icon="inline-start" />
+          )}
+          {paid ? "Mark as not paid" : "Mark as paid"}
+        </Button>
+      )}
     </SummaryCard>
   );
 }
@@ -113,14 +154,32 @@ interface TabSummaryProps {
   split: SplitResult;
   /** The currency `tab` and `split` are in. */
   currency: string;
+  /** Ids of the people who have paid their share. */
+  paidIds: readonly string[];
+  /** Absent when the viewer may not change who has paid. */
+  onPaidChange?: (participantId: string, paid: boolean) => void;
 }
 
 /** Everyone's totals plus the full receipt, as expandable cards. */
-export function TabSummary({ tab, split, currency }: TabSummaryProps) {
+export function TabSummary({
+  tab,
+  split,
+  currency,
+  paidIds,
+  onPaidChange,
+}: TabSummaryProps) {
   return (
     <Accordion type="multiple" className="space-y-3">
       {split.people.map((person) => (
-        <PersonCard key={person.id} person={person} currency={currency} />
+        <PersonCard
+          key={person.id}
+          person={person}
+          currency={currency}
+          paid={paidIds.includes(person.id)}
+          onPaidChange={
+            onPaidChange && ((paid: boolean) => onPaidChange(person.id, paid))
+          }
+        />
       ))}
       <SummaryCard
         value="receipt"

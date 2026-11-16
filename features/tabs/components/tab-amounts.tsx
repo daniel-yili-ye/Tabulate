@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { ArrowLeftRightIcon, Loader2Icon, PencilIcon } from "lucide-react";
 import { toast } from "sonner";
 import { CurrencySelect } from "@/components/currency-select";
@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { setTabConversion } from "../actions";
+import { setParticipantPaid, setTabConversion } from "../actions";
 import { convertTab, impliedRate } from "../convert";
 import type { CurrencyCode } from "../currency";
 import { formatCents } from "../format";
@@ -163,6 +163,23 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
   // the one people pay back in.
   const [view, setView] = useState<"receipt" | "charged">("charged");
 
+  // Shown at once, then settled by the server's answer.
+  const [paidIds, setPaidOptimistically] = useOptimistic(
+    tab.participants.filter((person) => person.paid).map((person) => person.id),
+    (current: string[], change: { id: string; paid: boolean }) =>
+      change.paid
+        ? [...current.filter((id) => id !== change.id), change.id]
+        : current.filter((id) => id !== change.id),
+  );
+  const [, startPaidChange] = useTransition();
+
+  const changePaid = (id: string, paid: boolean) =>
+    startPaidChange(async () => {
+      setPaidOptimistically({ id, paid });
+      const result = await setParticipantPaid(tab.slug, id, paid);
+      if (result?.error) toast.error(result.error);
+    });
+
   const receiptSplit = computeSplit(tab);
   const conversion =
     tab.settleCurrency && tab.settleTotalCents && receiptSplit.totalCents > 0
@@ -234,7 +251,13 @@ export function TabAmounts({ tab, ownerCurrency }: TabAmountsProps) {
         dialog && <div className="flex justify-end">{dialog}</div>
       )}
 
-      <TabSummary tab={shownTab} split={shownSplit} currency={shownCurrency} />
+      <TabSummary
+        tab={shownTab}
+        split={shownSplit}
+        currency={shownCurrency}
+        paidIds={paidIds}
+        onPaidChange={tab.isOwner || tab.allowGuestPaid ? changePaid : undefined}
+      />
     </div>
   );
 }

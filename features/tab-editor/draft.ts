@@ -37,6 +37,7 @@ export function emptyDraft(paymentMessage: string, currency: CurrencyCode): TabD
     discountCents: 0,
     receiptImagePath: null,
     paymentMessage,
+    allowGuestPaid: true,
     participants: [newParticipant(), newParticipant()],
     items: [newItem()],
   };
@@ -52,7 +53,8 @@ export function draftFromTab(tab: SharedTab): TabDraft {
     discountCents: tab.discountCents,
     receiptImagePath: tab.receiptImagePath,
     paymentMessage: tab.paymentMessage,
-    participants: tab.participants,
+    allowGuestPaid: tab.allowGuestPaid,
+    participants: tab.participants.map(({ id, name }) => ({ id, name })),
     items: tab.items,
   };
 }

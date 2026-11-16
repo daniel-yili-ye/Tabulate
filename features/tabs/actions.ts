@@ -2,6 +2,7 @@
 
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { redirect } from "next/navigation";
 import { RECEIPTS_BUCKET } from "@/lib/env";
 import { createClient, getUser } from "@/lib/supabase/server";
@@ -113,6 +114,38 @@ export async function setTabConversion(
   }
 
   revalidatePath(`/tab/${slug}`);
+}
+
+/**
+ * Mark one person's share as paid or not. Open to anyone holding the link when
+ * the owner allows it; the database function is what decides.
+ */
+export async function setParticipantPaid(
+  slug: string,
+  participantId: string,
+  paid: boolean,
+): Promise<ActionResult | void> {
+  if (
+    !SLUG.test(slug) ||
+    !z.uuid().safeParse(participantId).success ||
+    typeof paid !== "boolean"
+  ) {
+    return { error: "Tab not found." };
+  }
+
+  const supabase = await createClient();
+  const { data: changed, error } = await supabase.rpc("set_participant_paid", {
+    p_slug: slug,
+    p_participant_id: participantId,
+    p_paid: paid,
+  });
+  if (error) {
+    console.error("set_participant_paid failed", error);
+    return { error: "Couldn't update that. Try again." };
+  }
+  // The owner may have turned this off since the page was loaded.
+  revalidatePath(`/tab/${slug}`);
+  if (!changed) return { error: "Only the tab's owner can change who has paid." };
 }
 
 export async function deleteTab(slug: string): Promise<ActionResult | void> {
