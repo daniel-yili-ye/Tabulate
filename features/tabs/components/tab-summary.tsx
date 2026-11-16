@@ -20,6 +20,7 @@ function SummaryCard({
   totalCents,
   currency,
   paid = false,
+  action,
   children,
 }: {
   value: string;
@@ -29,10 +30,19 @@ function SummaryCard({
   totalCents: number;
   currency: string;
   paid?: boolean;
+  /** Shown under the header whether or not the card is open. */
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
-    <AccordionItem value={value} className="rounded-xl border px-4 last:border-b">
+    <AccordionItem
+      value={value}
+      className={cn(
+        "rounded-xl border px-4 transition-colors last:border-b",
+        paid &&
+          "border-emerald-600/30 bg-emerald-500/10 dark:border-emerald-500/30",
+      )}
+    >
       <AccordionTrigger className="items-center gap-3 py-3 hover:no-underline">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium uppercase">
           {avatar}
@@ -41,7 +51,7 @@ function SummaryCard({
           <span className="flex items-center gap-2">
             <span className="truncate font-medium">{title}</span>
             {paid && (
-              <Badge variant="secondary">
+              <Badge className="bg-emerald-600 text-white dark:bg-emerald-600">
                 <CheckIcon />
                 Paid
               </Badge>
@@ -51,15 +61,11 @@ function SummaryCard({
             {subtitle}
           </span>
         </span>
-        <span
-          className={cn(
-            "text-lg font-semibold tabular-nums",
-            paid && "text-muted-foreground line-through",
-          )}
-        >
+        <span className="text-lg font-semibold tabular-nums">
           {formatCents(totalCents, currency)}
         </span>
       </AccordionTrigger>
+      {action && <div className="pb-3">{action}</div>}
       <AccordionContent className="space-y-3 pb-4">{children}</AccordionContent>
     </AccordionItem>
   );
@@ -109,6 +115,25 @@ function PersonCard({ person, currency, paid, onPaidChange }: PersonCardProps) {
       totalCents={person.totalCents}
       currency={currency}
       paid={paid}
+      action={
+        onPaidChange &&
+        (paid ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full text-muted-foreground"
+            onClick={() => onPaidChange(false)}
+          >
+            <Undo2Icon data-icon="inline-start" />
+            Mark as not paid
+          </Button>
+        ) : (
+          <Button className="w-full" onClick={() => onPaidChange(true)}>
+            <CheckIcon data-icon="inline-start" />
+            Mark as paid
+          </Button>
+        ))
+      }
     >
       <LineItems
         currency={currency}
@@ -131,20 +156,6 @@ function PersonCard({ person, currency, paid, onPaidChange }: PersonCardProps) {
         totalCents={person.totalCents}
         currency={currency}
       />
-      {onPaidChange && (
-        <Button
-          variant={paid ? "outline" : "default"}
-          className="w-full"
-          onClick={() => onPaidChange(!paid)}
-        >
-          {paid ? (
-            <Undo2Icon data-icon="inline-start" />
-          ) : (
-            <CheckIcon data-icon="inline-start" />
-          )}
-          {paid ? "Mark as not paid" : "Mark as paid"}
-        </Button>
-      )}
     </SummaryCard>
   );
 }
