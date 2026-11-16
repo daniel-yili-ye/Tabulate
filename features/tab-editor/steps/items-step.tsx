@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { Totals } from "@/components/amount-rows";
 import { CurrencySelect } from "@/components/currency-select";
+import { DatePicker } from "@/components/date-picker";
 import { MoneyInput } from "@/components/money-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -159,16 +160,24 @@ export function ItemsStep() {
           />
           <FieldError errors={[errors.businessName]} />
         </Field>
-        <Field data-invalid={!!errors.date}>
-          <FieldLabel htmlFor="date">Date</FieldLabel>
-          <Input
-            id="date"
-            type="date"
-            aria-invalid={!!errors.date}
-            {...register("date")}
-          />
-          <FieldError errors={[errors.date]} />
-        </Field>
+        <Controller
+          control={control}
+          name="date"
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="date">Date</FieldLabel>
+              <DatePicker
+                id="date"
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+                aria-invalid={fieldState.invalid}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
         <Controller
           control={control}
           name="currency"
