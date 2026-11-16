@@ -81,7 +81,7 @@ function SummaryCard({
         </AccordionPrimitive.Header>
         {onPaidChange && (
           <label className="relative z-10 col-start-2 row-start-1 flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="max-sm:sr-only">Paid</span>
+            <span>Paid</span>
             <Switch
               aria-label={`${title} has paid`}
               className="data-checked:bg-emerald-600"
