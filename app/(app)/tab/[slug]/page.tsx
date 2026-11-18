@@ -25,7 +25,8 @@ export async function generateMetadata({
     description,
     // Share links are private to whoever holds them.
     robots: { index: false, follow: false },
-    openGraph: { title, description },
+    // Replaces the root layout's openGraph, so the site name is repeated here.
+    openGraph: { siteName: "Tabulate", type: "website", title, description },
   };
 }
 
