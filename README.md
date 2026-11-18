@@ -8,7 +8,7 @@ Live: [tabulate.vercel.app](https://tabulate.vercel.app/)
 
 ## Features
 
-- **Receipt scanning.** Upload a photo and Gemini extracts the items, tax, tip
+- **Receipt scanning.** Upload a photo and a vision model extracts the items, tax, tip
   and discounts. If the lines don't add up to the printed total you are told.
 - **Flexible splits.** Share an item equally, by shares, by percent or by exact
   amounts. Split one line into parts or duplicate it.
@@ -26,7 +26,7 @@ Live: [tabulate.vercel.app](https://tabulate.vercel.app/)
 
 Next.js 16 (App Router, React 19, React Compiler) · TypeScript 7 · Tailwind CSS
 4 with shadcn/ui · Supabase (Postgres, Auth, Storage) · Vercel AI SDK with
-Gemini · React Hook Form and Zod 4.
+Groq and Gemini · React Hook Form and Zod 4.
 
 ## Project layout
 
@@ -76,14 +76,13 @@ the Supabase secret key.
    # Supabase dashboard → Project Settings → API
    NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-   # Google AI Studio key, used server-side only for receipt scanning
+   # Receipt scanning, server-side only. Set at least one key.
+   # Groq reads receipts first; Gemini takes over when Groq fails or is slow.
+   GROQ_API_KEY=...
    GEMINI_API_KEY=...
-   # Optional, defaults to gemini-2.5-flash
-   # GEMINI_MODEL=gemini-2.5-flash
-   # Optional Groq key. Receipts are read by Groq when Gemini is rate limited or down
-   # GROQ_API_KEY=...
-   # Optional, defaults to qwen/qwen3.8-27b
+   # Optional, default to qwen/qwen3.8-27b and gemini-2.5-flash
    # GROQ_MODEL=qwen/qwen3.8-27b
+   # GEMINI_MODEL=gemini-2.5-flash
    ```
 
 3. Apply the schema to your Supabase project:

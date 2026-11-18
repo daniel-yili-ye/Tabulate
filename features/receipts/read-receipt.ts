@@ -12,20 +12,52 @@ import {
   type ParsedReceipt,
 } from "./extraction";
 
+// The vision model on Groq's free plan. Tried first because it answers in a
+// few seconds.
+const DEFAULT_GROQ_MODEL = "qwen/qwen3.8-27b";
+
 // Pinned on purpose. The "gemini-flash-latest" alias accepted requests with
 // this project's key but never answered them, and this model reads a full
 // receipt in about ten seconds.
-const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
 
-// The vision model on Groq's free plan. Only used when Gemini is unavailable.
-const DEFAULT_FALLBACK_MODEL = "qwen/qwen3.8-27b";
+// How long a model may take before the next one is tried. The last model in
+// line gets whatever is left of the request's own time limit.
+const HANDOVER_MS = 20_000;
 
-export const receiptModel = () => process.env.GEMINI_MODEL ?? DEFAULT_MODEL;
+interface Reader {
+  name: string;
+  model: LanguageModel;
+  providerOptions?: { groq: GroqLanguageModelChatOptions };
+}
 
-export const receiptApiKey = () =>
-  process.env.GEMINI_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+/** The configured models, in the order they are tried. */
+function readers(): Reader[] {
+  const list: Reader[] = [];
 
-const fallbackModel = () => process.env.GROQ_MODEL ?? DEFAULT_FALLBACK_MODEL;
+  const groqKey = process.env.GROQ_API_KEY;
+  if (groqKey) {
+    const name = process.env.GROQ_MODEL ?? DEFAULT_GROQ_MODEL;
+    list.push({
+      name,
+      model: createGroq({ apiKey: groqKey })(name),
+      // Keeps the model's thinking out of the JSON answer.
+      providerOptions: { groq: { reasoningFormat: "parsed" } },
+    });
+  }
+
+  const geminiKey =
+    process.env.GEMINI_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (geminiKey) {
+    const name = process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL;
+    list.push({ name, model: createGoogleGenerativeAI({ apiKey: geminiKey })(name) });
+  }
+
+  return list;
+}
+
+/** Whether at least one model has an API key. */
+export const receiptScanningConfigured = () => readers().length > 0;
 
 /**
  * The HTTP status behind a failed model call, or null if the call failed for
@@ -36,14 +68,7 @@ export function apiErrorStatus(error: unknown): number | null {
   return APICallError.isInstance(cause) ? (cause.statusCode ?? 0) : null;
 }
 
-/** Rate limits and outages are worth a second provider; a bad request is not. */
-function isUnavailable(error: unknown): boolean {
-  const status = apiErrorStatus(error);
-  return status !== null && (status === 0 || status === 429 || status >= 500);
-}
-
 interface ReadReceiptInput {
-  apiKey: string;
   image: Uint8Array;
   mediaType: string;
   /** The user's own currency, for receipts that do not say which they are in. */
@@ -59,64 +84,53 @@ interface ReadReceiptResult {
 }
 
 /**
- * Ask the vision model to read a receipt photo. When Gemini is rate limited or
- * down and a Groq key is set, the photo is read by Groq instead. Throws on
- * timeouts, cancellation and API errors.
+ * Ask a vision model to read a receipt photo. Groq is tried first; if it
+ * fails or is slow, Gemini reads the photo instead. Throws the first model's
+ * error when every model fails, and stops at once when `signal` aborts.
  */
 export async function readReceipt({
-  apiKey,
   image,
   mediaType,
   fallbackCurrency,
   signal,
 }: ReadReceiptInput): Promise<ReadReceiptResult> {
-  const extract = async (
-    model: LanguageModel,
-    providerOptions?: { groq: GroqLanguageModelChatOptions },
-  ) => {
-    const { output } = await generateText({
-      model,
-      // Reasoning is left at the model default: turning it off is faster but
-      // lets free modifiers and other noise through as items.
-      maxRetries: 1,
-      output: Output.object({ schema: extractionSchema }),
-      providerOptions,
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: EXTRACTION_PROMPT },
-            { type: "file", mediaType, data: image },
-          ],
-        },
-      ],
-      abortSignal: signal,
-    });
-    return normalizeExtraction(output, fallbackCurrency);
-  };
+  const list = readers();
+  if (list.length === 0) throw new Error("No receipt model is configured");
 
-  const model = receiptModel();
-  try {
-    const google = createGoogleGenerativeAI({ apiKey });
-    return { receipt: await extract(google(model)), model };
-  } catch (error) {
-    const groqKey = process.env.GROQ_API_KEY;
-    if (!groqKey || signal.aborted || !isUnavailable(error)) throw error;
-
-    const fallback = fallbackModel();
-    console.warn(`${model} is unavailable, reading the receipt with ${fallback}`, error);
+  let firstError: unknown;
+  for (const [index, reader] of list.entries()) {
+    const isLast = index === list.length - 1;
     try {
-      const groq = createGroq({ apiKey: groqKey });
-      const receipt = await extract(groq(fallback), {
-        // Keeps the model's thinking out of the JSON answer.
-        groq: { reasoningFormat: "parsed" },
+      const { output } = await generateText({
+        model: reader.model,
+        // Reasoning is left at the model default: turning it off is faster but
+        // lets free modifiers and other noise through as items.
+        maxRetries: 1,
+        output: Output.object({ schema: extractionSchema }),
+        providerOptions: reader.providerOptions,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: EXTRACTION_PROMPT },
+              { type: "file", mediaType, data: image },
+            ],
+          },
+        ],
+        abortSignal: isLast
+          ? signal
+          : AbortSignal.any([signal, AbortSignal.timeout(HANDOVER_MS)]),
       });
-      return { receipt, model: fallback };
-    } catch (fallbackError) {
-      if (signal.aborted) throw fallbackError;
-      console.error(`Fallback ${fallback} failed too`, fallbackError);
-      // Report the primary's failure: it is the one worth fixing.
-      throw error;
+      return { receipt: normalizeExtraction(output, fallbackCurrency), model: reader.name };
+    } catch (error) {
+      // Cancelled or out of time altogether: there is nothing left to try.
+      if (signal.aborted || isLast) throw firstError ?? error;
+      firstError ??= error;
+      console.warn(
+        `${reader.name} could not read the receipt, trying ${list[index + 1].name}`,
+        error,
+      );
     }
   }
+  throw firstError;
 }
