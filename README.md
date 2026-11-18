@@ -80,6 +80,10 @@ the Supabase secret key.
    GEMINI_API_KEY=...
    # Optional, defaults to gemini-2.5-flash
    # GEMINI_MODEL=gemini-2.5-flash
+   # Optional Groq key. Receipts are read by Groq when Gemini is rate limited or down
+   # GROQ_API_KEY=...
+   # Optional, defaults to qwen/qwen3.8-27b
+   # GROQ_MODEL=qwen/qwen3.8-27b
    ```
 
 3. Apply the schema to your Supabase project:

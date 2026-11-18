@@ -1,7 +1,7 @@
-import { APICallError } from "ai";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import {
+  apiErrorStatus,
   readReceipt,
   receiptApiKey,
   receiptModel,
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const { currency: fallbackCurrency } = await getMyProfile(user.id);
-    const receipt = await readReceipt({
+    const { receipt, model: answeredBy } = await readReceipt({
       apiKey,
       fallbackCurrency,
       image: new Uint8Array(await image.arrayBuffer()),
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         AbortSignal.timeout(MODEL_TIMEOUT_MS),
       ]),
     });
-    console.info(`Receipt parsed by ${model} in ${Date.now() - startedAt}ms`);
+    console.info(`Receipt parsed by ${answeredBy} in ${Date.now() - startedAt}ms`);
 
     if (!receipt) {
       return fail(
@@ -94,8 +94,8 @@ export async function POST(request: NextRequest) {
         504,
       );
     }
-    if (APICallError.isInstance(error)) {
-      const status = error.statusCode ?? 0;
+    const status = apiErrorStatus(error);
+    if (status !== null) {
       if (status === 400 || status === 401 || status === 403 || status === 404) {
         // Bad key, key without Gemini access, or an unknown model name.
         return fail("Receipt scanning isn't set up correctly.", 503);
