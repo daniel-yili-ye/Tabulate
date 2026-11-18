@@ -12,18 +12,19 @@ import {
   type ParsedReceipt,
 } from "./extraction";
 
-// The vision model on Groq's free plan. Tried first because it answers in a
-// few seconds.
-const DEFAULT_GROQ_MODEL = "qwen/qwen3.8-27b";
-
-// Pinned on purpose. The "gemini-flash-latest" alias accepted requests with
-// this project's key but never answered them, and this model reads a full
-// receipt in about ten seconds.
+// Tried first: the more accurate reader. Pinned on purpose. The
+// "gemini-flash-latest" alias accepted requests with this project's key but
+// never answered them, and this model reads a full receipt in about ten
+// seconds.
 const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+
+// The vision model on Groq's free plan. Less accurate but answers in a few
+// seconds, so it can still finish after Gemini has used most of the time.
+const DEFAULT_GROQ_MODEL = "qwen/qwen3.8-27b";
 
 // How long a model may take before the next one is tried. The last model in
 // line gets whatever is left of the request's own time limit.
-const HANDOVER_MS = 20_000;
+const HANDOVER_MS = 30_000;
 
 interface Reader {
   name: string;
@@ -35,6 +36,13 @@ interface Reader {
 function readers(): Reader[] {
   const list: Reader[] = [];
 
+  const geminiKey =
+    process.env.GEMINI_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (geminiKey) {
+    const name = process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL;
+    list.push({ name, model: createGoogleGenerativeAI({ apiKey: geminiKey })(name) });
+  }
+
   const groqKey = process.env.GROQ_API_KEY;
   if (groqKey) {
     const name = process.env.GROQ_MODEL ?? DEFAULT_GROQ_MODEL;
@@ -44,13 +52,6 @@ function readers(): Reader[] {
       // Keeps the model's thinking out of the JSON answer.
       providerOptions: { groq: { reasoningFormat: "parsed" } },
     });
-  }
-
-  const geminiKey =
-    process.env.GEMINI_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-  if (geminiKey) {
-    const name = process.env.GEMINI_MODEL ?? DEFAULT_GEMINI_MODEL;
-    list.push({ name, model: createGoogleGenerativeAI({ apiKey: geminiKey })(name) });
   }
 
   return list;
@@ -84,8 +85,8 @@ interface ReadReceiptResult {
 }
 
 /**
- * Ask a vision model to read a receipt photo. Groq is tried first; if it
- * fails or is slow, Gemini reads the photo instead. Throws the first model's
+ * Ask a vision model to read a receipt photo. Gemini is tried first; if it
+ * fails or is slow, Groq reads the photo instead. Throws the first model's
  * error when every model fails, and stops at once when `signal` aborts.
  */
 export async function readReceipt({

@@ -26,7 +26,7 @@ Live: [tabulate.vercel.app](https://tabulate.vercel.app/)
 
 Next.js 16 (App Router, React 19, React Compiler) · TypeScript 7 · Tailwind CSS
 4 with shadcn/ui · Supabase (Postgres, Auth, Storage) · Vercel AI SDK with
-Groq and Gemini · React Hook Form and Zod 4.
+Gemini and Groq · React Hook Form and Zod 4.
 
 ## Project layout
 
@@ -77,12 +77,12 @@ the Supabase secret key.
    NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
    # Receipt scanning, server-side only. Set at least one key.
-   # Groq reads receipts first; Gemini takes over when Groq fails or is slow.
-   GROQ_API_KEY=...
+   # Gemini reads receipts first; Groq takes over when Gemini fails or is slow.
    GEMINI_API_KEY=...
-   # Optional, default to qwen/qwen3.8-27b and gemini-2.5-flash
-   # GROQ_MODEL=qwen/qwen3.8-27b
+   GROQ_API_KEY=...
+   # Optional, default to gemini-2.5-flash and qwen/qwen3.8-27b
    # GEMINI_MODEL=gemini-2.5-flash
+   # GROQ_MODEL=qwen/qwen3.8-27b
    ```
 
 3. Apply the schema to your Supabase project:
