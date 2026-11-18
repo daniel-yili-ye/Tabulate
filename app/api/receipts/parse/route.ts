@@ -1,10 +1,9 @@
-import { APICallError } from "ai";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import {
+  apiErrorStatus,
   readReceipt,
-  receiptApiKey,
-  receiptModel,
+  receiptScanningConfigured,
 } from "@/features/receipts/read-receipt";
 import { getMyProfile } from "@/features/tabs/queries";
 import { RECEIPTS_BUCKET } from "@/lib/env";
@@ -32,9 +31,8 @@ export async function POST(request: NextRequest) {
     return fail("Invalid receipt image.", 400);
   }
 
-  const apiKey = receiptApiKey();
-  if (!apiKey) {
-    console.error("GEMINI_API_KEY is not set");
+  if (!receiptScanningConfigured()) {
+    console.error("Neither GROQ_API_KEY nor GEMINI_API_KEY is set");
     return fail("Receipt scanning isn't configured.", 503);
   }
 
@@ -57,13 +55,11 @@ export async function POST(request: NextRequest) {
     return fail("Couldn't read the uploaded image. Try uploading it again.", 400);
   }
 
-  const model = receiptModel();
   const startedAt = Date.now();
 
   try {
     const { currency: fallbackCurrency } = await getMyProfile(user.id);
-    const receipt = await readReceipt({
-      apiKey,
+    const { receipt, model } = await readReceipt({
       fallbackCurrency,
       image: new Uint8Array(await image.arrayBuffer()),
       mediaType: image.type || "image/jpeg",
@@ -86,7 +82,7 @@ export async function POST(request: NextRequest) {
     if (request.signal.aborted) return fail("Scan cancelled.", 499);
 
     const elapsed = Date.now() - startedAt;
-    console.error(`Receipt parsing with ${model} failed after ${elapsed}ms`, error);
+    console.error(`Receipt parsing failed after ${elapsed}ms`, error);
 
     if (error instanceof Error && error.name === "TimeoutError") {
       return fail(
@@ -94,10 +90,10 @@ export async function POST(request: NextRequest) {
         504,
       );
     }
-    if (APICallError.isInstance(error)) {
-      const status = error.statusCode ?? 0;
+    const status = apiErrorStatus(error);
+    if (status !== null) {
       if (status === 400 || status === 401 || status === 403 || status === 404) {
-        // Bad key, key without Gemini access, or an unknown model name.
+        // Bad key, key without access to the model, or an unknown model name.
         return fail("Receipt scanning isn't set up correctly.", 503);
       }
       if (status === 429) {

@@ -9,6 +9,7 @@ import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/acco
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { formatCents } from "../format";
+import { shareNote } from "../share-note";
 import type { PersonSplit, SplitInput, SplitResult } from "../split";
 
 function SummaryCard({
@@ -144,10 +145,7 @@ function PersonCard({ person, currency, paid, onPaidChange }: PersonCardProps) {
         lines={person.items.map((item, index) => ({
           key: `${index}`,
           name: item.name,
-          note:
-            item.sharedBy > 1
-              ? `${formatCents(item.priceCents, currency)} shared by ${item.sharedBy}`
-              : undefined,
+          note: shareNote(item, currency) ?? undefined,
           cents: item.cents,
         }))}
       />

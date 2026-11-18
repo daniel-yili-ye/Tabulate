@@ -21,6 +21,12 @@ export interface PersonItem {
   /** The item's full price. */
   priceCents: number;
   sharedBy: number;
+  /** How the item was divided between its sharers. */
+  splitType: SplitType;
+  /** This person's shares, percent or cents, depending on `splitType`. */
+  weight: number;
+  /** The sum of every sharer's weight. */
+  weightTotal: number;
 }
 
 export interface PersonSplit {
@@ -143,6 +149,9 @@ interface Line {
   name: string;
   priceCents: number;
   sharedBy: number;
+  splitType: SplitType;
+  weight: number;
+  weightTotal: number;
   exact: Fraction;
 }
 
@@ -179,11 +188,15 @@ export function computeSplit(tab: SplitInput): SplitResult {
       return;
     }
     const exact = exactShares({ ...item, shares });
+    const weightTotal = shares.reduce((sum, share) => sum + share.weight, 0);
     shares.forEach((share, position) => {
       lines[index.get(share.participantId)!].push({
         name: item.name || `Item ${itemIndex + 1}`,
         priceCents: item.priceCents,
         sharedBy: shares.length,
+        splitType: item.splitType,
+        weight: share.weight,
+        weightTotal,
         exact: exact[position],
       });
     });
@@ -220,6 +233,9 @@ export function computeSplit(tab: SplitInput): SplitResult {
         cents: amounts[lineIndex],
         priceCents: line.priceCents,
         sharedBy: line.sharedBy,
+        splitType: line.splitType,
+        weight: line.weight,
+        weightTotal: line.weightTotal,
       })),
       subtotalCents: subtotals[position],
       ...charge,
