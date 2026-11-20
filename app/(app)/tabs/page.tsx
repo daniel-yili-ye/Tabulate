@@ -6,7 +6,9 @@ import {
   PlusIcon,
   ReceiptTextIcon,
   SearchXIcon,
+  WalletIcon,
 } from "lucide-react";
+import { SettingCard } from "@/components/setting-card";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -20,7 +22,7 @@ import { TabFilters } from "@/features/tabs/components/tab-filters";
 import { TabRowMenu } from "@/features/tabs/components/tab-row-menu";
 import { formatCents, formatDate, parseIsoDate } from "@/features/tabs/format";
 import { LIMITS } from "@/features/tabs/limits";
-import { listMyTabs } from "@/features/tabs/queries";
+import { getMyProfile, listMyTabs } from "@/features/tabs/queries";
 import { requireUser } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Your tabs" };
@@ -41,8 +43,24 @@ function NewTabButton({ label = "New tab" }: { label?: string }) {
   );
 }
 
+/** Shown until the account has a default payment note for new tabs to start with. */
+function PaymentNotePrompt() {
+  return (
+    <SettingCard
+      empty
+      icon={<WalletIcon />}
+      title="No default payment note"
+      description="Add one in settings and every new tab will tell people how to pay you back."
+    >
+      <Button asChild variant="outline" size="sm">
+        <Link href="/settings">Add in settings</Link>
+      </Button>
+    </SettingCard>
+  );
+}
+
 export default async function TabsPage({ searchParams }: PageProps<"/tabs">) {
-  await requireUser("/tabs");
+  const user = await requireUser("/tabs");
 
   const params = await searchParams;
   const filters = {
@@ -53,28 +71,35 @@ export default async function TabsPage({ searchParams }: PageProps<"/tabs">) {
   const filtered = Boolean(filters.search || filters.from || filters.to);
   const requestedPage = Number.parseInt(first(params.page), 10);
 
-  const { tabs, total, page, pageCount } = await listMyTabs({
-    ...filters,
-    page: Number.isSafeInteger(requestedPage) ? requestedPage : 1,
-  });
+  const [{ tabs, total, page, pageCount }, profile] = await Promise.all([
+    listMyTabs({
+      ...filters,
+      page: Number.isSafeInteger(requestedPage) ? requestedPage : 1,
+    }),
+    getMyProfile(user.id),
+  ]);
+  const needsPaymentNote = !profile.paymentMessage.trim();
 
   if (total === 0 && !filtered) {
     return (
-      <Empty className="mt-10 border">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <ReceiptTextIcon />
-          </EmptyMedia>
-          <EmptyTitle>No tabs yet</EmptyTitle>
-          <EmptyDescription>
-            Scan a receipt and you&apos;ll have a shareable split in about a
-            minute.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <NewTabButton label="Split a receipt" />
-        </EmptyContent>
-      </Empty>
+      <div className="space-y-6">
+        {needsPaymentNote && <PaymentNotePrompt />}
+        <Empty className={needsPaymentNote ? "border" : "mt-10 border"}>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ReceiptTextIcon />
+            </EmptyMedia>
+            <EmptyTitle>No tabs yet</EmptyTitle>
+            <EmptyDescription>
+              Scan a receipt and you&apos;ll have a shareable split in about a
+              minute.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <NewTabButton label="Split a receipt" />
+          </EmptyContent>
+        </Empty>
+      </div>
     );
   }
 
@@ -90,6 +115,8 @@ export default async function TabsPage({ searchParams }: PageProps<"/tabs">) {
 
   return (
     <div className="space-y-6">
+      {needsPaymentNote && <PaymentNotePrompt />}
+
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">Your tabs</h1>
         <NewTabButton />
