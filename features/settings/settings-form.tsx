@@ -24,6 +24,12 @@ export function SettingsForm({ profile }: { profile: Profile }) {
   const [paymentMessage, setPaymentMessage] = useState(profile.paymentMessage);
   const [currency, setCurrency] = useState(profile.currency);
 
+  // Saving refreshes the page, so `profile` is always what is stored. The note
+  // is stored trimmed.
+  const changed =
+    paymentMessage.trim() !== profile.paymentMessage ||
+    currency !== profile.currency;
+
   useEffect(() => {
     if (state.status === "saved") toast.success("Settings saved");
   }, [state]);
@@ -95,7 +101,7 @@ export function SettingsForm({ profile }: { profile: Profile }) {
 
         {state.status === "error" && <FieldError>{state.message}</FieldError>}
 
-        <Button type="submit" disabled={pending} className="self-start">
+        <Button type="submit" disabled={pending || !changed} className="self-start">
           {pending ? "Saving…" : "Save settings"}
         </Button>
       </FieldGroup>
