@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BackToTabs } from "@/components/back-to-tabs";
 import { SettingsForm } from "@/features/settings/settings-form";
 import { getMyProfile } from "@/features/tabs/queries";
 import { requireUser } from "@/lib/supabase/server";
@@ -11,6 +12,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
+      <BackToTabs />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">
