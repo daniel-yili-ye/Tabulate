@@ -8,6 +8,7 @@ interface SettingCardProps {
   empty?: boolean;
   /** The control on the right: a button, a switch, a toggle. */
   children?: React.ReactNode;
+  className?: string;
 }
 
 /**
@@ -20,12 +21,14 @@ export function SettingCard({
   description,
   empty = false,
   children,
+  className,
 }: SettingCardProps) {
   return (
     <div
       className={cn(
         "flex items-center gap-3 rounded-xl border p-4",
         empty ? "border-dashed" : "bg-muted/40",
+        className,
       )}
     >
       <span className="shrink-0 text-muted-foreground [&_svg]:size-5">{icon}</span>

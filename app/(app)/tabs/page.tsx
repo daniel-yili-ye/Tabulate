@@ -47,8 +47,8 @@ function NewTabButton({ label = "New tab" }: { label?: string }) {
 function PaymentNotePrompt() {
   return (
     <SettingCard
-      empty
-      icon={<WalletIcon />}
+      className="border-amber-500/40 bg-amber-500/10"
+      icon={<WalletIcon className="text-amber-600 dark:text-amber-500" />}
       title="No default payment note"
       description="Add one in settings and every new tab will tell people how to pay you back."
     >
