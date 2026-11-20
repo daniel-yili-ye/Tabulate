@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PencilIcon } from "lucide-react";
+import { BackToTabs } from "@/components/back-to-tabs";
 import { ReceiptDialog } from "@/components/receipt-dialog";
 import { Button } from "@/components/ui/button";
 import { ShareDialog } from "@/features/tabs/components/share-dialog";
@@ -44,6 +45,7 @@ export default async function TabPage({
 
   return (
     <div className="space-y-6">
+      {tab.isOwner && <BackToTabs />}
       <div className="flex flex-wrap items-end justify-between gap-4 border-b pb-4">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-semibold tracking-tight">
