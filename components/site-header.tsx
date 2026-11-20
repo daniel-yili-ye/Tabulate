@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/user-menu";
 
 interface SiteHeaderProps {
-  /** Omit on static pages: the header then links to the app instead. */
+  /** Omit when the session isn't known: the header then links to the app instead. */
   user?: { email: string | null } | null;
   className?: string;
 }

@@ -9,6 +9,7 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { formatCents } from "@/features/tabs/format";
+import { getUser } from "@/lib/supabase/server";
 
 const STEPS: { icon: LucideIcon; title: string; body: string }[] = [
   {
@@ -71,10 +72,12 @@ function ExampleSplit() {
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const user = await getUser();
+
   return (
     <>
-      <SiteHeader className="max-w-5xl" />
+      <SiteHeader user={user ?? undefined} className="max-w-5xl" />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4">
         <section className="grid items-center gap-12 py-16 md:grid-cols-2 md:py-28">
           <div className="space-y-6">
